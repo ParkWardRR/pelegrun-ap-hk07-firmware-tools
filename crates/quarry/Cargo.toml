@@ -1,0 +1,16 @@
+[package]
+name = "quarry"
+description = "Senao/EnGenius firmware header re-head + Code27 serial tools for the ap-hk07 (IPQ807x) board family. Unofficial."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[[bin]]
+name = "quarry"
+path = "src/main.rs"
+
+[lib]
+name = "quarry"
+path = "src/lib.rs"

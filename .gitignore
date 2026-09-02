@@ -1,0 +1,16 @@
+# Rust
+/target
+**/*.rs.bk
+# Go
+/swallow
+/go/swallow
+*.test
+# Zig
+zig/zig-out
+zig/.zig-cache
+# OS / editor
+.DS_Store
+*.swp
+# local artifacts
+*.bin
+!crates/**/testdata/*.bin
