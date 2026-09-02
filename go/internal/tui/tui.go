@@ -16,40 +16,44 @@ import (
 	"github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/internal/mews"
 )
 
-// A calm, system-like palette tuned for legibility on a dark terminal: bright
-// near-white headings, a high-contrast body gray, one readable blue accent for
-// selection/links, and green/red reserved strictly for status meaning.
+// Everything sits on an elevated dark "surface" (like a macOS window) rather than
+// pure black, so near-white text reads crisply instead of thin-gray-on-black.
+// One blue accent for selection/links; green/red only carry status meaning.
 var (
-	accent   = lipgloss.Color("75")  // selection background
-	accentTx = lipgloss.Color("117") // accent text (bright enough to read on black)
-	strong   = lipgloss.Color("231") // headings — near-white
-	text     = lipgloss.Color("252") // primary body text
-	text2    = lipgloss.Color("250") // menu items / secondary
-	cap      = lipgloss.Color("245") // captions / hints (still readable)
-	line     = lipgloss.Color("240") // visible-but-subtle card borders
+	surface  = lipgloss.Color("235") // window/card background (elevated, not black)
+	ink      = lipgloss.Color("231") // headings + values — bright white
+	body     = lipgloss.Color("253") // body text — high contrast
+	muted    = lipgloss.Color("249") // secondary/captions — still clearly readable
+	line     = lipgloss.Color("240") // subtle card borders
+	accent   = lipgloss.Color("111") // links / step numbers — bright blue
+	pillBg   = lipgloss.Color("39")  // selected-row pill background
 	okc      = lipgloss.Color("114") // system green
 	noc      = lipgloss.Color("210") // system red
-	warnc    = lipgloss.Color("179") // muted amber (required tag)
+	warnc    = lipgloss.Color("179") // amber (required tag)
 	onAccent = lipgloss.Color("231") // text on the accent pill
 
-	sProduct = lipgloss.NewStyle().Bold(true).Foreground(strong)
-	sHead    = lipgloss.NewStyle().Bold(true).Foreground(strong)
-	sSub     = lipgloss.NewStyle().Foreground(cap)
-	sBody    = lipgloss.NewStyle().Foreground(text)
-	sInk     = lipgloss.NewStyle().Foreground(text)
-	sKey     = lipgloss.NewStyle().Bold(true).Foreground(strong) // values / tokens pop
-	sAccent  = lipgloss.NewStyle().Foreground(accentTx)
-	sVer     = lipgloss.NewStyle().Foreground(accentTx)
-	sOK      = lipgloss.NewStyle().Foreground(okc)
-	sNo      = lipgloss.NewStyle().Bold(true).Foreground(noc)
-	sWarn    = lipgloss.NewStyle().Foreground(warnc)
-	sPill    = lipgloss.NewStyle().Bold(true).Foreground(onAccent).Background(accent)
-	sItem    = lipgloss.NewStyle().Foreground(text2)
+	// base carries the surface background so no span falls back to terminal black.
+	base = lipgloss.NewStyle().Background(surface)
 
-	menuBx = lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).BorderForeground(line).
-		Padding(1, 1).MarginRight(1)
-	contBx = lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).BorderForeground(line).Padding(1, 3)
-	hdrBx  = lipgloss.NewStyle().Border(lipgloss.NormalBorder(), false, false, true, false).BorderForeground(line)
+	sProduct = base.Foreground(ink).Bold(true)
+	sHead    = base.Foreground(ink).Bold(true)
+	sSub     = base.Foreground(muted)
+	sBody    = base.Foreground(body)
+	sInk     = base.Foreground(body)
+	sKey     = base.Foreground(ink).Bold(true) // values / tokens pop
+	sAccent  = base.Foreground(accent)
+	sVer     = base.Foreground(accent)
+	sOK      = base.Foreground(okc)
+	sNo      = base.Foreground(noc).Bold(true)
+	sWarn    = base.Foreground(warnc)
+	sPill    = base.Foreground(onAccent).Background(pillBg).Bold(true)
+	sItem    = base.Foreground(body)
+
+	menuBx = base.Border(lipgloss.RoundedBorder()).BorderForeground(line).
+		BorderBackground(surface).Padding(1, 1).MarginRight(1)
+	contBx = base.Border(lipgloss.RoundedBorder()).BorderForeground(line).
+		BorderBackground(surface).Padding(1, 3)
+	barBx = base.Padding(0, 1) // full-width header/footer bars
 )
 
 type stage struct {
@@ -143,130 +147,139 @@ func (m model) View() string {
 	}
 	menuPanel := menuBx.Width(menuW).Height(bodyH).Render(strings.TrimRight(menu.String(), "\n"))
 
-	// Content card fills the rest of the width (menu box + its 1-col right margin).
-	contentW := m.w - menuW - 2
+	// Content card fills the rest of the width (menu box + its 1-col right margin),
+	// so the cards line up with the full-width header/footer bars.
+	contentW := m.w - menuW - 1
 	if contentW < 40 {
 		contentW = 40
 	}
 	cur := m.stages[m.sel]
 	crumb := sSub.Render(fmt.Sprintf("Step %d of %d", m.sel+1, len(m.stages)))
-	title := sHead.Render(cur.name) + "   " + crumb
+	title := sHead.Render(cur.name) + sSub.Render("    ") + crumb
 	sub := sSub.Render(cur.sub)
-	body := title + "\n" + sub + "\n\n" + cur.run()
-	contentPanel := contBx.Width(contentW).Height(bodyH).Render(body)
+	bodyText := title + "\n" + sub + "\n\n" + cur.run()
+	contentPanel := contBx.Width(contentW).Height(bodyH).Render(bodyText)
 
 	main := lipgloss.JoinHorizontal(lipgloss.Top, menuPanel, contentPanel)
-	foot := sSub.Render("  ↑ ↓  navigate    ·    g / G  first / last    ·    q  quit") + "\n" +
-		sSub.Render("  Unofficial · not affiliated with EnGenius or Senao · for hardware you own")
+
+	keys := sAccent.Render("↑↓") + sSub.Render(" move") + sSub.Render("    ") +
+		sAccent.Render("g/G") + sSub.Render(" ends") + sSub.Render("    ") +
+		sAccent.Render("q") + sSub.Render(" quit")
+	legal := sSub.Render("unofficial · not affiliated with EnGenius/Senao · hardware you own")
+	foot := barBx.Width(m.w).Render(keys) + "\n" + barBx.Width(m.w).Render(legal)
+
 	return lipgloss.JoinVertical(lipgloss.Left, m.header(), main, foot)
 }
 
 func (m model) header() string {
-	line := " " + sProduct.Render("swallow") +
-		sSub.Render("   ap-hk07 firmware toolkit") +
-		sSub.Render("      ") + sVer.Render("v"+m.version) +
-		sSub.Render("      ·   safe cross-flash")
-	return hdrBx.Width(m.w - 1).Render(line)
+	title := sProduct.Render("swallow") +
+		sSub.Render("  ·  ap-hk07 firmware toolkit  ·  ") +
+		sVer.Render("v"+m.version)
+	return barBx.Width(m.w).Render(title)
 }
 
-// ---- screen renderers (real package output; plain-language, human copy) ----
+// ---- screen renderers (real package output; blunt, plain-language copy) ----
+//
+// Every visible segment must be rendered through a surface-backed style — a raw
+// string literal between styled spans would show as a black gap on the card.
+
+// pad returns n surface-backed spaces (for indents/separators, never raw " ").
+func pad(n int) string { return base.Render(strings.Repeat(" ", n)) }
+
+// blank returns a full-width surface-backed line so multi-line bodies keep the
+// card colour on otherwise-empty rows.
+func blank() string { return "\n" }
 
 func runDiscover() string {
 	var b strings.Builder
-	b.WriteString(sBody.Render("Identify the access point, then pick how to connect.") + "\n\n")
+	b.WriteString(sBody.Render("Find the AP and read what firmware it runs.") + blank() + blank())
 	rows := [][3]string{
-		{"Cloud model", "React web UI · JSON API (admin / admin)", "no shell"},
+		{"Cloud model", "React web UI · JSON API (admin/admin)", "no shell"},
 		{"EWS model", "LuCI web UI · md5.js · cgi-bin/luci", "SSH + LuCI upload"},
 		{"FIT model", "ews377-fit · FitController", "controller-managed"},
 	}
 	for _, r := range rows {
-		b.WriteString("  " + sKey.Render(fmt.Sprintf("%-13s", r[0])) + sBody.Render(r[1]) + "\n")
-		b.WriteString("               " + sSub.Render(r[2]) + "\n")
+		b.WriteString(pad(2) + sKey.Render(fmt.Sprintf("%-13s", r[0])) + sBody.Render(r[1]) + "\n")
+		b.WriteString(pad(15) + sSub.Render(r[2]) + "\n")
 	}
-	b.WriteString("\n" + sSub.Render("Try it:  ") + sAccent.Render("swallow discover http://<ap-ip>"))
+	b.WriteString(blank() + sSub.Render("Run:  ") + sAccent.Render("swallow discover http://<ap-ip>"))
 	return b.String()
 }
 
 func runConnect() string {
 	var b strings.Builder
-	b.WriteString(sBody.Render("Choose how to connect — a normal SSH client won't work here:") + "\n\n")
-	b.WriteString("  " + sKey.Render("SSH") + "     " + sBody.Render("port ") + sKey.Render("8822") +
-		sBody.Render(" (not 22), older host-key type, admin password") + "\n")
-	b.WriteString("  " + sKey.Render("Cloud") + "   " + sBody.Render("web API login → token → upload") + "\n")
-	b.WriteString("  " + sKey.Render("LuCI") + "    " + sBody.Render("hashed-password login → session → two-step upload") + "\n\n")
-	b.WriteString(sSub.Render("Every firmware write still goes through the safety checks."))
+	b.WriteString(sBody.Render("Pick the access path. A normal SSH client won't reach it.") + blank() + blank())
+	b.WriteString(pad(2) + sKey.Render("SSH   ") + sBody.Render("port ") + sKey.Render("8822") +
+		sBody.Render(" (not 22), old host-key type, admin password") + "\n")
+	b.WriteString(pad(2) + sKey.Render("Cloud ") + sBody.Render("web API login → token → upload") + "\n")
+	b.WriteString(pad(2) + sKey.Render("LuCI  ") + sBody.Render("hashed-password login → session → 2-step upload") + "\n")
+	b.WriteString(blank() + sSub.Render("All firmware writes still pass the safety checks."))
 	return b.String()
 }
 
 func runBackup() string {
 	var b strings.Builder
-	b.WriteString(sBody.Render("Save a full backup first — this is required, not optional:") + "\n\n")
+	b.WriteString(sBody.Render("Dump everything first. This is a hard gate, not a suggestion.") + blank() + blank())
 	for _, a := range mews.Plan() {
 		tag := sSub.Render("optional")
 		if a.Critical {
 			tag = sWarn.Render("required")
 		}
-		b.WriteString("  " + sOK.Render("· ") + sInk.Render(fmt.Sprintf("%-20s", a.Name)) + sSub.Render(a.Command) + "  " + tag + "\n")
+		b.WriteString(pad(2) + sOK.Render("· ") + sInk.Render(fmt.Sprintf("%-20s", a.Name)) +
+			sSub.Render(fmt.Sprintf("%-26s", a.Command)) + tag + "\n")
 	}
-	b.WriteString("\n" + sSub.Render("The RF-calibration area (factory MACs) is read-only and never touched."))
+	b.WriteString(blank() + sSub.Render("RF calibration (factory MACs) is read-only — never written."))
 	return b.String()
 }
 
 func runSafeguards() string {
 	var b strings.Builder
-	b.WriteString(sBody.Render("The bootloader is protected — the tool can't brick it.") + "\n\n")
+	b.WriteString(sBody.Render("The bootloader env is append-only. The tool can't brick it.") + blank() + blank())
 	good := hood.ParsePrintenv("bootcmd=bootipq\nactive_fw=0\napp_part=0\nrootfsname=rootfs\nsnextra=00000000000000000000\n")
 	cmd, _ := good.PlanSet("snextra", "SWLWX42000000000000A")
 	wiped := hood.ParsePrintenv("ethaddr=00:03:7f:12:3e:87\n")
 	_, _ = wiped.PlanSet("snextra", "x")
-	b.WriteString("  " + sOK.Render("· complete env") + sBody.Render("    allowed — adds a single field") + "\n")
-	b.WriteString("  " + sNo.Render("· wiped env") + sBody.Render(fmt.Sprintf("       refused — %d required keys missing", len(wiped.Missing()))) + "\n")
-	b.WriteString("  " + sNo.Render("· empty value") + sBody.Render("     refused — u-boot would delete it") + "\n\n")
-	b.WriteString(sSub.Render("Example allowed write:  ") + sAccent.Render(cmd) + "\n\n")
-	b.WriteString(sSub.Render("It only ever adds a setting — it never erases or resets them."))
+	b.WriteString(pad(2) + sOK.Render(fmt.Sprintf("%-16s", "· complete env")) + sBody.Render("allowed — adds one field") + "\n")
+	b.WriteString(pad(2) + sNo.Render(fmt.Sprintf("%-16s", "· wiped env")) + sBody.Render(fmt.Sprintf("refused — %d required keys missing", len(wiped.Missing()))) + "\n")
+	b.WriteString(pad(2) + sNo.Render(fmt.Sprintf("%-16s", "· empty value")) + sBody.Render("refused — u-boot would delete it") + "\n")
+	b.WriteString(blank() + sSub.Render("Allowed write:  ") + sAccent.Render(cmd) + "\n")
+	b.WriteString(blank() + sSub.Render("It only ever adds a field — never erases or resets."))
 	return b.String()
 }
 
 func runIdentity() string {
 	var b strings.Builder
-	b.WriteString(sBody.Render("Give each unit a unique identity, checked for collisions:") + "\n\n")
+	b.WriteString(sBody.Render("Mint a unique, valid serial per unit. Collisions are refused.") + blank() + blank())
 	for i, mdl := range [][2]string{{"ECW230v3", "X42"}, {"EWS377-FIT", "X45"}, {"EWS377AP v3", "X44"}} {
 		ser, _ := band.MakeSerial("SWLW", mdl[1], fmt.Sprintf("%04d", i+1))
 		ok := sOK.Render("valid")
 		if !band.ValidateSerial(ser) {
 			ok = sNo.Render("BAD")
 		}
-		b.WriteString("  " + sInk.Render(fmt.Sprintf("%-12s", mdl[0])) + sSub.Render("→ ") + sKey.Render(ser) + sSub.Render("  ("+mdl[1]+") ") + ok + "\n")
+		b.WriteString(pad(2) + sInk.Render(fmt.Sprintf("%-12s", mdl[0])) + sSub.Render("→ ") +
+			sKey.Render(ser) + sSub.Render("  ("+mdl[1]+")  ") + ok + "\n")
 	}
 	x, _ := band.MakeSnextra("SWLW", "X42")
-	b.WriteString("\n" + sSub.Render("  Extra identity field (20 chars): ") + sAccent.Render(x) + "\n")
+	b.WriteString(blank() + pad(2) + sSub.Render("field 19 (20 chars): ") + sAccent.Render(x))
 	return b.String()
 }
 
 func runInstall() string {
 	var b strings.Builder
-	b.WriteString(sBody.Render("Install without opening the case — no UART needed:") + "\n\n")
-	b.WriteString("  " + sAccent.Render("1.") + " Write the " + sKey.Render("spare") + " slot — the running one stays bootable\n")
-	b.WriteString("  " + sAccent.Render("2.") + " Reboot, then re-read the firmware and serial\n")
-	b.WriteString("  " + sAccent.Render("3.") + " Roll back anytime; UART only if it's truly dead\n\n")
-	b.WriteString(sSub.Render("Because the active slot is never overwritten, a failed flash can't brick."))
+	b.WriteString(sBody.Render("Flash over the network. No UART, no open case.") + blank() + blank())
+	b.WriteString(pad(2) + sAccent.Render("1  ") + sBody.Render("Write the ") + sKey.Render("spare") + sBody.Render(" slot; the running one stays bootable") + "\n")
+	b.WriteString(pad(2) + sAccent.Render("2  ") + sBody.Render("Reboot, then re-read firmware + serial") + "\n")
+	b.WriteString(pad(2) + sAccent.Render("3  ") + sBody.Render("Roll back anytime; UART only if truly dead") + "\n")
+	b.WriteString(blank() + sSub.Render("The active slot is never overwritten, so a bad flash can't brick."))
 	return b.String()
 }
 
 func runVerify() string {
 	var b strings.Builder
-	b.WriteString(sBody.Render("Confirm the device came back exactly as intended:") + "\n\n")
-	b.WriteString("  " + sOK.Render("·") + " Reads the firmware family and serial after reboot\n")
-	b.WriteString("  " + sOK.Render("·") + " Compares them against what was written\n")
-	b.WriteString("  " + sOK.Render("·") + " Flags any mismatch and offers a one-step rollback\n\n")
-	b.WriteString(sSub.Render("Only after this passes is the flash considered done."))
+	b.WriteString(sBody.Render("Prove it came back exactly as intended.") + blank() + blank())
+	b.WriteString(pad(2) + sOK.Render("· ") + sBody.Render("Re-read firmware family + serial after reboot") + "\n")
+	b.WriteString(pad(2) + sOK.Render("· ") + sBody.Render("Compare against what was written") + "\n")
+	b.WriteString(pad(2) + sOK.Render("· ") + sBody.Render("Flag any mismatch, offer one-step rollback") + "\n")
+	b.WriteString(blank() + sSub.Render("Not done until this passes."))
 	return b.String()
-}
-
-func oneline(s string) string {
-	s = strings.ReplaceAll(s, "\n", " ")
-	if len(s) > 52 {
-		s = s[:49] + "…"
-	}
-	return s
 }

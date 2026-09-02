@@ -1,14 +1,12 @@
 <div align="center">
 
-# 🦅 swallow · ap-hk07 firmware tools
+# swallow · ap-hk07 firmware tools
 
-### Cross-flash & recover EnGenius/Senao `ap-hk07` access points — *without bricking them.*
-
-A toolkit with a **clean, plain-language TUI** for the **IPQ807x / `ap-hk07`** board
-family (EWS377AP v3 · EWS377-FIT · ECW230v3): one-field firmware re-head, safe
-serial provisioning, no-UART flashing, and a gated UART recovery path. The UI
-walks the job in plain steps — *Discover · Connect · Back Up · Safeguards ·
-Identity · Install · Verify* — over a falconry-themed core.
+Cross-flash and recover EnGenius/Senao `ap-hk07` access points (EWS377AP v3 ·
+EWS377-FIT · ECW230v3) over the network. One-field firmware re-head, serial
+provisioning, A/B-slot flashing, and a gated UART recovery path. Rust core, Go
+TUI/CLI, Zig recovery helper. The TUI walks the job in seven steps:
+Discover · Connect · Back Up · Safeguards · Identity · Install · Verify.
 
 [![License: Blue Oak 1.0.0](https://img.shields.io/badge/License-Blue_Oak_1.0.0-0a7bbb.svg)](LICENSE)
 [![CI](https://github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/actions/workflows/ci.yml/badge.svg)](https://github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/actions/workflows/ci.yml)
@@ -25,30 +23,31 @@ Identity · Install · Verify* — over a falconry-themed core.
 
 <br/>
 
-<img src="docs/screenshots/01-discover.png" alt="swallow TUI — Discover screen" width="720"/>
+<img src="docs/tour.gif" alt="swallow TUI — walking through the seven steps" width="720"/>
 
 </div>
 
 ---
 
-> ⚠️ **Cross-flashing can brick hardware.** This tool is built to make that nearly
-> impossible (see [the two invariants](#-the-two-invariants)). Read
-> [`SAFETY.md`](SAFETY.md) and the [scope/legal](#-scope--legal) notes first.
-> **Unofficial — not affiliated with EnGenius or Senao.** For interoperability and
-> self-hosting on hardware you own.
+> **Cross-flashing can brick hardware.** swallow is designed so the common
+> mistakes aren't reachable (see [the two invariants](#the-two-invariants)), but
+> firmware work is never zero-risk. Read [`SAFETY.md`](SAFETY.md) and the
+> [scope/legal](#scope--legal) notes first. Unofficial — not affiliated with
+> EnGenius or Senao. For hardware you own.
 
 ## Why
 
-The documented EWS377AP v3 → FIT/cloud "bridge" firmware is EOL and gone. The
-sibling `ap-hk07` images *can* be cross-flashed by editing **one field** in the
-header — but the manual path is a minefield: a stray `setconfig` wipes the
-bootloader env, a hand-rebuilt env bricks the boot slot, SSH hides on **port
-8822**, and adoption fails silently on a blank serial. This toolkit turns the
-hard-won safe path into the *only* path — and gives it a UI worth using.
+The documented EWS377AP v3 → FIT/cloud bridge firmware is EOL and gone. The
+sibling `ap-hk07` images can be cross-flashed by editing one header field, but the
+manual path is easy to get wrong: a stray `setconfig` wipes the bootloader env, a
+hand-rebuilt env bricks the boot slot, SSH is on **port 8822**, and adoption fails
+silently on a blank serial. swallow encodes the safe path so those mistakes aren't
+reachable.
 
-## ⛨ The two invariants
+## The two invariants
 
-Everything exists to preserve two things, so **UART is rarely needed**:
+Two rules keep a failed flash recoverable over the network, so UART is rarely
+needed:
 
 1. **Writes go to the `INACTIVE` A/B slot.** The working slot stays bootable — a
    bad image is undone with a factory-reset hold.
@@ -80,10 +79,10 @@ network and no UART is needed.
 
 ## The TUI
 
-`swallow` with no arguments opens a live dashboard. The sidebar walks the job in
-plain steps — **Discover · Connect · Back Up · Safeguards · Identity · Install ·
-Verify** — and each screen runs against the **real** internal packages, no mock
-data.
+`swallow` with no arguments opens the dashboard. The sidebar is the seven-step
+sequence — Discover · Connect · Back Up · Safeguards · Identity · Install ·
+Verify — and each screen renders live output from the real internal packages, not
+mock data.
 
 | | |
 |:--:|:--:|
@@ -197,7 +196,7 @@ Built with [GitHub Spec Kit](https://github.com/github/spec-kit) discipline —
 [spec](specs/001-swallow-mvp/spec.md) · [plan](specs/001-swallow-mvp/plan.md) ·
 [tasks](specs/001-swallow-mvp/tasks.md) · [roadmap](ROADMAP.md).
 
-## 🔒 Scope & legal
+## Scope & legal
 
 Unofficial community tooling for **interoperability and self-hosting on hardware
 you own**. "EnGenius" and "Senao" are trademarks of their owners, used only to
