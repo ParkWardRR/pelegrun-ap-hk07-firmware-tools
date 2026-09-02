@@ -59,7 +59,7 @@ func run(args []string, out, errw io.Writer) int {
 	case "-h", "--help", "help":
 		fmt.Fprint(out, usageText)
 	default:
-		fmt.Fprintf(errw, "swallow: %q is planned but not implemented yet (see ROADMAP-DEV.md)\n", cmd)
+		fmt.Fprintf(errw, "swallow: %q is planned but not implemented yet (see ROADMAP.md)\n", cmd)
 		return 2
 	}
 	if err != nil {

@@ -1,7 +1,7 @@
 # Tasks 001 — actionable breakdown
 
 **Stage:** Tasks · **Spec:** [spec.md](spec.md) · **Plan:** [plan.md](plan.md)
-Legend: [x] done · [~] in progress · [ ] todo. Maps to `../../ROADMAP-DEV.md`.
+Legend: [x] done · [~] in progress · [ ] todo. Maps to `../../ROADMAP.md`.
 
 ## Phase 1 — Core + scaffold  (this release)
 - [x] T1.1 Cargo workspace + `quarry` crate (lib + bin)

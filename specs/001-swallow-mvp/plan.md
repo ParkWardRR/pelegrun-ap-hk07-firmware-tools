@@ -56,5 +56,5 @@ flowchart LR
 - A single `make` front-end (`make ci`) reproduces the whole gate locally.
 
 ## Milestones → dev phases
-See [tasks.md](tasks.md) and `../../ROADMAP-DEV.md`. All six dev phases are
+See [tasks.md](tasks.md) and `../../ROADMAP.md`. All six dev phases are
 complete (v0.4.0); MVP = FR1–FR6 (dev phases 1–4).

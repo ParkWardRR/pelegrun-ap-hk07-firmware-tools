@@ -13,7 +13,7 @@ Identity · Install · Verify* — over a falconry-themed core.
 [![License: Blue Oak 1.0.0](https://img.shields.io/badge/License-Blue_Oak_1.0.0-0a7bbb.svg)](LICENSE)
 [![CI](https://github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/actions/workflows/ci.yml/badge.svg)](https://github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/ParkWardRR/swallow-ap-hk07-firmware-tools?color=success)](https://github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/releases)
-[![Status: all phases ✓](https://img.shields.io/badge/dev-all%206%20phases%20✓-brightgreen.svg)](ROADMAP-DEV.md)
+[![Status: all phases ✓](https://img.shields.io/badge/dev-all%206%20phases%20✓-brightgreen.svg)](ROADMAP.md)
 [![Unofficial](https://img.shields.io/badge/vendor-unofficial-lightgrey.svg)](SAFETY.md)
 
 ![Rust](https://img.shields.io/badge/Rust-core-000000?logo=rust&logoColor=white)
@@ -179,7 +179,7 @@ Built with [GitHub Spec Kit](https://github.com/github/spec-kit) discipline —
 **Specify → Plan → Tasks → Implement → Validate**:
 [constitution](.specify/memory/constitution.md) ·
 [spec](specs/001-swallow-mvp/spec.md) · [plan](specs/001-swallow-mvp/plan.md) ·
-[tasks](specs/001-swallow-mvp/tasks.md) · [roadmap](ROADMAP-DEV.md).
+[tasks](specs/001-swallow-mvp/tasks.md) · [roadmap](ROADMAP.md).
 
 ## 🔒 Scope & legal
 
