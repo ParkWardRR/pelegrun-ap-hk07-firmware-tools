@@ -32,8 +32,10 @@ fn error_display_is_human_readable() {
 #[test]
 fn product_id_label_roundtrip() {
     for (id, label) in [
-        (282u32, "EWS377AP v3"),
+        (182u32, "EWS377AP v2"),
+        (282, "EWS377AP v3"),
         (300, "EWS377-FIT"),
+        (275, "ECW230"),
         (284, "ECW230v3"),
     ] {
         let p = Product::from_id(id);

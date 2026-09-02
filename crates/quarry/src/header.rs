@@ -28,11 +28,15 @@ pub const MIN_LEN: usize = OFF_MODEL + 16;
 
 /// Known `product_id` values on the ap-hk07 board family.
 ///
-/// The three cross-flash siblings are `282`/`300`/`284`.
+/// The three cross-flash siblings are `282`/`300`/`284`. The other ids were read
+/// from real vendor images (see `tests/real_images.rs`): `275` base ECW230,
+/// `182` the older EWS377AP v2 / `ews377ap-all` line.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Product {
+    Ews377ApV2, // 182
     Ews377ApV3, // 282
     Ews377Fit,  // 300
+    Ecw230,     // 275
     Ecw230V3,   // 284
     Other(u32),
 }
@@ -40,24 +44,30 @@ pub enum Product {
 impl Product {
     pub fn from_id(id: u32) -> Self {
         match id {
+            182 => Product::Ews377ApV2,
             282 => Product::Ews377ApV3,
             300 => Product::Ews377Fit,
+            275 => Product::Ecw230,
             284 => Product::Ecw230V3,
             other => Product::Other(other),
         }
     }
     pub fn id(self) -> u32 {
         match self {
+            Product::Ews377ApV2 => 182,
             Product::Ews377ApV3 => 282,
             Product::Ews377Fit => 300,
+            Product::Ecw230 => 275,
             Product::Ecw230V3 => 284,
             Product::Other(v) => v,
         }
     }
     pub fn label(self) -> &'static str {
         match self {
+            Product::Ews377ApV2 => "EWS377AP v2",
             Product::Ews377ApV3 => "EWS377AP v3",
             Product::Ews377Fit => "EWS377-FIT",
+            Product::Ecw230 => "ECW230",
             Product::Ecw230V3 => "ECW230v3",
             Product::Other(_) => "unknown",
         }

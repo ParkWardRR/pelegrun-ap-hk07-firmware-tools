@@ -147,8 +147,12 @@ $ cd .. && cargo run -q -p quarry -- rehead ecw230v3.bin out.bin --to 282
 $ cargo run -q -p quarry -- serial --model X42 --prefix EPC1 --suffix 0001   # EPC1X4200011
 ```
 
-Product ids: `282` EWS377AP v3 · `300` EWS377-FIT · `284` ECW230v3.
+Product ids: `282` EWS377AP v3 · `300` EWS377-FIT · `284` ECW230v3 · `275` ECW230 · `182` EWS377AP v2.
 Model codes: `X44` EWS377AP v3 · `X45` EWS377-FIT · `X42` ECW230v3.
+
+> The header parser is verified against **real vendor images** (28 across the
+> family) — see `make test-firmware FW=<dir>`. All ids/models above were read
+> from genuine firmware; nothing is committed to the repo.
 
 ## Build & test
 

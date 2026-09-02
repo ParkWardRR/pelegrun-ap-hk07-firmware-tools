@@ -2,7 +2,7 @@
 # One repo, three languages: Rust (quarry), Go (swallow), Zig (lure).
 .DEFAULT_GOAL := help
 .PHONY: help ci test test-race lint fmt fmt-check cover \
-        test-rust test-go test-zig lint-rust lint-go lint-zig \
+        test-rust test-go test-zig test-firmware lint-rust lint-go lint-zig \
         dist tui screenshots clean
 
 ## help: list targets
@@ -22,6 +22,11 @@ test-race: test-rust test-zig
 
 test-rust:
 	cargo test --workspace
+
+## test-firmware: validate the header parser against real images (set FW=<dir>)
+test-firmware:
+	QUARRY_FIRMWARE_DIR=$(or $(FW),$$HOME/Downloads) \
+	  cargo test -p quarry --test real_images -- --nocapture
 test-go:
 	cd go && go test ./...
 test-zig:
