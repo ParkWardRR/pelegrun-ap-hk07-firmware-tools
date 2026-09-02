@@ -57,6 +57,22 @@ Everything exists to preserve two things, so **UART is rarely needed**:
    A valid-but-incomplete env is the one thing that bricks — the code is
    structurally incapable of producing one.
 
+**When UART *is* required.** Wire up a USB-TTL serial adapter to the console
+header only when the network path is already gone:
+
+- **No shell and no web UI** — the device won't boot far enough to reach SSH:8822,
+  the cloud API, or LuCI, so there's nothing for `jess` to talk to.
+- **A wiped or incomplete bootloader env** already bricked the board (e.g. a prior
+  hand-edit) — `creance` drives the gated `env default -a → inspect → env save`
+  repair over the console.
+- **The rootfs itself is gone** and only u-boot answers — `lure` serves a fresh
+  image to `tftpboot` over the wire.
+- **First flash of a new/unproven model**, as a safety net (recommended, not
+  required).
+
+If the AP still shells or serves its web UI, everything above happens over the
+network and no UART is needed.
+
 <div align="center">
 <img src="docs/screenshots/04-safeguards.png" alt="swallow TUI — Safeguards screen" width="720"/>
 <br/><sub>The <b>Safeguards</b> screen refuses to write a wiped env, and refuses an empty value (which u-boot would delete). Live output — this is exactly what the tool computes.</sub>
