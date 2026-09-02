@@ -1,6 +1,7 @@
 [workspace]
 resolver = "2"
 members = ["crates/quarry"]
+exclude = ["tools/shots"]
 
 [workspace.package]
 version = "0.1.0"

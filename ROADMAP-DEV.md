@@ -10,16 +10,18 @@ flowchart LR
   P4 --> P5[Phase 5<br/>UART recovery]
   P5 --> P6[Phase 6<br/>Release polish]
   style P1 fill:#1f7a1f,stroke:#0a3,color:#fff
+  style P2 fill:#1f7a1f,stroke:#0a3,color:#fff
+  style P3 fill:#1f7a1f,stroke:#0a3,color:#fff
 ```
 
 | Phase | Scope | Deliverable | Status |
 |-------|-------|-------------|--------|
 | **1** | **Core + scaffold** | tested `quarry` (Rust) + `swallow`/Zig skeletons + Spec Kit + CI | **✅ done (this release)** |
-| 2 | Access + discovery | `eyas` fingerprint, `jess` ssh/cloud/luci adapters | 🟡 next |
-| 3 | Safety + backup + provision | `hood` env gate, `mews` bundles, `band` serials | ⬜ |
-| 4 | No-UART A/B flash | slot-aware flash + verify + rollback | ⬜ |
+| 2 | Access + discovery | `eyas` fingerprint, `jess` ssh/cloud/luci adapters | ✅ done |
+| 3 | Safety + backup + provision | `hood` env gate, `mews` bundles, `band` serials | ✅ done |
+| 4 | No-UART A/B flash | slot-aware flash + verify + rollback | 🟡 next |
 | 5 | UART recovery | `creance` gated serial repair, `lure` Zig TFTP | ⬜ |
 | 6 | Release polish | cross-compiled binaries, fixture/property tests, docs | ⬜ |
 
-**Phase 1 is complete.** `cargo test` green (12/12), `go build`/`go vet` clean,
-`zig build` clean. Phase 2 begins with `eyas` firmware fingerprinting.
+**Phases 1–3 complete.** Rust 12/12, Go 5 packages, Zig build, and termwright
+terminal-E2E all green. Phase 4 is the no-UART A/B flash + verify.

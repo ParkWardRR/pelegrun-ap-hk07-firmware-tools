@@ -1,16 +1,15 @@
 # Rust
-/target
+**/target/
 **/*.rs.bk
 # Go
-/swallow
 /go/swallow
 *.test
 # Zig
-zig/zig-out
-zig/.zig-cache
+**/zig-out/
+**/.zig-cache/
 # OS / editor
 .DS_Store
 *.swp
-# local artifacts
+# stray firmware images (never commit vendor firmware); keep test fixtures + screenshots
 *.bin
-!crates/**/testdata/*.bin
+!**/testdata/*.bin

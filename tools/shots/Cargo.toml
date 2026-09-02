@@ -1,0 +1,15 @@
+# Screenshot + terminal-E2E harness. Standalone (NOT in the core workspace) so the
+# core build stays lean. Uses termwright (playwright-for-the-terminal).
+[package]
+name = "shots"
+version = "0.2.0"
+edition = "2021"
+license = "BlueOak-1.0.0"
+publish = false
+
+[dependencies]
+termwright = "0.1"
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "time"] }
+anyhow = "1"
+
+[workspace]

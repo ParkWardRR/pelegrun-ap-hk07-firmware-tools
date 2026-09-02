@@ -1,66 +1,182 @@
-// Command swallow is the falconry-themed orchestrator for cross-flashing and
-// recovering EnGenius/Senao ap-hk07 (IPQ807x) access points without UART where
-// possible, and with a gated UART path where it isn't.
+// Command swallow — falconry-themed orchestrator to cross-flash and recover
+// EnGenius/Senao ap-hk07 (IPQ807x) APs without bricking them.
 //
-// Unofficial; not affiliated with EnGenius or Senao. For interoperability and
-// self-hosting on hardware you own. See README.md and SAFETY.md.
-//
-// This is the dev-phase-1 skeleton: it prints its plan and hands the working
-// image/serial math to the quarry binary (Rust). Network/UART flows land in
-// later phases behind the internal falconry packages.
+// Run with no arguments for the TUI; subcommands are script/CI friendly.
+// Unofficial; not affiliated with EnGenius or Senao. See README.md / SAFETY.md.
 package main
 
 import (
-	"flag"
+	"context"
 	"fmt"
+	"io"
 	"os"
+	"strings"
+	"time"
+
+	"github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/internal/band"
+	"github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/internal/eyas"
+	"github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/internal/hood"
+	"github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/internal/jess"
+	"github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/internal/tui"
+
+	tea "github.com/charmbracelet/bubbletea"
+	"golang.org/x/term"
 )
 
-// Version is stamped at build time via -ldflags "-X main.Version=...".
-var Version = "0.1.0"
+var Version = "0.2.0"
 
 func main() {
-	flag.Usage = usage
-	flag.Parse()
-	args := flag.Args()
-	if len(args) == 0 {
-		usage()
-		return
+	args := os.Args[1:]
+	cmd := ""
+	if len(args) > 0 {
+		cmd = args[0]
+		args = args[1:]
 	}
-	switch args[0] {
+
+	var err error
+	switch cmd {
+	case "", "tui":
+		err = runTUI()
 	case "version":
 		fmt.Printf("swallow %s\n", Version)
 	case "plan":
-		fmt.Print(plan)
+		fmt.Print(planText)
+	case "serial":
+		err = cmdSerial(args)
+	case "snextra":
+		err = cmdSnextra(args)
+	case "check":
+		err = cmdCheck(args)
+	case "envcheck":
+		err = cmdEnvcheck(args)
+	case "discover":
+		err = cmdDiscover(args)
+	case "-h", "--help", "help":
+		fmt.Print(usageText)
 	default:
-		fmt.Fprintf(os.Stderr, "swallow: %q is planned but not implemented yet (see ROADMAP-DEV.md)\n", args[0])
+		fmt.Fprintf(os.Stderr, "swallow: %q is planned but not implemented yet (see ROADMAP-DEV.md)\n", cmd)
 		os.Exit(2)
+	}
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		os.Exit(1)
 	}
 }
 
-func usage() {
-	fmt.Print(usageText)
+func runTUI() error {
+	if !term.IsTerminal(int(os.Stdout.Fd())) {
+		fmt.Print(usageText)
+		return nil
+	}
+	_, err := tea.NewProgram(tui.New(Version), tea.WithAltScreen()).Run()
+	return err
+}
+
+func argVal(a []string, key string) string {
+	for i, v := range a {
+		if v == key && i+1 < len(a) {
+			return a[i+1]
+		}
+	}
+	return ""
+}
+
+func cmdSerial(a []string) error {
+	model := argVal(a, "--model")
+	if model == "" {
+		return fmt.Errorf("serial: --model <CODE> required (e.g. X42)")
+	}
+	prefix := or(argVal(a, "--prefix"), "SWLW")
+	suffix := or(argVal(a, "--suffix"), "0001")
+	s, err := band.MakeSerial(prefix, model, suffix)
+	if err != nil {
+		return err
+	}
+	fmt.Println(s)
+	return nil
+}
+
+func cmdSnextra(a []string) error {
+	model := argVal(a, "--model")
+	if model == "" {
+		return fmt.Errorf("snextra: --model <CODE> required")
+	}
+	s, err := band.MakeSnextra(argVal(a, "--prefix"), model)
+	if err != nil {
+		return err
+	}
+	fmt.Println(s)
+	return nil
+}
+
+func cmdCheck(a []string) error {
+	if len(a) == 0 {
+		return fmt.Errorf("check: <serial> required")
+	}
+	s := a[0]
+	mc, _ := band.ModelCode(s)
+	fmt.Printf("serial=%s valid=%t model_code=%s\n", s, band.ValidateSerial(s), mc)
+	if !band.ValidateSerial(s) {
+		return fmt.Errorf("check character does not match")
+	}
+	return nil
+}
+
+func cmdEnvcheck(a []string) error {
+	var data []byte
+	var err error
+	if len(a) > 0 && a[0] != "-" {
+		data, err = os.ReadFile(a[0])
+	} else {
+		data, err = io.ReadAll(os.Stdin)
+	}
+	if err != nil {
+		return err
+	}
+	e := hood.ParsePrintenv(string(data))
+	if e.IsComplete() {
+		fmt.Println("env: COMPLETE — safe to append individual fields")
+		return nil
+	}
+	fmt.Printf("env: INCOMPLETE — missing %v\n", e.Missing())
+	fmt.Println("refuse writes; recover with `env default -a` over UART first")
+	return fmt.Errorf("incomplete env")
+}
+
+func cmdDiscover(a []string) error {
+	if len(a) == 0 {
+		return fmt.Errorf("discover: <url> required (e.g. http://192.168.1.1)")
+	}
+	url := a[0]
+	fam, err := eyas.Fingerprint(context.Background(), jess.InsecureClient(10*time.Second), url)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("family=%s\naccess=%s\n", fam, fam.AccessHint())
+	return nil
+}
+
+func or(v, def string) string {
+	if strings.TrimSpace(v) == "" {
+		return def
+	}
+	return v
 }
 
 const usageText = "swallow — cross-flash & recover EnGenius/Senao ap-hk07 APs (unofficial)\n\n" +
 	"USAGE:\n" +
-	"  swallow version\n" +
-	"  swallow plan            print the safety ladder + what each phase adds\n\n" +
-	"PLANNED (see ROADMAP-DEV.md):\n" +
-	"  swallow discover        eyas:    find + fingerprint an AP\n" +
-	"  swallow backup          mews:    dump mtd7/8/11 + config, hashed\n" +
-	"  swallow serial          band:    provision a unique Code27 / snextra (quarry)\n" +
-	"  swallow rehead          quarry:  one-field product_id patch (available now via quarry)\n" +
-	"  swallow flash           hood+jess: safe A/B flash, env-completeness gated\n" +
-	"  swallow recover         creance+lure: gated UART env repair / TFTP re-flash\n\n" +
-	"Today the image + serial math ships as the tested quarry binary (Rust);\n" +
-	"swallow grows the safe network/UART automation around it, phase by phase.\n"
+	"  swallow                 launch the TUI (default)\n" +
+	"  swallow version | plan\n" +
+	"  swallow discover <url>            fingerprint firmware family (eyas)\n" +
+	"  swallow serial  --model X42 [--prefix P --suffix S]   Code27 serial (band)\n" +
+	"  swallow snextra --model X42 [--prefix P]              20-char field-19 value\n" +
+	"  swallow check   <serial>                              validate a serial\n" +
+	"  swallow envcheck [file|-]                             hood env completeness gate\n\n" +
+	"Image re-head ships as the quarry binary (Rust). Unofficial; hardware you own only.\n"
 
-const plan = "Safety ladder (why UART is usually unnecessary):\n\n" +
+const planText = "Safety ladder (why UART is usually unnecessary):\n\n" +
 	"  1. network flash        no UART — dual A/B slot means a bad image never bricks\n" +
 	"  2. network env-repair   no UART — append-only fw_setenv on a verified env\n" +
 	"  3. UART env-repair      gated: env default -a -> inspect -> env save\n" +
 	"  4. UART TFTP re-flash   truly dead board — lure calls it back over the wire\n\n" +
-	"Two invariants the tool structurally cannot break:\n" +
-	"  - always write the INACTIVE slot; keep the active one bootable\n" +
-	"  - the env is APPEND-ONLY; never erase or hand-rebuild it (the one thing that bricks)\n"
+	"Invariants the tool cannot break: write the INACTIVE slot; env is APPEND-ONLY.\n"
