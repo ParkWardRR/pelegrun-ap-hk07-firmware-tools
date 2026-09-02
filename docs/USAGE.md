@@ -93,6 +93,13 @@ quarry inspect firmware.bin             # parse + validate the Senao header
 quarry rehead firmware.bin --to 284     # ECW230v3; writes only 4 bytes at 0x08
 ```
 
+**Header `product_id`s** (read from real vendor images; `vendor_id` is `257`
+across the line): `282` EWS377AP v3 · `300` EWS377-FIT · `284` ECW230v3 are the
+three cross-flash **siblings** (the values you pass to `--to`). Also recognised
+for identification only: `275` ECW230, `182` EWS377AP v2, `285` ECW230S — the
+last is a related cloud AP, **not** a verified cross-flash target. The parser is
+regression-tested against real firmware with `make test-firmware FW=<dir>`.
+
 ## The two invariants (why it won't brick)
 
 1. **Writes go to the `INACTIVE` A/B slot.** The running slot stays bootable — a

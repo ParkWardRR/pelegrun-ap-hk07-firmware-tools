@@ -169,8 +169,8 @@ make dist          # cross-compiled binaries + SHA256SUMS → dist/
 
 What's covered:
 
-- **Rust (`quarry`)** — unit tests + **property tests** (`tests/properties.rs`, 5 invariants × 5000 generated cases) + error/display tests; `cargo fmt --check` and `clippy -D warnings` gate CI.
-- **Go (`swallow`)** — every package tested (CLI, TUI model, `eyas` with recorded HTTP fixtures, `jess` adapters via `httptest`, `hood`/`band`/`flash`/`mews`/`creance`); run under the **race detector**; `gofmt` + `go vet` gated.
+- **Rust (`quarry`)** — unit + **property tests** (`tests/properties.rs`, 5 invariants × 5000 generated cases) + error/display tests + an opt-in **real-image test** (`make test-firmware`) validating the parser against genuine firmware (6 product ids across ~26 images); `cargo fmt --check` and `clippy -D warnings` gate CI.
+- **Go (`swallow`)** — every package tested (CLI, TUI model, `eyas` with recorded HTTP fixtures, `jess` adapters via `httptest`, `hood`/`band`/`flash`/`mews`/`creance`), plus a **Go↔Rust parity test** (`band` vs. the `quarry` binary); run under the **race detector**; `gofmt` + `go vet` gated.
 - **Zig (`lure`)** — unit tests (`zig build test`) for the TFTP parsing helpers + a real **multi-block transfer integration test**; `zig fmt --check` gated.
 
 ## Spec-driven

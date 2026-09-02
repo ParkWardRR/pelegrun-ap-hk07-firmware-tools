@@ -1,6 +1,6 @@
 # Spec 001 — swallow MVP: no-UART cross-flash + serial provisioning
 
-**Stage:** Specify · **Status:** approved → Plan
+**Stage:** Specify · **Status:** implemented — MVP (FR1–FR6) shipped in v0.4.0; FR7–FR9 also landed
 **Constitution:** all clauses apply (esp. I, II, VI).
 
 ## Problem
@@ -26,23 +26,36 @@ that recovers a device **without UART wherever physically possible**.
    fresh image if the rootfs is gone.
 
 ## Functional requirements
-- **FR1 (quarry, done):** parse/validate the Senao header; one-field `product_id`
-  re-head; Code27 serial + 20-char `snextra` generate/validate. Pure, tested.
-- **FR2:** fingerprint firmware family (EWS-LuCI / cloud-React / FIT).
-- **FR3:** access adapters — SSH:8822, cloud GUI API, LuCI, UART — one interface.
-- **FR4:** per-device backup bundle (mtd7/8/11 + config + hashes) as a hard gate.
-- **FR5:** env-completeness gate; append-only writes; refuse fragile states.
-- **FR6:** A/B-aware flash (inactive slot), with verification + rollback.
-- **FR7:** serial uniqueness + collision preflight against a local inventory.
-- **FR8:** UART console recovery (gated env repair; TFTP deep-brick re-flash).
-- **FR9:** single static binary per OS; no runtime deps.
+- **FR1 (quarry, ✅):** parse/validate the Senao header; one-field `product_id`
+  re-head; Code27 serial + 20-char `snextra` generate/validate. Pure, tested —
+  including property tests and validation against real vendor images.
+- **FR2 (eyas, ✅):** fingerprint firmware family (EWS-LuCI / cloud-React / FIT).
+- **FR3 (jess, ✅):** access adapters — SSH:8822, cloud GUI API, LuCI (UART via
+  creance) — one interface.
+- **FR4 (mews, ✅):** per-device backup bundle (mtd7/8/11 + config + hashes) as a
+  hard gate.
+- **FR5 (hood, ✅):** env-completeness gate; append-only writes; refuse fragile
+  states.
+- **FR6 (flash, ✅):** A/B-aware flash (inactive slot), with verification +
+  rollback.
+- **FR7 (band, ✅):** serial uniqueness + collision preflight against a local
+  inventory.
+- **FR8 (creance + lure, ✅):** UART console recovery (gated env repair; TFTP
+  deep-brick re-flash).
+- **FR9 (✅):** single static binary per OS; no runtime deps — cross-compiled
+  release binaries + checksums ship per tag.
 
 ## Non-goals
 - No bundled vendor firmware. No controller-side seeding of DBs. No support for
   defeating licensing/theft protection. No cloud accounts.
 
-## Acceptance criteria (MVP = FR1–FR6)
-- `quarry` re-head + serial math match hardware-verified values; tests green in CI.
-- The tool **cannot** issue an env-erase or a partial-env-save (enforced in code).
-- A failed flash always leaves a bootable slot (documented + tested against fixtures).
-- Every mutating command has a paired verify step and a captured evidence artifact.
+## Acceptance criteria (MVP = FR1–FR6) — met in v0.4.0
+- ✅ `quarry` re-head + serial math match hardware-verified values; tests green in
+  CI, plus property tests and real-image validation (6 product ids across ~26
+  genuine images), and a Go↔Rust parity check on the serial math.
+- ✅ The tool **cannot** issue an env-erase or a partial-env-save (enforced in
+  `hood`; no `PlanErase`/`PlanReset` exists, empty values are refused).
+- ✅ A failed flash always leaves a bootable slot (`flash` targets the inactive
+  slot; unit-tested).
+- ✅ Every mutating command has a paired verify step and a captured evidence
+  artifact (`flash.Plan` ordering; `mews` bundle gate).
