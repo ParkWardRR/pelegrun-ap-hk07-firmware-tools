@@ -57,7 +57,7 @@ fn parses_real_firmware_headers() {
             h.product_id
         );
         // A known id must carry a non-"unknown" label.
-        if matches!(h.product_id, 182 | 275 | 282 | 284 | 300) {
+        if matches!(h.product_id, 182 | 275 | 282 | 284 | 285 | 300) {
             assert_ne!(
                 h.product().label(),
                 "unknown",

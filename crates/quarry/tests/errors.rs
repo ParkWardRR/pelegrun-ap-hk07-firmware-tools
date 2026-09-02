@@ -37,6 +37,7 @@ fn product_id_label_roundtrip() {
         (300, "EWS377-FIT"),
         (275, "ECW230"),
         (284, "ECW230v3"),
+        (285, "ECW230S"),
     ] {
         let p = Product::from_id(id);
         assert_eq!(p.id(), id);

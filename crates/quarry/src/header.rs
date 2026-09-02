@@ -30,7 +30,9 @@ pub const MIN_LEN: usize = OFF_MODEL + 16;
 ///
 /// The three cross-flash siblings are `282`/`300`/`284`. The other ids were read
 /// from real vendor images (see `tests/real_images.rs`): `275` base ECW230,
-/// `182` the older EWS377AP v2 / `ews377ap-all` line.
+/// `182` the older EWS377AP v2 / `ews377ap-all` line, and `285` ECW230S (a
+/// related cloud AP with an extra scanning radio — labelled, but NOT a verified
+/// cross-flash target).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Product {
     Ews377ApV2, // 182
@@ -38,6 +40,7 @@ pub enum Product {
     Ews377Fit,  // 300
     Ecw230,     // 275
     Ecw230V3,   // 284
+    Ecw230S,    // 285
     Other(u32),
 }
 
@@ -49,6 +52,7 @@ impl Product {
             300 => Product::Ews377Fit,
             275 => Product::Ecw230,
             284 => Product::Ecw230V3,
+            285 => Product::Ecw230S,
             other => Product::Other(other),
         }
     }
@@ -59,6 +63,7 @@ impl Product {
             Product::Ews377Fit => 300,
             Product::Ecw230 => 275,
             Product::Ecw230V3 => 284,
+            Product::Ecw230S => 285,
             Product::Other(v) => v,
         }
     }
@@ -69,6 +74,7 @@ impl Product {
             Product::Ews377Fit => "EWS377-FIT",
             Product::Ecw230 => "ECW230",
             Product::Ecw230V3 => "ECW230v3",
+            Product::Ecw230S => "ECW230S",
             Product::Other(_) => "unknown",
         }
     }
