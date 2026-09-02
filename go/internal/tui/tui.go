@@ -16,37 +16,40 @@ import (
 	"github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/internal/mews"
 )
 
-// A restrained, system-like palette: mostly neutral ink, one soft-blue accent
-// for selection/emphasis, and green/red reserved strictly for status meaning.
+// A calm, system-like palette tuned for legibility on a dark terminal: bright
+// near-white headings, a high-contrast body gray, one readable blue accent for
+// selection/links, and green/red reserved strictly for status meaning.
 var (
-	accent   = lipgloss.Color("75")  // soft blue — selection + emphasis
-	ink      = lipgloss.Color("253") // primary text
-	ink2     = lipgloss.Color("247") // secondary text
-	faint    = lipgloss.Color("242") // hints / captions
-	hair     = lipgloss.Color("237") // hairline dividers
-	okc      = lipgloss.Color("78")  // system green
+	accent   = lipgloss.Color("75")  // selection background
+	accentTx = lipgloss.Color("117") // accent text (bright enough to read on black)
+	strong   = lipgloss.Color("231") // headings — near-white
+	text     = lipgloss.Color("252") // primary body text
+	text2    = lipgloss.Color("250") // menu items / secondary
+	cap      = lipgloss.Color("245") // captions / hints (still readable)
+	line     = lipgloss.Color("240") // visible-but-subtle card borders
+	okc      = lipgloss.Color("114") // system green
 	noc      = lipgloss.Color("210") // system red
-	warnc    = lipgloss.Color("179") // muted amber (critical tag)
-	onAccent = lipgloss.Color("231") // near-white text on the accent pill
+	warnc    = lipgloss.Color("179") // muted amber (required tag)
+	onAccent = lipgloss.Color("231") // text on the accent pill
 
-	sProduct = lipgloss.NewStyle().Bold(true).Foreground(ink)
-	sHead    = lipgloss.NewStyle().Bold(true).Foreground(ink)
-	sSub     = lipgloss.NewStyle().Foreground(faint)
-	sBody    = lipgloss.NewStyle().Foreground(ink2)
-	sInk     = lipgloss.NewStyle().Foreground(ink)
-	sKey     = lipgloss.NewStyle().Bold(true).Foreground(ink) // values / tokens
-	sAccent  = lipgloss.NewStyle().Foreground(accent)
-	sVer     = lipgloss.NewStyle().Foreground(accent)
+	sProduct = lipgloss.NewStyle().Bold(true).Foreground(strong)
+	sHead    = lipgloss.NewStyle().Bold(true).Foreground(strong)
+	sSub     = lipgloss.NewStyle().Foreground(cap)
+	sBody    = lipgloss.NewStyle().Foreground(text)
+	sInk     = lipgloss.NewStyle().Foreground(text)
+	sKey     = lipgloss.NewStyle().Bold(true).Foreground(strong) // values / tokens pop
+	sAccent  = lipgloss.NewStyle().Foreground(accentTx)
+	sVer     = lipgloss.NewStyle().Foreground(accentTx)
 	sOK      = lipgloss.NewStyle().Foreground(okc)
 	sNo      = lipgloss.NewStyle().Bold(true).Foreground(noc)
 	sWarn    = lipgloss.NewStyle().Foreground(warnc)
 	sPill    = lipgloss.NewStyle().Bold(true).Foreground(onAccent).Background(accent)
-	sItem    = lipgloss.NewStyle().Foreground(ink2)
+	sItem    = lipgloss.NewStyle().Foreground(text2)
 
-	menuBx = lipgloss.NewStyle().Border(lipgloss.NormalBorder(), false, true, false, false).
-		BorderForeground(hair).PaddingRight(2)
-	contBx = lipgloss.NewStyle().Padding(1, 4)
-	hdrBx  = lipgloss.NewStyle().Border(lipgloss.NormalBorder(), false, false, true, false).BorderForeground(hair)
+	menuBx = lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).BorderForeground(line).
+		Padding(1, 1).MarginRight(1)
+	contBx = lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).BorderForeground(line).Padding(1, 3)
+	hdrBx  = lipgloss.NewStyle().Border(lipgloss.NormalBorder(), false, false, true, false).BorderForeground(line)
 )
 
 type stage struct {
@@ -115,32 +118,37 @@ func (m model) View() string {
 		m.w, m.h = 100, 30
 	}
 	bodyH := m.h - 5
-	if bodyH < 15 {
-		bodyH = 15
+	if bodyH < 16 {
+		bodyH = 16
 	}
-	menuW := 22
+	// Menu card is a fixed width; its inner text width accounts for the rounded
+	// border (2) + horizontal padding (2).
+	menuW := 24
+	menuInner := menuW - 4
 
-	// Sidebar: plain step names. The selected row is a full-width accent pill
-	// (like a settings sidebar); the rest is quiet secondary ink.
+	// Sidebar: plain step names, numbered so the flow reads as a sequence. The
+	// selected row is a full-width accent pill (like a settings sidebar).
 	var menu strings.Builder
 	menu.WriteString(sSub.Render("STEPS") + "\n\n")
 	for i, s := range m.stages {
-		label := fmt.Sprintf("  %-*s", menuW-2, s.name)
+		label := fmt.Sprintf(" %d  %-*s", i+1, menuInner-4, s.name)
 		if i == m.sel {
 			menu.WriteString(sPill.Render(label))
 		} else {
 			menu.WriteString(sItem.Render(label))
 		}
-		menu.WriteByte('\n')
+		menu.WriteString("\n\n")
 	}
 	menuPanel := menuBx.Width(menuW).Height(bodyH).Render(strings.TrimRight(menu.String(), "\n"))
 
-	contentW := m.w - menuW - 8
-	if contentW < 36 {
-		contentW = 36
+	// Content card fills the rest of the width (menu box + its 1-col right margin).
+	contentW := m.w - menuW - 2
+	if contentW < 40 {
+		contentW = 40
 	}
 	cur := m.stages[m.sel]
-	title := sHead.Render(cur.name)
+	crumb := sSub.Render(fmt.Sprintf("Step %d of %d", m.sel+1, len(m.stages)))
+	title := sHead.Render(cur.name) + "   " + crumb
 	sub := sSub.Render(cur.sub)
 	body := title + "\n" + sub + "\n\n" + cur.run()
 	contentPanel := contBx.Width(contentW).Height(bodyH).Render(body)
@@ -196,7 +204,7 @@ func runBackup() string {
 		if a.Critical {
 			tag = sWarn.Render("required")
 		}
-		b.WriteString("  " + sOK.Render("▢ ") + sInk.Render(fmt.Sprintf("%-20s", a.Name)) + sSub.Render(a.Command) + "  " + tag + "\n")
+		b.WriteString("  " + sOK.Render("· ") + sInk.Render(fmt.Sprintf("%-20s", a.Name)) + sSub.Render(a.Command) + "  " + tag + "\n")
 	}
 	b.WriteString("\n" + sSub.Render("The RF-calibration area (factory MACs) is read-only and never touched."))
 	return b.String()
@@ -204,16 +212,15 @@ func runBackup() string {
 
 func runSafeguards() string {
 	var b strings.Builder
-	b.WriteString(sBody.Render("The bootloader is protected — the tool physically can't brick it.") + "\n\n")
+	b.WriteString(sBody.Render("The bootloader is protected — the tool can't brick it.") + "\n\n")
 	good := hood.ParsePrintenv("bootcmd=bootipq\nactive_fw=0\napp_part=0\nrootfsname=rootfs\nsnextra=00000000000000000000\n")
 	cmd, _ := good.PlanSet("snextra", "SWLWX42000000000000A")
-	b.WriteString("  " + sOK.Render("Complete settings") + sSub.Render("  →  allowed:  ") + sAccent.Render(cmd) + "\n")
 	wiped := hood.ParsePrintenv("ethaddr=00:03:7f:12:3e:87\n")
-	_, e1 := wiped.PlanSet("snextra", "x")
-	b.WriteString("  " + sNo.Render("Wiped settings") + sSub.Render(fmt.Sprintf("     →  refused: missing %v", wiped.Missing())) + "\n")
-	_, e2 := good.PlanSet("snextra", "")
-	_ = e1
-	b.WriteString("  " + sNo.Render("Empty value") + sSub.Render("        →  refused: "+oneline(e2.Error())) + "\n\n")
+	_, _ = wiped.PlanSet("snextra", "x")
+	b.WriteString("  " + sOK.Render("· complete env") + sBody.Render("    allowed — adds a single field") + "\n")
+	b.WriteString("  " + sNo.Render("· wiped env") + sBody.Render(fmt.Sprintf("       refused — %d required keys missing", len(wiped.Missing()))) + "\n")
+	b.WriteString("  " + sNo.Render("· empty value") + sBody.Render("     refused — u-boot would delete it") + "\n\n")
+	b.WriteString(sSub.Render("Example allowed write:  ") + sAccent.Render(cmd) + "\n\n")
 	b.WriteString(sSub.Render("It only ever adds a setting — it never erases or resets them."))
 	return b.String()
 }
@@ -247,9 +254,9 @@ func runInstall() string {
 func runVerify() string {
 	var b strings.Builder
 	b.WriteString(sBody.Render("Confirm the device came back exactly as intended:") + "\n\n")
-	b.WriteString("  " + sOK.Render("✓") + " Reads the firmware family and serial after reboot\n")
-	b.WriteString("  " + sOK.Render("✓") + " Compares them against what was written\n")
-	b.WriteString("  " + sOK.Render("✓") + " Flags any mismatch and offers a one-step rollback\n\n")
+	b.WriteString("  " + sOK.Render("·") + " Reads the firmware family and serial after reboot\n")
+	b.WriteString("  " + sOK.Render("·") + " Compares them against what was written\n")
+	b.WriteString("  " + sOK.Render("·") + " Flags any mismatch and offers a one-step rollback\n\n")
 	b.WriteString(sSub.Render("Only after this passes is the flash considered done."))
 	return b.String()
 }
