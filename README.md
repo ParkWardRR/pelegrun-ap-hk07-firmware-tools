@@ -152,12 +152,21 @@ Model codes: `X44` EWS377AP v3 · `X45` EWS377-FIT · `X42` ECW230v3.
 
 ## Build & test
 
+One `make` front-end drives all three languages (`make help` lists everything):
+
 ```console
-cargo test --workspace          # Rust core (quarry) — unit + 5 property tests
-cd go  && go test ./...          # Go: eyas (+recorded fixtures) · jess · hood · band · mews · flash · creance
-cd zig && ./tftp_test.sh         # Zig lure — real TFTP transfer round-trip
-make dist                        # cross-compiled binaries + SHA256SUMS → dist/
+make ci            # exactly what CI runs: fmt-check + lint + tests (race), 3 langs
+make test          # every suite: cargo test · go test · zig build test · lure integration
+make cover         # Go coverage summary (currently ~89% of statements)
+make fmt           # auto-format Rust + Go + Zig
+make dist          # cross-compiled binaries + SHA256SUMS → dist/
 ```
+
+What's covered:
+
+- **Rust (`quarry`)** — unit tests + **property tests** (`tests/properties.rs`, 5 invariants × 5000 generated cases) + error/display tests; `cargo fmt --check` and `clippy -D warnings` gate CI.
+- **Go (`swallow`)** — every package tested (CLI, TUI model, `eyas` with recorded HTTP fixtures, `jess` adapters via `httptest`, `hood`/`band`/`flash`/`mews`/`creance`); run under the **race detector**; `gofmt` + `go vet` gated.
+- **Zig (`lure`)** — unit tests (`zig build test`) for the TFTP parsing helpers + a real **multi-block transfer integration test**; `zig fmt --check` gated.
 
 ## Spec-driven
 

@@ -19,10 +19,16 @@ pub const SNEXTRA_LEN: usize = 20;
 /// `check = CODE27[(sum of the body's byte values) % 27]`.
 pub fn check_char(body: &str) -> Result<char, Error> {
     if body.len() != SERIAL_LEN - 1 {
-        return Err(Error::BadLength { field: "serial body", want: SERIAL_LEN - 1, got: body.len() });
+        return Err(Error::BadLength {
+            field: "serial body",
+            want: SERIAL_LEN - 1,
+            got: body.len(),
+        });
     }
     if !body.bytes().all(|b| b.is_ascii_alphanumeric()) {
-        return Err(Error::BadChar { field: "serial body" });
+        return Err(Error::BadChar {
+            field: "serial body",
+        });
     }
     let sum: usize = body.bytes().map(|b| b as usize).sum();
     Ok(CODE27[sum % 27] as char)
@@ -32,13 +38,25 @@ pub fn check_char(body: &str) -> Result<char, Error> {
 /// 4-char suffix, appending the Code27 check character.
 pub fn make_serial(prefix4: &str, model_code3: &str, suffix4: &str) -> Result<String, Error> {
     if prefix4.len() != 4 {
-        return Err(Error::BadLength { field: "prefix", want: 4, got: prefix4.len() });
+        return Err(Error::BadLength {
+            field: "prefix",
+            want: 4,
+            got: prefix4.len(),
+        });
     }
     if model_code3.len() != 3 {
-        return Err(Error::BadLength { field: "model_code", want: 3, got: model_code3.len() });
+        return Err(Error::BadLength {
+            field: "model_code",
+            want: 3,
+            got: model_code3.len(),
+        });
     }
     if suffix4.len() != 4 {
-        return Err(Error::BadLength { field: "suffix", want: 4, got: suffix4.len() });
+        return Err(Error::BadLength {
+            field: "suffix",
+            want: 4,
+            got: suffix4.len(),
+        });
     }
     let body = format!("{prefix4}{model_code3}{suffix4}");
     let c = check_char(&body)?;
@@ -52,7 +70,7 @@ pub fn validate_serial(s: &str) -> bool {
     }
     let (body, tail) = s.split_at(SERIAL_LEN - 1);
     match check_char(body) {
-        Ok(c) => tail.chars().next() == Some(c),
+        Ok(c) => tail.starts_with(c),
         Err(_) => false,
     }
 }
@@ -60,7 +78,11 @@ pub fn validate_serial(s: &str) -> bool {
 /// The 3-char model code (positions 5–7) of a serial or `snextra`.
 pub fn model_code(s: &str) -> Result<&str, Error> {
     if s.len() < 7 {
-        return Err(Error::BadLength { field: "serial", want: 7, got: s.len() });
+        return Err(Error::BadLength {
+            field: "serial",
+            want: 7,
+            got: s.len(),
+        });
     }
     Ok(&s[4..7])
 }
@@ -73,7 +95,11 @@ pub fn model_code(s: &str) -> Result<&str, Error> {
 /// field; the Code27 check character applies to the 12-char serial form, not here.
 pub fn make_snextra(prefix: &str, model_code3: &str) -> Result<String, Error> {
     if model_code3.len() != 3 {
-        return Err(Error::BadLength { field: "model_code", want: 3, got: model_code3.len() });
+        return Err(Error::BadLength {
+            field: "model_code",
+            want: 3,
+            got: model_code3.len(),
+        });
     }
     let prefix = if prefix.is_empty() { "SWLW" } else { prefix };
     if prefix.len() != 4 || !prefix.bytes().all(|b| b.is_ascii_alphanumeric()) {
@@ -108,7 +134,7 @@ mod tests {
     fn validate_known_serial() {
         assert!(validate_serial("EPC1X4200011"));
         assert!(!validate_serial("EPC1X4200012")); // wrong check char
-        assert!(!validate_serial("EPC1X420001"));  // too short
+        assert!(!validate_serial("EPC1X420001")); // too short
     }
 
     #[test]
@@ -131,7 +157,7 @@ mod tests {
         assert_eq!(x.len(), SNEXTRA_LEN);
         assert_eq!(&x[4..7], "X42");
         assert!(validate_snextra(&x));
-        assert!(!validate_snextra("EPC1X42"));            // too short
+        assert!(!validate_snextra("EPC1X42")); // too short
         assert!(!validate_snextra("EPC1X420000000000!0")); // bad char
     }
 

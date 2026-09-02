@@ -9,12 +9,12 @@ import (
 
 func TestClassify(t *testing.T) {
 	cases := map[string]Family{
-		`<script src="/static/js/main.abc.chunk.js">`:              Cloud,
-		`<script src="/luci-static/resources/md5.js"></script>`:    EwsLuCI,
-		`<input name="password_plain_text" type="password">`:       EwsLuCI,
-		`action="/cgi-bin/luci"`:                                   EwsLuCI,
-		`<title>EWS377-FIT</title>`:                                Fit,
-		`<html><body>nothing here</body></html>`:                   Unknown,
+		`<script src="/static/js/main.abc.chunk.js">`:           Cloud,
+		`<script src="/luci-static/resources/md5.js"></script>`: EwsLuCI,
+		`<input name="password_plain_text" type="password">`:    EwsLuCI,
+		`action="/cgi-bin/luci"`:                                EwsLuCI,
+		`<title>EWS377-FIT</title>`:                             Fit,
+		`<html><body>nothing here</body></html>`:                Unknown,
 	}
 	for body, want := range cases {
 		if got := Classify(body); got != want {

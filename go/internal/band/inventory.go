@@ -11,9 +11,9 @@ import (
 // Asset is one provisioned device's immutable identity record.
 type Asset struct {
 	Name    string `json:"name"`
-	Serial  string `json:"serial"`  // synthetic snextra or 12-char serial
-	MAC     string `json:"mac"`     // real label MAC
-	Model   string `json:"model"`   // e.g. ECW230v3
+	Serial  string `json:"serial"` // synthetic snextra or 12-char serial
+	MAC     string `json:"mac"`    // real label MAC
+	Model   string `json:"model"`  // e.g. ECW230v3
 	AddedAt string `json:"added_at"`
 }
 

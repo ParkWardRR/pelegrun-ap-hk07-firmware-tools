@@ -28,7 +28,11 @@ pub enum Error {
     /// Magic value at offset 0x5C was not `0x12345678`.
     BadMagic { got: u32 },
     /// A serial/model-code string had the wrong length.
-    BadLength { field: &'static str, want: usize, got: usize },
+    BadLength {
+        field: &'static str,
+        want: usize,
+        got: usize,
+    },
     /// A serial/model-code contained a character outside the allowed set.
     BadChar { field: &'static str },
 }
@@ -36,9 +40,15 @@ pub enum Error {
 impl core::fmt::Display for Error {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
-            Error::TooShort { need, got } => write!(f, "image too short: need {need} bytes, got {got}"),
-            Error::BadMagic { got } => write!(f, "bad Senao magic: expected 0x12345678, got {got:#010x}"),
-            Error::BadLength { field, want, got } => write!(f, "{field}: expected {want} chars, got {got}"),
+            Error::TooShort { need, got } => {
+                write!(f, "image too short: need {need} bytes, got {got}")
+            }
+            Error::BadMagic { got } => {
+                write!(f, "bad Senao magic: expected 0x12345678, got {got:#010x}")
+            }
+            Error::BadLength { field, want, got } => {
+                write!(f, "{field}: expected {want} chars, got {got}")
+            }
             Error::BadChar { field } => write!(f, "{field}: contains a disallowed character"),
         }
     }

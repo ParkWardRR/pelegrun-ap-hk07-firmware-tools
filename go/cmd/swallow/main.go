@@ -26,7 +26,13 @@ import (
 var Version = "0.4.0"
 
 func main() {
-	args := os.Args[1:]
+	os.Exit(run(os.Args[1:], os.Stdout, os.Stderr))
+}
+
+// run is the testable entry point: it dispatches a subcommand, writing normal
+// output to out and diagnostics to errw, and returns the process exit code
+// (0 ok, 1 command error, 2 unknown command).
+func run(args []string, out, errw io.Writer) int {
 	cmd := ""
 	if len(args) > 0 {
 		cmd, args = args[0], args[1:]
@@ -35,36 +41,37 @@ func main() {
 	var err error
 	switch cmd {
 	case "", "tui":
-		err = runTUI()
+		err = runTUI(out)
 	case "version":
-		fmt.Printf("swallow %s\n", Version)
+		fmt.Fprintf(out, "swallow %s\n", Version)
 	case "plan":
-		fmt.Print(planText)
+		fmt.Fprint(out, planText)
 	case "serial":
-		err = cmdSerial(args)
+		err = cmdSerial(out, args)
 	case "snextra":
-		err = cmdSnextra(args)
+		err = cmdSnextra(out, args)
 	case "check":
-		err = cmdCheck(args)
+		err = cmdCheck(out, args)
 	case "envcheck":
-		err = cmdEnvcheck(args)
+		err = cmdEnvcheck(out, args)
 	case "discover":
-		err = cmdDiscover(args)
+		err = cmdDiscover(out, args)
 	case "-h", "--help", "help":
-		fmt.Print(usageText)
+		fmt.Fprint(out, usageText)
 	default:
-		fmt.Fprintf(os.Stderr, "swallow: %q is planned but not implemented yet (see ROADMAP-DEV.md)\n", cmd)
-		os.Exit(2)
+		fmt.Fprintf(errw, "swallow: %q is planned but not implemented yet (see ROADMAP-DEV.md)\n", cmd)
+		return 2
 	}
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "error: %v\n", err)
-		os.Exit(1)
+		fmt.Fprintf(errw, "error: %v\n", err)
+		return 1
 	}
+	return 0
 }
 
-func runTUI() error {
+func runTUI(out io.Writer) error {
 	if !term.IsTerminal(int(os.Stdout.Fd())) {
-		fmt.Print(usageText)
+		fmt.Fprint(out, usageText)
 		return nil
 	}
 	return tui.Run(Version)
@@ -86,7 +93,7 @@ func or(v, def string) string {
 	return v
 }
 
-func cmdSerial(a []string) error {
+func cmdSerial(out io.Writer, a []string) error {
 	model := argVal(a, "--model")
 	if model == "" {
 		return fmt.Errorf("serial: --model <CODE> required (e.g. X42)")
@@ -95,11 +102,11 @@ func cmdSerial(a []string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(s)
+	fmt.Fprintln(out, s)
 	return nil
 }
 
-func cmdSnextra(a []string) error {
+func cmdSnextra(out io.Writer, a []string) error {
 	model := argVal(a, "--model")
 	if model == "" {
 		return fmt.Errorf("snextra: --model <CODE> required")
@@ -108,23 +115,23 @@ func cmdSnextra(a []string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(s)
+	fmt.Fprintln(out, s)
 	return nil
 }
 
-func cmdCheck(a []string) error {
+func cmdCheck(out io.Writer, a []string) error {
 	if len(a) == 0 {
 		return fmt.Errorf("check: <serial> required")
 	}
 	mc, _ := band.ModelCode(a[0])
-	fmt.Printf("serial=%s valid=%t model_code=%s\n", a[0], band.ValidateSerial(a[0]), mc)
+	fmt.Fprintf(out, "serial=%s valid=%t model_code=%s\n", a[0], band.ValidateSerial(a[0]), mc)
 	if !band.ValidateSerial(a[0]) {
 		return fmt.Errorf("check character does not match")
 	}
 	return nil
 }
 
-func cmdEnvcheck(a []string) error {
+func cmdEnvcheck(out io.Writer, a []string) error {
 	var data []byte
 	var err error
 	if len(a) > 0 && a[0] != "-" {
@@ -137,14 +144,14 @@ func cmdEnvcheck(a []string) error {
 	}
 	e := hood.ParsePrintenv(string(data))
 	if e.IsComplete() {
-		fmt.Println("env: COMPLETE — safe to append individual fields")
+		fmt.Fprintln(out, "env: COMPLETE — safe to append individual fields")
 		return nil
 	}
-	fmt.Printf("env: INCOMPLETE — missing %v\nrefuse writes; recover with `env default -a` over UART first\n", e.Missing())
+	fmt.Fprintf(out, "env: INCOMPLETE — missing %v\nrefuse writes; recover with `env default -a` over UART first\n", e.Missing())
 	return fmt.Errorf("incomplete env")
 }
 
-func cmdDiscover(a []string) error {
+func cmdDiscover(out io.Writer, a []string) error {
 	if len(a) == 0 {
 		return fmt.Errorf("discover: <url> required (e.g. http://192.168.1.1)")
 	}
@@ -152,7 +159,7 @@ func cmdDiscover(a []string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("family=%s\naccess=%s\n", fam, fam.AccessHint())
+	fmt.Fprintf(out, "family=%s\naccess=%s\n", fam, fam.AccessHint())
 	return nil
 }
 

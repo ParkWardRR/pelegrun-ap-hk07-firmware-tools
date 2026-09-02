@@ -84,23 +84,37 @@ impl Header {
 fn be_u32(data: &[u8], off: usize) -> Result<u32, Error> {
     let end = off + 4;
     if data.len() < end {
-        return Err(Error::TooShort { need: end, got: data.len() });
+        return Err(Error::TooShort {
+            need: end,
+            got: data.len(),
+        });
     }
-    Ok(u32::from_be_bytes([data[off], data[off + 1], data[off + 2], data[off + 3]]))
+    Ok(u32::from_be_bytes([
+        data[off],
+        data[off + 1],
+        data[off + 2],
+        data[off + 3],
+    ]))
 }
 
 /// Parse and validate a Senao image header. Errors if the image is too short or
 /// the magic is wrong (i.e. it isn't a Senao image).
 pub fn parse(data: &[u8]) -> Result<Header, Error> {
     if data.len() < MIN_LEN {
-        return Err(Error::TooShort { need: MIN_LEN, got: data.len() });
+        return Err(Error::TooShort {
+            need: MIN_LEN,
+            got: data.len(),
+        });
     }
     let magic = be_u32(data, OFF_MAGIC)?;
     if magic != MAGIC {
         return Err(Error::BadMagic { got: magic });
     }
     let model_bytes = &data[OFF_MODEL..OFF_MODEL + 16];
-    let end = model_bytes.iter().position(|&b| b == 0 || b < 0x20 || b > 0x7e).unwrap_or(model_bytes.len());
+    let end = model_bytes
+        .iter()
+        .position(|&b| b == 0 || !(0x20..=0x7e).contains(&b))
+        .unwrap_or(model_bytes.len());
     let model = String::from_utf8_lossy(&model_bytes[..end]).into_owned();
 
     Ok(Header {

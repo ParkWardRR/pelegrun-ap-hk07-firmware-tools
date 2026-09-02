@@ -19,7 +19,9 @@ Model codes:  X44 = EWS377AP v3, X45 = EWS377-FIT, X42 = ECW230v3."
 }
 
 fn arg_val(args: &[String], key: &str) -> Option<String> {
-    args.iter().position(|a| a == key).and_then(|i| args.get(i + 1).cloned())
+    args.iter()
+        .position(|a| a == key)
+        .and_then(|i| args.get(i + 1).cloned())
 }
 
 fn main() -> ExitCode {
@@ -65,12 +67,20 @@ fn cmd_inspect(a: &[String]) -> Result<(), String> {
 fn cmd_rehead(a: &[String]) -> Result<(), String> {
     let input = a.first().ok_or("rehead: missing <in.bin>")?;
     let output = a.get(1).ok_or("rehead: missing <out.bin>")?;
-    let to: u32 = arg_val(a, "--to").ok_or("rehead: missing --to <product_id>")?
-        .parse().map_err(|_| "rehead: --to must be a number")?;
+    let to: u32 = arg_val(a, "--to")
+        .ok_or("rehead: missing --to <product_id>")?
+        .parse()
+        .map_err(|_| "rehead: --to must be a number")?;
     let mut data = std::fs::read(input).map_err(|e| format!("read {input}: {e}"))?;
     let old = quarry::header::rehead(&mut data, to).map_err(|e| e.to_string())?;
     std::fs::write(output, &data).map_err(|e| format!("write {output}: {e}"))?;
-    println!("re-headed product_id {} -> {} : {} bytes -> {}", old, to, data.len(), output);
+    println!(
+        "re-headed product_id {} -> {} : {} bytes -> {}",
+        old,
+        to,
+        data.len(),
+        output
+    );
     println!("note: verify on a recoverable A/B slot; the tool never asserts a flash succeeded.");
     Ok(())
 }
@@ -95,9 +105,15 @@ fn cmd_snextra(a: &[String]) -> Result<(), String> {
 fn cmd_check(a: &[String]) -> Result<(), String> {
     let s = a.first().ok_or("check: missing <serial12>")?;
     let ok = quarry::serial::validate_serial(s);
-    let mc = quarry::serial::model_code(s).map(str::to_string).unwrap_or_else(|_| "?".into());
+    let mc = quarry::serial::model_code(s)
+        .map(str::to_string)
+        .unwrap_or_else(|_| "?".into());
     println!("serial    : {s}");
     println!("valid     : {ok}");
     println!("model_code: {mc}");
-    if ok { Ok(()) } else { Err("check character does not match".into()) }
+    if ok {
+        Ok(())
+    } else {
+        Err("check character does not match".into())
+    }
 }

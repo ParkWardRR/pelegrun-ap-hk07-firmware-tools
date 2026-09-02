@@ -5,7 +5,7 @@
 //! invariants that must hold for *every* input, not just the hand-picked vectors
 //! in the unit tests.
 
-use quarry::header::{self, OFF_MAGIC, OFF_MODEL, OFF_PRODUCT_ID, MAGIC};
+use quarry::header::{self, MAGIC, OFF_MAGIC, OFF_MODEL, OFF_PRODUCT_ID};
 use quarry::serial::{
     check_char, make_serial, make_snextra, model_code, validate_serial, validate_snextra, CODE27,
     SERIAL_LEN, SNEXTRA_LEN,
@@ -121,7 +121,10 @@ fn rehead_only_changes_product_id_and_is_reversible() {
         let untouched = data.clone();
 
         let returned_old = header::rehead(&mut data, new_id).unwrap();
-        assert_eq!(returned_old, old_id, "rehead returns the previous product_id");
+        assert_eq!(
+            returned_old, old_id,
+            "rehead returns the previous product_id"
+        );
 
         // Exactly the 4 product_id bytes changed — nothing else.
         for (i, (a, b)) in untouched.iter().zip(data.iter()).enumerate() {

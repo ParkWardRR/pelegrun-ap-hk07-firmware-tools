@@ -33,6 +33,16 @@ fn be16(hi: u8, lo: u8) u16 {
     return (@as(u16, hi) << 8) | @as(u16, lo);
 }
 
+/// Parse a TFTP packet as a read request (RRQ): returns the requested filename,
+/// or null if it isn't a well-formed RRQ (wrong opcode, runt, or no NUL).
+fn parseRRQ(pkt: []const u8) ?[]const u8 {
+    if (pkt.len < 4) return null;
+    if (be16(pkt[0], pkt[1]) != OP_RRQ) return null;
+    const rest = pkt[2..];
+    const nul = std.mem.indexOfScalar(u8, rest, 0) orelse return null;
+    return rest[0..nul];
+}
+
 pub fn main() !void {
     // v1 config: serve the current directory on PORT. A future revision reads
     // these from swallow once the 0.16 env/args API settles.
@@ -62,13 +72,7 @@ pub fn main() !void {
         const n = recvfrom(fd, &pkt, pkt.len, 0, &src, &slen);
         if (n < 4) continue; // timeout (-1) or runt packet — keep listening
         const len: usize = @intCast(n);
-        const op = be16(pkt[0], pkt[1]);
-        if (op != OP_RRQ) continue;
-
-        // filename is the first NUL-terminated string after the opcode
-        const rest = pkt[2..len];
-        const nul = std.mem.indexOfScalar(u8, rest, 0) orelse continue;
-        const name = rest[0..nul];
+        const name = parseRRQ(pkt[0..len]) orelse continue;
         serveFile(fd, root, name, &src, slen) catch |e| {
             sendError(fd, &src, slen, 1, "file not found");
             std.debug.print("lure: {s}: {any}\n", .{ name, e });
@@ -120,4 +124,24 @@ fn sendError(fd: c_int, dst: *const c.sockaddr.in, dlen: c.socklen_t, code: u16,
     @memcpy(e[4 .. 4 + m], msg[0..m]);
     e[4 + m] = 0;
     _ = sendto(fd, &e, 5 + m, 0, dst, dlen);
+}
+
+// ---- unit tests (`zig build test`) ----
+
+test "be16 combines bytes big-endian" {
+    try std.testing.expectEqual(@as(u16, 0x0103), be16(0x01, 0x03));
+    try std.testing.expectEqual(@as(u16, OP_RRQ), be16(0, 1));
+    try std.testing.expectEqual(@as(u16, 0xFFFF), be16(0xFF, 0xFF));
+}
+
+test "parseRRQ extracts the filename" {
+    const pkt = [_]u8{ 0, OP_RRQ } ++ "fw.bin".* ++ [_]u8{0} ++ "octet".* ++ [_]u8{0};
+    const name = parseRRQ(pkt[0..]) orelse return error.TestExpectedName;
+    try std.testing.expectEqualStrings("fw.bin", name);
+}
+
+test "parseRRQ rejects non-RRQ, runts, and missing NUL" {
+    try std.testing.expect(parseRRQ(&[_]u8{ 0, OP_ACK, 0, 1 }) == null); // wrong opcode
+    try std.testing.expect(parseRRQ(&[_]u8{ 0, OP_RRQ }) == null); // too short (<4)
+    try std.testing.expect(parseRRQ(&[_]u8{ 0, OP_RRQ, 0x41, 0x42 }) == null); // no NUL
 }
