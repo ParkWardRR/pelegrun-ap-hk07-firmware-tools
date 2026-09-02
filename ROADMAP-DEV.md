@@ -9,12 +9,12 @@ flowchart LR
   P3 --> P4[Phase 4<br/>No-UART A/B flash]
   P4 --> P5[Phase 5<br/>UART recovery]
   P5 --> P6[Phase 6<br/>Release polish]
-  P4 --> P5
   style P1 fill:#1f7a1f,stroke:#0a3,color:#fff
   style P2 fill:#1f7a1f,stroke:#0a3,color:#fff
   style P3 fill:#1f7a1f,stroke:#0a3,color:#fff
   style P4 fill:#1f7a1f,stroke:#0a3,color:#fff
   style P5 fill:#1f7a1f,stroke:#0a3,color:#fff
+  style P6 fill:#1f7a1f,stroke:#0a3,color:#fff
 ```
 
 | Phase | Scope | Deliverable | Status |
@@ -23,9 +23,10 @@ flowchart LR
 | 2 | Access + discovery | `eyas` fingerprint, `jess` ssh/cloud/luci adapters | ✅ done |
 | 3 | Safety + backup + provision | `hood` env gate, `mews` bundles, `band` serials | ✅ done |
 | 4 | No-UART A/B flash | slot-aware flash + verify + rollback | ✅ done |
-| **5** | **UART recovery** | `creance` gated serial repair, `lure` Zig TFTP responder | **✅ done (this release)** |
-| 6 | Release polish | cross-compiled binaries, fixture/property tests, docs | ⬜ next |
+| 5 | UART recovery | `creance` gated serial repair, `lure` Zig TFTP responder | ✅ done |
+| **6** | **Release polish** | cross-compiled binaries + checksums, fixture/property tests, user docs | **✅ done (this release)** |
 
-**Phases 1–5 complete.** Rust 12/12, Go 6 packages, Zig build + `lure` TFTP
-integration test, and termwright terminal-E2E all green. Phase 6 is release
-polish: cross-compiled binaries, recorded-fixture tests, and expanded docs.
+**All 6 phases complete.** Rust unit + property tests (5 invariants), Go 7
+packages incl. recorded fixtures, Zig `lure` TFTP integration test, and
+termwright terminal-E2E all green. Releases ship cross-compiled binaries
+(Go ×5, Zig `lure` ×4) with `SHA256SUMS` via a tag-triggered workflow.

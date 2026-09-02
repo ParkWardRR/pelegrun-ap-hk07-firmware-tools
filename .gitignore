@@ -13,3 +13,4 @@
 # stray firmware images (never commit vendor firmware); keep test fixtures + screenshots
 *.bin
 !**/testdata/*.bin
+dist/

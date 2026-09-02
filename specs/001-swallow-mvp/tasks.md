@@ -38,7 +38,7 @@ Legend: [x] done · [~] in progress · [ ] todo. Maps to `../../ROADMAP-DEV.md`.
 - [x] T5.1 `creance` gated env-repair script (inspect → default-a → gate → save → load → cold boot) + `Decide` safety
 - [x] T5.2 `lure` Zig TFTP (RFC 1350) read responder — real multi-block transfer, integration-tested (`zig/tftp_test.sh`)
 
-## Phase 6 — Release polish
-- [ ] T6.1 cross-compiled release binaries (mac/linux/win) + checksums
-- [ ] T6.2 recorded-fixture adapter tests; property tests for quarry
-- [ ] T6.3 user docs + field-guide cross-link
+## Phase 6 — Release polish  ✅
+- [x] T6.1 cross-compiled binaries (`scripts/dist.sh` + `make dist`: Go ×5, Zig lure ×4) + SHA256SUMS + tag-triggered `release.yml`
+- [x] T6.2 recorded-fixture tests (`eyas/testdata/*.html`) + property tests for quarry (`tests/properties.rs`, 5 invariants × 5000 cases)
+- [x] T6.3 user guide (`docs/USAGE.md`) + install/checksum section + field-guide cross-links

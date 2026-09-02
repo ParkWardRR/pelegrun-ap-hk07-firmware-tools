@@ -13,7 +13,7 @@ Identity · Install · Verify* — over a falconry-themed core.
 [![License: Blue Oak 1.0.0](https://img.shields.io/badge/License-Blue_Oak_1.0.0-0a7bbb.svg)](LICENSE)
 [![CI](https://github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/actions/workflows/ci.yml/badge.svg)](https://github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/ParkWardRR/swallow-ap-hk07-firmware-tools?color=success)](https://github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/releases)
-[![Status: phase 5](https://img.shields.io/badge/dev-phase%205%20✓-brightgreen.svg)](ROADMAP-DEV.md)
+[![Status: all phases ✓](https://img.shields.io/badge/dev-all%206%20phases%20✓-brightgreen.svg)](ROADMAP-DEV.md)
 [![Unofficial](https://img.shields.io/badge/vendor-unofficial-lightgrey.svg)](SAFETY.md)
 
 ![Rust](https://img.shields.io/badge/Rust-core-000000?logo=rust&logoColor=white)
@@ -114,6 +114,22 @@ The middle column maps each to its plain-language screen.
 | **creance** | UART gated env repair (the training line) | Go | ✅ tested |
 | **lure** | deep-brick TFTP recovery responder | Zig | ✅ integration-tested |
 
+## Install
+
+Download a prebuilt binary from the
+[latest release](https://github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/releases/latest)
+and **verify the checksum** — binaries ship for `darwin/{arm64,amd64}`,
+`linux/{amd64,arm64}`, and `windows/amd64`:
+
+```console
+$ curl -LO .../releases/latest/download/swallow-linux-amd64
+$ curl -LO .../releases/latest/download/SHA256SUMS
+$ sha256sum -c SHA256SUMS --ignore-missing && chmod +x swallow-linux-amd64
+```
+
+Prefer source? `cd go && go build ./cmd/swallow`. Full walkthrough:
+**[docs/USAGE.md](docs/USAGE.md)**.
+
 ## Quick start
 
 ```console
@@ -137,9 +153,10 @@ Model codes: `X44` EWS377AP v3 · `X45` EWS377-FIT · `X42` ECW230v3.
 ## Build & test
 
 ```console
-cargo test --workspace          # Rust core (quarry) — 12 tests
-cd go  && go test ./...          # Go: eyas · jess · hood · band · mews
-cd zig && zig build              # Zig recovery helper (0.16)
+cargo test --workspace          # Rust core (quarry) — unit + 5 property tests
+cd go  && go test ./...          # Go: eyas (+recorded fixtures) · jess · hood · band · mews · flash · creance
+cd zig && ./tftp_test.sh         # Zig lure — real TFTP transfer round-trip
+make dist                        # cross-compiled binaries + SHA256SUMS → dist/
 ```
 
 ## Spec-driven

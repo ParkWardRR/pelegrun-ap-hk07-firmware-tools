@@ -23,7 +23,7 @@ import (
 )
 
 // Version is stamped via -ldflags "-X main.Version=...".
-var Version = "0.3.1"
+var Version = "0.4.0"
 
 func main() {
 	args := os.Args[1:]

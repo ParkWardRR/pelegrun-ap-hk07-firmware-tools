@@ -117,9 +117,11 @@ func (m model) View() string {
 	if m.w == 0 {
 		m.w, m.h = 100, 30
 	}
-	bodyH := m.h - 5
-	if bodyH < 16 {
-		bodyH = 16
+	// Height budget: header (2 rows) + card + footer (2 rows) must fit m.h. The
+	// card's rounded border adds 2 rows on top of its Height(), so reserve 6.
+	bodyH := m.h - 6
+	if bodyH < 14 {
+		bodyH = 14
 	}
 	// Menu card is a fixed width; its inner text width accounts for the rounded
 	// border (2) + horizontal padding (2).

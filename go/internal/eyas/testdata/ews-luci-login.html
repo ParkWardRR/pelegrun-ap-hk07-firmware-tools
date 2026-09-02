@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>EnGenius EWS377AP v3 - Authorization Required</title>
+    <script src="/luci-static/resources/md5.js"></script>
+    <script src="/luci-static/resources/cbi.js"></script>
+  </head>
+  <body>
+    <form method="post" action="/cgi-bin/luci">
+      <div class="cbi-value">
+        <label>Username</label>
+        <input type="text" name="luci_username" value="admin" />
+      </div>
+      <div class="cbi-value">
+        <label>Password</label>
+        <input type="password" name="luci_password" />
+        <input type="hidden" name="password_plain_text" value="" />
+      </div>
+      <input type="submit" value="Login" />
+    </form>
+  </body>
+</html>

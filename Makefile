@@ -1,4 +1,4 @@
-.PHONY: test tui screenshots lure-test
+.PHONY: test tui screenshots lure-test dist
 test:
 	cargo test --workspace
 	cd go && go test ./...
@@ -7,6 +7,9 @@ test:
 # lure TFTP recovery responder — build + real transfer round-trip
 lure-test:
 	cd zig && ./tftp_test.sh
+# cross-compiled release artifacts + SHA256SUMS into dist/
+dist:
+	./scripts/dist.sh
 tui:
 	cd go && go run ./cmd/swallow
 # regenerate README screenshots (builds swallow, drives the TUI with termwright)
