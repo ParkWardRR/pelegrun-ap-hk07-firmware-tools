@@ -14,12 +14,13 @@ async fn main() -> anyhow::Result<()> {
 
     // (file stem, a substring that must be on-screen for that menu item)
     let screens = [
-        ("01-eyas-discover", "fingerprint from web markers"),
-        ("02-jess-access", "access tether per family"),
-        ("03-mews-backup", "hard-gate backup"),
-        ("04-hood-safety", "APPEND-ONLY"),
-        ("05-band-serial", "mint a unique"),
-        ("06-flash-phase4", "no-UART A/B flash"),
+        ("01-discover", "Identify the access point"),
+        ("02-connect", "Choose how to connect"),
+        ("03-backup", "Save a full backup first"),
+        ("04-safeguards", "The bootloader is protected"),
+        ("05-identity", "Give each unit a unique identity"),
+        ("06-install", "Install without opening the case"),
+        ("07-verify", "Confirm the device came back"),
     ];
 
     let term = Terminal::builder().size(100, 30).spawn(&bin, &[]).await?;
