@@ -4,9 +4,11 @@
 
 ### Cross-flash & recover EnGenius/Senao `ap-hk07` access points — *without bricking them.*
 
-A falconry-themed toolkit + **aesthetic TUI** for the **IPQ807x / `ap-hk07`** board
+A toolkit with a **clean, plain-language TUI** for the **IPQ807x / `ap-hk07`** board
 family (EWS377AP v3 · EWS377-FIT · ECW230v3): one-field firmware re-head, safe
-serial provisioning, no-UART flashing, and a gated UART recovery path.
+serial provisioning, no-UART flashing, and a gated UART recovery path. The UI
+walks the job in plain steps — *Discover · Connect · Back Up · Safeguards ·
+Identity · Install · Verify* — over a falconry-themed core.
 
 [![License: Blue Oak 1.0.0](https://img.shields.io/badge/License-Blue_Oak_1.0.0-0a7bbb.svg)](LICENSE)
 [![CI](https://github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/actions/workflows/ci.yml/badge.svg)](https://github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/actions/workflows/ci.yml)
@@ -96,16 +98,19 @@ flowchart LR
   C --> L[lure · Zig<br/>TFTP re-flash]
 ```
 
-| Codename | Role (falconry) | Lang | State |
+The codenames below are the internal package names — the **UI never shows them**.
+The middle column maps each to its plain-language screen.
+
+| Codename | UI screen · role | Lang | State |
 |---|---|---|---|
 | **swallow** | the tool + TUI | Go | ✅ |
-| **quarry** | header re-head + Code27 serial (the prey) | Rust | ✅ tested |
-| **eyas** | discover + fingerprint (the nestling) | Go | ✅ tested |
-| **jess** | access tether (ssh/cloud/luci) | Go | ✅ tested |
-| **hood** | append-only env safety gate | Go | ✅ tested |
-| **band** | identity provisioning (ringing a bird) | Go | ✅ tested |
-| **mews** | backup/evidence bundle (the shelter) | Go | ✅ tested |
-| **flash** | no-UART A/B slot flash + verify + rollback | Go | ✅ tested |
+| **quarry** | *(core)* header re-head + Code27 serial (the prey) | Rust | ✅ tested |
+| **eyas** | **Discover** — fingerprint the AP (the nestling) | Go | ✅ tested |
+| **jess** | **Connect** — access tether (ssh/cloud/luci) | Go | ✅ tested |
+| **mews** | **Back Up** — backup/evidence bundle (the shelter) | Go | ✅ tested |
+| **hood** | **Safeguards** — append-only env safety gate | Go | ✅ tested |
+| **band** | **Identity** — unique serial provisioning (ringing a bird) | Go | ✅ tested |
+| **flash** | **Install** / **Verify** — no-UART A/B flash + rollback | Go | ✅ tested |
 | **creance** | UART gated env repair (the training line) | Go | ✅ tested |
 | **lure** | deep-brick TFTP recovery responder | Zig | ✅ integration-tested |
 
