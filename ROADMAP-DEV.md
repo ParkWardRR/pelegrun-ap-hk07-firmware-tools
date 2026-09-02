@@ -9,21 +9,23 @@ flowchart LR
   P3 --> P4[Phase 4<br/>No-UART A/B flash]
   P4 --> P5[Phase 5<br/>UART recovery]
   P5 --> P6[Phase 6<br/>Release polish]
+  P4 --> P5
   style P1 fill:#1f7a1f,stroke:#0a3,color:#fff
   style P2 fill:#1f7a1f,stroke:#0a3,color:#fff
   style P3 fill:#1f7a1f,stroke:#0a3,color:#fff
-  style P2 fill:#1f7a1f,stroke:#0a3,color:#fff
-  style P3 fill:#1f7a1f,stroke:#0a3,color:#fff
+  style P4 fill:#1f7a1f,stroke:#0a3,color:#fff
+  style P5 fill:#1f7a1f,stroke:#0a3,color:#fff
 ```
 
 | Phase | Scope | Deliverable | Status |
 |-------|-------|-------------|--------|
-| **1** | **Core + scaffold** | tested `quarry` (Rust) + `swallow`/Zig skeletons + Spec Kit + CI | **✅ done (this release)** |
+| 1 | Core + scaffold | tested `quarry` (Rust) + `swallow`/Zig skeletons + Spec Kit + CI | ✅ done |
 | 2 | Access + discovery | `eyas` fingerprint, `jess` ssh/cloud/luci adapters | ✅ done |
 | 3 | Safety + backup + provision | `hood` env gate, `mews` bundles, `band` serials | ✅ done |
-| 4 | No-UART A/B flash | slot-aware flash + verify + rollback | 🟡 next |
-| 5 | UART recovery | `creance` gated serial repair, `lure` Zig TFTP | ⬜ |
-| 6 | Release polish | cross-compiled binaries, fixture/property tests, docs | ⬜ |
+| 4 | No-UART A/B flash | slot-aware flash + verify + rollback | ✅ done |
+| **5** | **UART recovery** | `creance` gated serial repair, `lure` Zig TFTP responder | **✅ done (this release)** |
+| 6 | Release polish | cross-compiled binaries, fixture/property tests, docs | ⬜ next |
 
-**Phases 1–3 complete.** Rust 12/12, Go 5 packages, Zig build, and termwright
-terminal-E2E all green. Phase 4 is the no-UART A/B flash + verify.
+**Phases 1–5 complete.** Rust 12/12, Go 6 packages, Zig build + `lure` TFTP
+integration test, and termwright terminal-E2E all green. Phase 6 is release
+polish: cross-compiled binaries, recorded-fixture tests, and expanded docs.

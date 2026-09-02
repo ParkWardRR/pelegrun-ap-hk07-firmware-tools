@@ -29,14 +29,14 @@ Legend: [x] done · [~] in progress · [ ] todo. Maps to `../../ROADMAP-DEV.md`.
 - [x] T3.4 professional Bubble Tea TUI (`tui`) rendering real package output
 - [x] T3.5 termwright E2E harness: assert every TUI screen + generate README screenshots
 
-## Phase 4 — Safe flash + verify (no UART)
-- [ ] T4.1 A/B slot detection
-- [ ] T4.2 flash inactive slot (LuCI two-step / cloud upload+fw_upgrade)
-- [ ] T4.3 reboot watch + env/serial re-verify + rollback
+## Phase 4 — Safe flash + verify (no UART)  ✅
+- [x] T4.1 A/B slot detection (`flash.Slots`/`NextActiveFW` — always writes the inactive slot)
+- [x] T4.2 flash inactive slot (`jess` cloud upload+validate+fw_upgrade / LuCI two-step)
+- [x] T4.3 `flash.Plan` — env-complete gate, point-boot, reboot watch, re-verify + rollback steps
 
-## Phase 5 — UART recovery (creance, lure)
-- [ ] T5.1 `creance` serial console + scripted gated env repair
-- [ ] T5.2 `lure` Zig TFTP/BOOTP responder (real)
+## Phase 5 — UART recovery (creance, lure)  ✅
+- [x] T5.1 `creance` gated env-repair script (inspect → default-a → gate → save → load → cold boot) + `Decide` safety
+- [x] T5.2 `lure` Zig TFTP (RFC 1350) read responder — real multi-block transfer, integration-tested (`zig/tftp_test.sh`)
 
 ## Phase 6 — Release polish
 - [ ] T6.1 cross-compiled release binaries (mac/linux/win) + checksums
