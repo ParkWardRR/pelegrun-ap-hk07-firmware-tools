@@ -1683,15 +1683,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f8fadd59c855ef2080decdef8ff161eb6661b86933c9d82e5ba29dc602a55aba"
 
 [[package]]
-name = "shots"
-version = "0.2.0"
-dependencies = [
- "anyhow",
- "termwright",
- "tokio",
-]
-
-[[package]]
 name = "simba"
 version = "0.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1907,6 +1898,15 @@ name = "ttf-parser"
 version = "0.25.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d2df906b07856748fa3f6e0ad0cbaa047052d4a7dd609e231c4f72cee8c36f31"
+
+[[package]]
+name = "tui-harness"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "termwright",
+ "tokio",
+]
 
 [[package]]
 name = "typenum"

@@ -15,17 +15,19 @@ Legend: [x] done · [~] in progress · [ ] todo. Maps to `../../ROADMAP-DEV.md`.
 - [x] T1.9 Zig `lure` stub building on 0.16
 - [x] T1.10 Spec Kit artifacts (constitution, spec, plan, tasks) + CI + docs
 
-## Phase 2 — Access & discovery (eyas, jess)  ✅
+## Phase 2 — Access & discovery (eyas, jess)  ✅  ✅
 - [x] T2.1 `eyas` fingerprint (EWS-LuCI vs cloud-React vs FIT) over HTTP
 - [x] T2.2 `jess` SSH:8822 adapter (legacy ssh-rsa) — exec channel
 - [x] T2.3 `jess` cloud GUI API adapter (login → bearer → sys_info/force_ac/upload)
 - [x] T2.4 `jess` LuCI adapter (md5(pw+\n) login, stok, flashops)
 - [x] T2.5 Focused adapters (Cloud/LuCI/SSH) with a shared insecure client + LuciPassword
 
-## Phase 3 — Safety, backup, provisioning (hood, mews, band)  ✅
+## Phase 3 — Safety, backup, provisioning (hood, mews, band)  ✅  ✅
 - [x] T3.1 `hood` fw_printenv parse + completeness gate; append-only writer
 - [x] T3.2 `mews` mtd7/8/11 dump + config export + hashes → dated bundle
-- [x] T3.3 `band` unique serial + local inventory + collision preflight (quarry via WASM)
+- [x] T3.3 `band` unique serial + local inventory + collision preflight (Go Code27)
+- [x] T3.4 professional Bubble Tea TUI (`tui`) rendering real package output
+- [x] T3.5 termwright E2E harness: assert every TUI screen + generate README screenshots
 
 ## Phase 4 — Safe flash + verify (no UART)
 - [ ] T4.1 A/B slot detection

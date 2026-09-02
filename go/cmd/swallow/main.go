@@ -1,7 +1,7 @@
 // Command swallow — falconry-themed orchestrator to cross-flash and recover
 // EnGenius/Senao ap-hk07 (IPQ807x) APs without bricking them.
 //
-// Run with no arguments for the TUI; subcommands are script/CI friendly.
+// No arguments launches the TUI; subcommands are script/CI friendly.
 // Unofficial; not affiliated with EnGenius or Senao. See README.md / SAFETY.md.
 package main
 
@@ -19,18 +19,17 @@ import (
 	"github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/internal/jess"
 	"github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/internal/tui"
 
-	tea "github.com/charmbracelet/bubbletea"
 	"golang.org/x/term"
 )
 
+// Version is stamped via -ldflags "-X main.Version=...".
 var Version = "0.2.0"
 
 func main() {
 	args := os.Args[1:]
 	cmd := ""
 	if len(args) > 0 {
-		cmd = args[0]
-		args = args[1:]
+		cmd, args = args[0], args[1:]
 	}
 
 	var err error
@@ -68,8 +67,7 @@ func runTUI() error {
 		fmt.Print(usageText)
 		return nil
 	}
-	_, err := tea.NewProgram(tui.New(Version), tea.WithAltScreen()).Run()
-	return err
+	return tui.Run(Version)
 }
 
 func argVal(a []string, key string) string {
@@ -81,14 +79,19 @@ func argVal(a []string, key string) string {
 	return ""
 }
 
+func or(v, def string) string {
+	if strings.TrimSpace(v) == "" {
+		return def
+	}
+	return v
+}
+
 func cmdSerial(a []string) error {
 	model := argVal(a, "--model")
 	if model == "" {
 		return fmt.Errorf("serial: --model <CODE> required (e.g. X42)")
 	}
-	prefix := or(argVal(a, "--prefix"), "SWLW")
-	suffix := or(argVal(a, "--suffix"), "0001")
-	s, err := band.MakeSerial(prefix, model, suffix)
+	s, err := band.MakeSerial(or(argVal(a, "--prefix"), "SWLW"), model, or(argVal(a, "--suffix"), "0001"))
 	if err != nil {
 		return err
 	}
@@ -113,10 +116,9 @@ func cmdCheck(a []string) error {
 	if len(a) == 0 {
 		return fmt.Errorf("check: <serial> required")
 	}
-	s := a[0]
-	mc, _ := band.ModelCode(s)
-	fmt.Printf("serial=%s valid=%t model_code=%s\n", s, band.ValidateSerial(s), mc)
-	if !band.ValidateSerial(s) {
+	mc, _ := band.ModelCode(a[0])
+	fmt.Printf("serial=%s valid=%t model_code=%s\n", a[0], band.ValidateSerial(a[0]), mc)
+	if !band.ValidateSerial(a[0]) {
 		return fmt.Errorf("check character does not match")
 	}
 	return nil
@@ -138,8 +140,7 @@ func cmdEnvcheck(a []string) error {
 		fmt.Println("env: COMPLETE — safe to append individual fields")
 		return nil
 	}
-	fmt.Printf("env: INCOMPLETE — missing %v\n", e.Missing())
-	fmt.Println("refuse writes; recover with `env default -a` over UART first")
+	fmt.Printf("env: INCOMPLETE — missing %v\nrefuse writes; recover with `env default -a` over UART first\n", e.Missing())
 	return fmt.Errorf("incomplete env")
 }
 
@@ -147,20 +148,12 @@ func cmdDiscover(a []string) error {
 	if len(a) == 0 {
 		return fmt.Errorf("discover: <url> required (e.g. http://192.168.1.1)")
 	}
-	url := a[0]
-	fam, err := eyas.Fingerprint(context.Background(), jess.InsecureClient(10*time.Second), url)
+	fam, err := eyas.Fingerprint(context.Background(), jess.InsecureClient(10*time.Second), a[0])
 	if err != nil {
 		return err
 	}
 	fmt.Printf("family=%s\naccess=%s\n", fam, fam.AccessHint())
 	return nil
-}
-
-func or(v, def string) string {
-	if strings.TrimSpace(v) == "" {
-		return def
-	}
-	return v
 }
 
 const usageText = "swallow — cross-flash & recover EnGenius/Senao ap-hk07 APs (unofficial)\n\n" +

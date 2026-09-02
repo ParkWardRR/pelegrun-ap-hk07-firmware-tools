@@ -1,0 +1,15 @@
+# Standalone dev tool — NOT part of the quarry workspace (keeps `cargo test
+# --workspace` fast). Drives the swallow TUI with termwright: asserts each screen
+# (E2E) and writes README screenshots.
+[workspace]
+
+[package]
+name = "tui-harness"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+termwright = "0.1"
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "time"] }
+anyhow = "1"

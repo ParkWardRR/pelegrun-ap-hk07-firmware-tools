@@ -12,6 +12,8 @@ flowchart LR
   style P1 fill:#1f7a1f,stroke:#0a3,color:#fff
   style P2 fill:#1f7a1f,stroke:#0a3,color:#fff
   style P3 fill:#1f7a1f,stroke:#0a3,color:#fff
+  style P2 fill:#1f7a1f,stroke:#0a3,color:#fff
+  style P3 fill:#1f7a1f,stroke:#0a3,color:#fff
 ```
 
 | Phase | Scope | Deliverable | Status |
