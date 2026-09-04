@@ -1,0 +1,10 @@
+#!/bin/sh
+# Local CI gate — this project uses no hosted CI (no GitHub Actions).
+# Enable once per clone with `make hooks` (sets core.hooksPath=githooks).
+# Runs the same checks `make ci` runs; a failure blocks the push.
+#
+# Bypass in a genuine emergency with `git push --no-verify`.
+set -e
+
+echo "== local CI (pre-push): make ci =="
+exec make ci

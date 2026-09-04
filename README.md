@@ -9,7 +9,7 @@ TUI/CLI, Zig recovery helper. The TUI walks the job in seven steps:
 Discover · Connect · Back Up · Safeguards · Identity · Install · Verify.
 
 [![License: Blue Oak 1.0.0](https://img.shields.io/badge/License-Blue_Oak_1.0.0-0a7bbb.svg)](LICENSE)
-[![CI](https://github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/actions/workflows/ci.yml/badge.svg)](https://github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/actions/workflows/ci.yml)
+[![CI: local](https://img.shields.io/badge/CI-local%20(make%20ci)-informational.svg)](Makefile)
 [![Release](https://img.shields.io/github/v/release/ParkWardRR/swallow-ap-hk07-firmware-tools?color=success)](https://github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/releases)
 [![Status: all phases ✓](https://img.shields.io/badge/dev-all%206%20phases%20✓-brightgreen.svg)](ROADMAP.md)
 [![Unofficial](https://img.shields.io/badge/vendor-unofficial-lightgrey.svg)](SAFETY.md)
@@ -172,19 +172,24 @@ Model codes: `X44` EWS377AP v3 · `X45` EWS377-FIT · `X42` ECW230v3.
 
 ## Build & test
 
-One `make` front-end drives all three languages (`make help` lists everything):
+CI is **local only** — this project runs no hosted CI (no GitHub Actions). One
+`make` front-end drives all three languages (`make help` lists everything):
 
 ```console
-make ci            # exactly what CI runs: fmt-check + lint + tests (race), 3 langs
+make ci            # the project's CI: fmt-check + lint + tests (race), 3 langs
+make hooks         # enable the pre-push gate that runs `make ci` before each push
 make test          # every suite: cargo test · go test · zig build test · lure integration
 make cover         # Go coverage summary (currently ~89% of statements)
 make fmt           # auto-format Rust + Go + Zig
 make dist          # cross-compiled binaries + SHA256SUMS → dist/
 ```
 
+Run `make hooks` once per clone so `git push` is gated on a green `make ci`
+(bypass in an emergency with `git push --no-verify`).
+
 What's covered:
 
-- **Rust (`quarry`)** — unit + **property tests** (`tests/properties.rs`, 5 invariants × 5000 generated cases) + error/display tests + an opt-in **real-image test** (`make test-firmware`) validating the parser against genuine firmware (6 product ids across ~26 images); `cargo fmt --check` and `clippy -D warnings` gate CI.
+- **Rust (`quarry`)** — unit + **property tests** (`tests/properties.rs`, 5 invariants × 5000 generated cases) + error/display tests + an opt-in **real-image test** (`make test-firmware`) validating the parser against genuine firmware (6 product ids across ~26 images); `cargo fmt --check` and `clippy -D warnings` gate `make ci`.
 - **Go (`swallow`)** — every package tested (CLI, TUI model, `eyas` with recorded HTTP fixtures, `jess` adapters via `httptest`, `hood`/`band`/`flash`/`mews`/`creance`), plus a **Go↔Rust parity test** (`band` vs. the `quarry` binary); run under the **race detector**; `gofmt` + `go vet` gated.
 - **Zig (`lure`)** — unit tests (`zig build test`) for the TFTP parsing helpers + a real **multi-block transfer integration test**; `zig fmt --check` gated.
 

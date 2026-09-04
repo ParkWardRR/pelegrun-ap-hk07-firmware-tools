@@ -1,7 +1,7 @@
 # swallow-ap-hk07-firmware-tools — build & test entry points.
 # One repo, three languages: Rust (quarry), Go (swallow), Zig (lure).
 .DEFAULT_GOAL := help
-.PHONY: help ci test test-race lint fmt fmt-check cover \
+.PHONY: help ci hooks test test-race lint fmt fmt-check cover \
         test-rust test-go test-zig test-firmware lint-rust lint-go lint-zig \
         dist tui screenshots clean
 
@@ -10,8 +10,14 @@ help:
 	@grep -E '^## ' $(MAKEFILE_LIST) | sed 's/## //'
 
 ## ci: everything CI runs — format check, lint, tests (race), all three langs
+## This is the project's ONLY CI: there is no hosted CI (no GitHub Actions).
 ci: fmt-check lint test-race
 	@echo "== CI OK =="
+
+## hooks: enable the local pre-push CI gate (runs `make ci` before every push)
+hooks:
+	git config core.hooksPath githooks
+	@echo "local CI hook enabled: git will run `make ci` before each push"
 
 ## test: run every test suite (Rust + Go + Zig unit + lure integration)
 test: test-rust test-go test-zig

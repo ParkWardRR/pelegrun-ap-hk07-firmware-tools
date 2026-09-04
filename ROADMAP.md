@@ -55,7 +55,8 @@ flowchart LR
 validation, Go 7 packages incl. recorded fixtures + a Go↔Rust parity test, Zig
 `lure` unit + TFTP integration tests, and termwright terminal-E2E all green.
 Releases ship cross-compiled binaries (Go ×5, Zig `lure` ×4) with `SHA256SUMS`
-via a tag-triggered workflow.
+built locally via `make dist` (`scripts/dist.sh`). This project uses no hosted
+CI: `make ci` is the gate, enforced locally by the `githooks/pre-push` hook.
 
 ---
 
@@ -92,7 +93,7 @@ timeline
 | 8 | Deep-brick TFTP recovery | lure | Zig TFTP responder (unit + integration tested) | ✅ |
 | 9 | Fleet mode | band | inventory + unique-serial issuance + collision preflight ✅; batch + canary-gate automation ⬜ | 🟡 |
 | 10 | FIT real-serial path | — | adopt via FIT ≥ v1.1.65 with the device's real serial | ⬜ |
-| 11 | TUI + release binaries | swallow | bubbletea UI ✅, cross-compiled binaries + SHA256SUMS via tag workflow ✅ | ✅ |
+| 11 | TUI + release binaries | swallow | bubbletea UI ✅, cross-compiled binaries + SHA256SUMS via local `make dist` ✅ | ✅ |
 | 12 | Community & extensibility | — | recorded fixtures ✅, product-id/model DB ✅ (6 ids verified from real images); adapters for other Senao boards ⬜ | 🟡 |
 
 **Shipped:** phases 1–8 and 11 (all six dev phases above). **Remaining product
@@ -436,8 +437,8 @@ operational-security guide.
 
 | Item | Minimum implementation |
 |---|---|
-| CI gates | Format/lint/test, Go↔Rust parity test, Zig integration test, terminal E2E, fixture schema validation, adapter contract tests |
-| Reproducible builds | Locked dependency files, pinned CI action revisions, recorded toolchain versions, deterministic packaging where practical |
+| CI gates (local `make ci`) | Format/lint/test, Go↔Rust parity test, Zig integration test, terminal E2E, fixture schema validation, adapter contract tests — enforced by the `githooks/pre-push` hook (no hosted CI) |
+| Reproducible builds | Locked dependency files, recorded toolchain versions, deterministic packaging where practical |
 | Artifact integrity | Continue `SHA256SUMS`; add signature/provenance attestation if release process can be maintained reliably |
 | SBOM | Generate SBOM per release artifact or source release; document coverage/limitations |
 | Test matrix | Native target tests plus real hardware smoke tests for supported product families where a safe lab exists |
@@ -465,7 +466,7 @@ The next work should compose and standardize them rather than reimplement them.
 | `lure` | Tested Zig TFTP responder | Make recovery availability a declared adapter capability; do not infer that every board can use it |
 | Recorded fixtures / parity tests | Existing regression foundation | Generalize into versioned adapter contract fixtures and fleet plan/journal fixture suites |
 | Bubble Tea TUI | Operator-facing visibility | Add read-only plan review, canary progress, blocked-device explanations, and recovery guidance; retain equivalent noninteractive outputs |
-| Tag release workflow | Existing multi-arch release pipeline | Extend with SBOM/provenance/signing and release-policy checks rather than replacing it wholesale |
+| Local release pipeline (`make dist` / `scripts/dist.sh`) | Existing multi-arch release build | Extend with SBOM/provenance/signing and release-policy checks; keep it local — no hosted CI |
 
 ---
 

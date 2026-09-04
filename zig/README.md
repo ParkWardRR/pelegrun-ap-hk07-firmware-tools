@@ -17,8 +17,7 @@ portable one.
 - `./tftp_test.sh` is an integration test: it serves a temp dir and verifies a
   real multi-block transfer round-trips byte-for-byte, plus a clean
   file-not-found path and that the server survives an error.
-- All three run in CI (see `../.github/workflows/ci.yml`) and via `make lure-test`
-  / `make test` from the repo root.
+- All three run in local CI (`make ci` from the repo root) and via `make test`.
 
 ## Usage
 
