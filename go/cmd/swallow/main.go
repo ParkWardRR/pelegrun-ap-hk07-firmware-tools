@@ -58,6 +58,8 @@ func run(args []string, out, errw io.Writer) int {
 		err = cmdDiscover(out, args)
 	case "fleet":
 		err = cmdFleet(out, args)
+	case "dump":
+		err = cmdDump(out, args)
 	case "-h", "--help", "help":
 		fmt.Fprint(out, usageText)
 	default:
@@ -174,7 +176,8 @@ const usageText = "swallow — cross-flash & recover EnGenius/Senao ap-hk07 APs 
 	"  swallow snextra --model X42 [--prefix P]              20-char field-19 value\n" +
 	"  swallow check   <serial>                              validate a serial\n" +
 	"  swallow envcheck [file|-]                             hood env completeness gate\n" +
-	"  swallow fleet   plan|apply ...                        P9 batch rollout (read-only planner)\n\n" +
+	"  swallow fleet   plan|apply ...                        P9 batch rollout (read-only planner)\n" +
+	"  swallow dump    plan --dest DIR [--proc-mtd f|-]      on-device full-flash capture plan\n\n" +
 	"Image re-head ships as the quarry binary (Rust). Unofficial; hardware you own only.\n"
 
 const planText = "Safety ladder (why UART is usually unnecessary):\n\n" +
