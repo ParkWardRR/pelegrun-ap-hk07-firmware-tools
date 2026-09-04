@@ -50,9 +50,21 @@ IO-free style (decide WHAT to do; an accessor does the I/O).
 - `executor.go` — **`Accessor` interface** the executor drives:
   `Preflight / Backup / WriteInactive / VerifyWrite / Reboot / Validate`.
   Persists intent BEFORE each mutation; `Resume` refuses to blindly repeat a
-  half-applied write/reboot. **This is the main wiring point:** implement
-  `Accessor` on top of a `jess` adapter (see `internal/jess`) and the existing
-  `flash` plan.
+  half-applied write/reboot.
+
+### 1b. `internal/fleetexec` — SSHAccessor (the Accessor wiring, started)
+`SSHAccessor` implements `fleet.Accessor` over an injected command `Runner`
+(`jess.SSH.Run` matches it). The **read-only** steps are implemented and tested:
+Preflight/Validate confirm the env is complete (hood) + optional serial; Backup
+runs the on-device `dump` plan and returns the SHA-256 of the device's
+`SHA256SUMS`, refusing if a recovery-critical artifact is missing. The
+**destructive** steps are REQUIRED injected hooks (`WriteInactiveFn`,
+`VerifyWriteFn`, optional `PointBootFn`/`HealthFn`) because the write path is
+firmware-family-specific — a nil hook errors, never silently no-ops. Remaining
+hardware work: fill those hooks per family (cloud/LuCI/FIT), add a
+`CloudAccessor` sibling for the HTTP families, pull dump artifacts to host and
+call `dump.Manifest.Verify`, and confirm where the real serial actually lives.
+See the NOTES block at the top of `internal/fleetexec/ssh_accessor.go`.
 
 ### 2. `internal/fitadopt` — P10a FIT real-serial eligibility
 Read-only gate: FIT ≥ 1.1.65, FIT family, 64-hex image digest + provenance, ≥1
