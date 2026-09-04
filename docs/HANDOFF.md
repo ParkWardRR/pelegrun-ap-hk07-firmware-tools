@@ -71,10 +71,18 @@ Read-only gate: FIT ≥ 1.1.65, FIT family, 64-hex image digest + provenance, �
 recovery route, and a **real device-read serial** (Code27-checked; rejects
 empty/generated/spoofed). Absolute rule: never generate or spoof a serial.
 
-### 3. `internal/adapter` — P12a capability contract
+### 3. `internal/adapter` — P12a capability contract + P12d registry
 Typed capabilities + support tiers. `CanFlash` requires ≥ experimental tier plus
 `backup` + `flash_ab` + a recovery route; `Validate` catches tier/capability
-incoherence. Use this to gate any new board before it can be recommended.
+incoherence. `Registry` is the machine-readable model DB (load/save/validate),
+seeded with `ap-hk07` at `experimental`. Promote to `verified` only after the
+ROADMAP hardware qualification matrix passes. CLI: `swallow adapters list|validate`.
+
+### 3b. `internal/redact` — secret scrubbing (safety)
+Scrubs passwords/tokens/private-keys/(opt-in)MACs and explicit literals
+(serials, hostnames) from support bundles, fixtures, and logs. Run every shared
+artifact through it: `swallow redact bundle.txt [--mac] [--value <serial>]`.
+Verify on real fixtures that nothing sensitive survives before publishing.
 
 ### 4. `internal/dump` — on-device verified full-flash capture (NEW safety feature)
 `swallow dump plan --dest /tmp/swallow-dump` prints a read-only dd/nanddump script
@@ -97,6 +105,8 @@ before any flash. **See the big `NOTES FOR THE NEXT AGENT` block at the top of
 swallow fleet plan  --inventory inv.json --policy policy.json --image <n> --image-sha256 <hex> [--out plan.json]
 swallow fleet apply --inventory inv.json --policy policy.json --plan plan.json --image <n> --image-sha256 <hex> [--max-age 10m]
 swallow dump  plan  --dest /tmp/swallow-dump [--proc-mtd file|-] [--nand] [--manifest out.json]
+swallow redact [file|-] [--mac] [--value <serial>]...
+swallow adapters list|validate [--file registry.json]
 ```
 
 `fleet apply` currently stops at `ApplyGuard` (no accessor wired) and changes
