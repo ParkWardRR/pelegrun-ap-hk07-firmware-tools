@@ -1,60 +1,138 @@
 // Package tui is swallow's dashboard (Bubble Tea). Each screen renders live
 // output from the real internal packages, so what you see is exactly what the
-// tool computes — including the safety refusals. The visuals aim for a calm,
-// refined feel: neutral text, one soft accent, and plain-language labels.
+// tool computes — including the safety refusals.
+//
+// The look is "Tokyo Night": a deep indigo canvas, near-white text, and neon
+// blue/cyan/purple accents (palette from tokyo-night.terminal). Two touches make
+// it feel alive without getting in the way:
+//
+//   - a hand-built pixel-font wordmark whose colours sweep through the neon ramp
+//     each frame (the "dynamic text art"), and
+//   - harmonica spring physics driving the sidebar caret and the progress bar,
+//     so selection and progress glide (and gently overshoot) instead of jumping.
+//
+// Everything is drawn on surface-backed styles so no span falls back to terminal
+// black, and the whole frame is finally placed on the page background.
 package tui
 
 import (
 	"fmt"
+	"math"
 	"strings"
+	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/harmonica"
 	"github.com/charmbracelet/lipgloss"
+	colorful "github.com/lucasb-eyer/go-colorful"
 
 	"github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/internal/band"
 	"github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/internal/hood"
 	"github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/internal/mews"
 )
 
-// Everything sits on an elevated dark "surface" (like a macOS window) rather than
-// pure black, so near-white text reads crisply instead of thin-gray-on-black.
-// One blue accent for selection/links; green/red only carry status meaning.
-var (
-	surface  = lipgloss.Color("235") // window/card background (elevated, not black)
-	ink      = lipgloss.Color("231") // headings + values — bright white
-	body     = lipgloss.Color("253") // body text — high contrast
-	muted    = lipgloss.Color("249") // secondary/captions — still clearly readable
-	line     = lipgloss.Color("240") // subtle card borders
-	accent   = lipgloss.Color("111") // links / step numbers — bright blue
-	pillBg   = lipgloss.Color("39")  // selected-row pill background
-	okc      = lipgloss.Color("114") // system green
-	noc      = lipgloss.Color("210") // system red
-	warnc    = lipgloss.Color("179") // amber (required tag)
-	onAccent = lipgloss.Color("231") // text on the accent pill
+// ---- Tokyo Night palette (tokyo-night.terminal) --------------------------------
 
-	// base carries the surface background so no span falls back to terminal black.
-	base = lipgloss.NewStyle().Background(surface)
-
-	sProduct = base.Foreground(ink).Bold(true)
-	sHead    = base.Foreground(ink).Bold(true)
-	sSub     = base.Foreground(muted)
-	sBody    = base.Foreground(body)
-	sInk     = base.Foreground(body)
-	sKey     = base.Foreground(ink).Bold(true) // values / tokens pop
-	sAccent  = base.Foreground(accent)
-	sVer     = base.Foreground(accent)
-	sOK      = base.Foreground(okc)
-	sNo      = base.Foreground(noc).Bold(true)
-	sWarn    = base.Foreground(warnc)
-	sPill    = base.Foreground(onAccent).Background(pillBg).Bold(true)
-	sItem    = base.Foreground(body)
-
-	menuBx = base.Border(lipgloss.RoundedBorder()).BorderForeground(line).
-		BorderBackground(surface).Padding(1, 1).MarginRight(1)
-	contBx = base.Border(lipgloss.RoundedBorder()).BorderForeground(line).
-		BorderBackground(surface).Padding(1, 3)
-	barBx = base.Padding(0, 1) // full-width header/footer bars
+const (
+	cBg      = "#1a1b26" // page canvas — deep indigo (Night)
+	cSurface = "#24283b" // elevated card surface (Storm) so white text reads crisp
+	cSel     = "#33467c" // selected-row pill background
+	cInk     = "#c0caf5" // headings + values — bright foreground
+	cBody    = "#a9b1d6" // body text
+	cMuted   = "#565f89" // captions / secondary — the classic TN comment colour
+	cLine    = "#3b4261" // subtle borders / bar troughs
+	cBlue    = "#7aa2f7" // primary accent — links, step numbers
+	cCyan    = "#7dcfff" // secondary accent
+	cTeal    = "#2ac3de"
+	cPurple  = "#bb9af7"
+	cGreen   = "#9ece6a" // status: ok
+	cRed     = "#f7768e" // status: refused
+	cOrange  = "#e0af68" // status: required / warning
 )
+
+var (
+	surface = lipgloss.Color(cSurface)
+
+	// base carries the card surface so no styled span shows terminal black.
+	base = lipgloss.NewStyle().Background(surface)
+	page = lipgloss.NewStyle().Background(lipgloss.Color(cBg))
+
+	sProduct = base.Foreground(lipgloss.Color(cInk)).Bold(true)
+	sHead    = base.Foreground(lipgloss.Color(cInk)).Bold(true)
+	sSub     = base.Foreground(lipgloss.Color(cMuted))
+	sBody    = base.Foreground(lipgloss.Color(cBody))
+	sInk     = base.Foreground(lipgloss.Color(cBody))
+	sKey     = base.Foreground(lipgloss.Color(cInk)).Bold(true)
+	sAccent  = base.Foreground(lipgloss.Color(cBlue))
+	sVer     = base.Foreground(lipgloss.Color(cCyan)).Bold(true)
+	sOK      = base.Foreground(lipgloss.Color(cGreen))
+	sNo      = base.Foreground(lipgloss.Color(cRed)).Bold(true)
+	sWarn    = base.Foreground(lipgloss.Color(cOrange))
+	sPill    = base.Foreground(lipgloss.Color(cInk)).Background(lipgloss.Color(cSel)).Bold(true)
+	sItem    = base.Foreground(lipgloss.Color(cBody))
+
+	// Header / footer bars sit on the page canvas, not the card surface.
+	onBg     = lipgloss.NewStyle().Background(lipgloss.Color(cBg))
+	sBgMuted = onBg.Foreground(lipgloss.Color(cMuted))
+	sBgAcc   = onBg.Foreground(lipgloss.Color(cBlue))
+	sBgInk   = onBg.Foreground(lipgloss.Color(cInk)).Bold(true)
+	sBgCyan  = onBg.Foreground(lipgloss.Color(cCyan)).Bold(true)
+
+	menuBx = base.Border(lipgloss.RoundedBorder()).BorderForeground(lipgloss.Color(cLine)).
+		BorderBackground(surface).Padding(1, 1).MarginRight(1)
+	contBx = base.Border(lipgloss.RoundedBorder()).BorderForeground(lipgloss.Color(cLine)).
+		BorderBackground(surface).Padding(1, 3)
+	barBx = onBg.Padding(0, 1) // full-width header/footer bars
+)
+
+// neonRamp is a seamless loop through the Tokyo Night accent hues. The banner
+// picks colours from it per column and shifts the offset each frame, producing a
+// horizontal shimmer across the wordmark.
+var neonRamp = buildRamp([]string{cBlue, cCyan, cTeal, cPurple, cBlue}, 60)
+
+// PaletteHex returns every theme colour plus the full shimmer ramp as hex
+// strings. The tuigif tool seeds its GIF palette with these so the neon blocks
+// and gradient render without banding.
+func PaletteHex() []string {
+	out := []string{cBg, cSurface, cSel, cInk, cBody, cMuted, cLine, cBlue, cCyan, cTeal, cPurple, cGreen, cRed, cOrange}
+	for _, c := range neonRamp {
+		out = append(out, string(c))
+	}
+	return out
+}
+
+func buildRamp(stops []string, n int) []lipgloss.Color {
+	cols := make([]colorful.Color, len(stops))
+	for i, s := range stops {
+		c, _ := colorful.Hex(s)
+		cols[i] = c
+	}
+	out := make([]lipgloss.Color, n)
+	segs := len(cols) - 1
+	for i := 0; i < n; i++ {
+		t := float64(i) / float64(n) * float64(segs)
+		seg := int(t)
+		if seg >= segs {
+			seg = segs - 1
+		}
+		local := t - float64(seg)
+		blended := cols[seg].BlendHcl(cols[seg+1], local).Clamped()
+		out[i] = lipgloss.Color(blended.Hex())
+	}
+	return out
+}
+
+// ---- animation timing ---------------------------------------------------------
+
+const fps = 30
+
+type frameMsg time.Time
+
+func tick() tea.Cmd {
+	return tea.Tick(time.Second/fps, func(t time.Time) tea.Msg { return frameMsg(t) })
+}
+
+// ---- model --------------------------------------------------------------------
 
 type stage struct {
 	name, sub string
@@ -66,12 +144,19 @@ type model struct {
 	sel     int
 	version string
 	w, h    int
+
+	frame int // banner shimmer offset
+
+	spring             harmonica.Spring
+	caretPos, caretVel float64 // sidebar caret glide (in step units)
+	progPos, progVel   float64 // footer progress fill (0..1)
 }
 
 // New builds the dashboard model.
 func New(version string) model {
 	return model{
 		version: version,
+		spring:  harmonica.NewSpring(harmonica.FPS(fps), 7.0, 0.65),
 		stages: []stage{
 			{"Discover", "Identify the access point", runDiscover},
 			{"Connect", "Choose how to reach it", runConnect},
@@ -90,12 +175,68 @@ func Run(version string) error {
 	return err
 }
 
-func (m model) Init() tea.Cmd { return nil }
+func (m model) Init() tea.Cmd { return tick() }
+
+// DemoFrames drives the model through a canned tour — an intro shimmer, a walk
+// down all seven steps (so the caret and progress springs glide), then a spring
+// back to the top — capturing one rendered frame per animation tick. It exists
+// so the tuigif tool can rasterise the TUI to docs/tour.gif offline, without a
+// terminal recorder. Colour must be forced on by the caller (non-TTY output).
+func DemoFrames(version string, w, h int) []string {
+	m := New(version)
+	nm, _ := m.Update(tea.WindowSizeMsg{Width: w, Height: h})
+	m = nm.(model)
+
+	var frames []string
+	adv := func(n int) {
+		for i := 0; i < n; i++ {
+			u, _ := m.Update(frameMsg(time.Now()))
+			m = u.(model)
+			frames = append(frames, m.View())
+		}
+	}
+	press := func(k string) {
+		u, _ := m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune(k)})
+		m = u.(model)
+	}
+
+	adv(16) // hold on Discover; let the wordmark shimmer
+	for i := 0; i < len(m.stages)-1; i++ {
+		press("j")
+		adv(9) // glide the caret + progress into the next step
+	}
+	adv(8)
+	press("g")
+	adv(18) // spring all the way back to the top
+	return frames
+}
+
+// StepFrame renders a single settled frame for the given step (0-indexed) — the
+// springs have come to rest — for the tuigif tool's static PNG screenshots.
+func StepFrame(version string, w, h, step int) string {
+	m := New(version)
+	nm, _ := m.Update(tea.WindowSizeMsg{Width: w, Height: h})
+	m = nm.(model)
+	for i := 0; i < step; i++ {
+		u, _ := m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("j")})
+		m = u.(model)
+	}
+	for i := 0; i < 40; i++ { // let the caret + progress springs settle
+		u, _ := m.Update(frameMsg(time.Now()))
+		m = u.(model)
+	}
+	return m.View()
+}
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.w, m.h = msg.Width, msg.Height
+	case frameMsg:
+		m.frame++
+		m.caretPos, m.caretVel = m.spring.Update(m.caretPos, m.caretVel, float64(m.sel))
+		m.progPos, m.progVel = m.spring.Update(m.progPos, m.progVel, m.progTarget())
+		return m, tick()
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "q", "ctrl+c", "esc":
@@ -117,65 +258,215 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
+func (m model) progTarget() float64 {
+	if len(m.stages) <= 1 {
+		return 1
+	}
+	return float64(m.sel) / float64(len(m.stages)-1)
+}
+
 func (m model) View() string {
 	if m.w == 0 {
 		m.w, m.h = 100, 30
 	}
-	// Height budget: header (2 rows) + card + footer (2 rows) must fit m.h. The
-	// card's rounded border adds 2 rows on top of its Height(), so reserve 6.
-	bodyH := m.h - 6
-	if bodyH < 14 {
-		bodyH = 14
-	}
-	// Menu card is a fixed width; its inner text width accounts for the rounded
-	// border (2) + horizontal padding (2).
-	menuW := 24
-	menuInner := menuW - 4
 
-	// Sidebar: plain step names, numbered so the flow reads as a sequence. The
-	// selected row is a full-width accent pill (like a settings sidebar).
-	var menu strings.Builder
-	menu.WriteString(sSub.Render("STEPS") + "\n\n")
-	for i, s := range m.stages {
-		label := fmt.Sprintf(" %d  %-*s", i+1, menuInner-4, s.name)
-		if i == m.sel {
-			menu.WriteString(sPill.Render(label))
-		} else {
-			menu.WriteString(sItem.Render(label))
-		}
-		menu.WriteString("\n\n")
+	header := m.header()
+	footer := m.footer()
+	bodyH := m.h - lipgloss.Height(header) - lipgloss.Height(footer)
+	if bodyH < 12 {
+		bodyH = 12
 	}
-	menuPanel := menuBx.Width(menuW).Height(bodyH).Render(strings.TrimRight(menu.String(), "\n"))
 
-	// Content card fills the rest of the width (menu box + its 1-col right margin),
-	// so the cards line up with the full-width header/footer bars.
-	contentW := m.w - menuW - 1
-	if contentW < 40 {
-		contentW = 40
+	// Column footprints (including borders + the menu's right margin) sum to m.w.
+	// menuBx: Width is the text+padding area; +2 border +1 margin. contBx: +2 border.
+	const menuCol = 26
+	menuPanel := menuBx.Width(menuCol - 3).Height(bodyH).Render(m.sidebar())
+
+	contentCol := m.w - menuCol
+	if contentCol < 42 {
+		contentCol = 42
 	}
+	contentInner := contentCol - 8 // minus border (2) and horizontal padding (6)
 	cur := m.stages[m.sel]
 	crumb := sSub.Render(fmt.Sprintf("Step %d of %d", m.sel+1, len(m.stages)))
 	title := sHead.Render(cur.name) + sSub.Render("    ") + crumb
 	sub := sSub.Render(cur.sub)
-	bodyText := title + "\n" + sub + "\n\n" + cur.run()
-	contentPanel := contBx.Width(contentW).Height(bodyH).Render(bodyText)
+	rule := base.Foreground(lipgloss.Color(cLine)).Render(strings.Repeat("─", max(0, contentInner)))
+	bodyText := title + "\n" + sub + "\n" + rule + "\n\n" + cur.run()
+	contentPanel := contBx.Width(contentCol - 2).Height(bodyH).Render(bodyText)
 
 	main := lipgloss.JoinHorizontal(lipgloss.Top, menuPanel, contentPanel)
 
-	keys := sAccent.Render("↑↓") + sSub.Render(" move") + sSub.Render("    ") +
-		sAccent.Render("g/G") + sSub.Render(" ends") + sSub.Render("    ") +
-		sAccent.Render("q") + sSub.Render(" quit")
-	legal := sSub.Render("unofficial · not affiliated with EnGenius/Senao · hardware you own")
-	foot := barBx.Width(m.w).Render(keys) + "\n" + barBx.Width(m.w).Render(legal)
-
-	return lipgloss.JoinVertical(lipgloss.Left, m.header(), main, foot)
+	frame := lipgloss.JoinVertical(lipgloss.Left, header, main, footer)
+	return page.Width(m.w).Height(m.h).Render(frame)
 }
 
+// ---- header: animated wordmark + tagline --------------------------------------
+
 func (m model) header() string {
-	title := sProduct.Render("swallow") +
-		sSub.Render("  ·  ap-hk07 firmware toolkit  ·  ") +
-		sVer.Render("v"+m.version)
-	return barBx.Width(m.w).Render(title)
+	tagline := sProductBg("swallow") +
+		sBgMuted.Render("  ·  ap-hk07 firmware toolkit  ·  ") +
+		sVerBg("v"+m.version)
+
+	// Below ~84 cols the pixel wordmark doesn't fit; fall back to the tagline alone.
+	if m.w < 84 {
+		return barBx.Width(m.w).Render(tagline)
+	}
+	art := banner(m.frame)
+	block := lipgloss.JoinVertical(lipgloss.Left, art, "", barBx.Render(tagline))
+	return onBg.Width(m.w).Render(block)
+}
+
+func sProductBg(s string) string { return sBgInk.Render(s) }
+func sVerBg(s string) string     { return sBgCyan.Render(s) }
+
+// ---- sidebar: numbered steps with a spring-driven caret -----------------------
+
+func (m model) sidebar() string {
+	const labelW = 26 - 10 // caret(1) + " %d  " (4) + name → fits the inner text area
+	var b strings.Builder
+	b.WriteString(sSub.Render("STEPS") + "\n\n")
+	for i, s := range m.stages {
+		// Caret glow: brightest on the row the spring is nearest, fading to the
+		// neighbour it's travelling toward. Between rows, both light up faintly.
+		d := math.Abs(float64(i) - m.caretPos)
+		intensity := 1 - d
+		var caret string
+		if intensity > 0 {
+			trough, _ := colorful.Hex(cSurface)
+			glow, _ := colorful.Hex(cBlue)
+			c := trough.BlendHcl(glow, clamp01(intensity)).Clamped()
+			caret = base.Foreground(lipgloss.Color(c.Hex())).Render("▍")
+		} else {
+			caret = base.Render(" ")
+		}
+
+		label := fmt.Sprintf(" %d  %-*s", i+1, labelW, s.name)
+		var row string
+		if i == m.sel {
+			row = sPill.Render(label)
+		} else {
+			row = sItem.Render(label)
+		}
+		b.WriteString(caret + row + "\n\n")
+	}
+	return strings.TrimRight(b.String(), "\n")
+}
+
+// ---- footer: spring progress bar + keys + legal -------------------------------
+
+func (m model) footer() string {
+	pct := fmt.Sprintf("  %d of %d", m.sel+1, len(m.stages))
+	barW := m.w - 2 - lipgloss.Width(pct) // bar box has 1-col padding each side
+	if barW < 10 {
+		barW = 10
+	}
+	bar := progressBar(clamp01(m.progPos), barW)
+	progress := barBx.Width(m.w).Render(bar + sBgMuted.Render(pct))
+
+	keys := sBgAcc.Render("↑↓") + sBgMuted.Render(" move") + sBgMuted.Render("    ") +
+		sBgAcc.Render("g/G") + sBgMuted.Render(" ends") + sBgMuted.Render("    ") +
+		sBgAcc.Render("q") + sBgMuted.Render(" quit")
+	legal := sBgMuted.Render("unofficial · not affiliated with EnGenius/Senao · hardware you own")
+
+	return lipgloss.JoinVertical(lipgloss.Left,
+		progress,
+		barBx.Width(m.w).Render(keys),
+		barBx.Width(m.w).Render(legal),
+	)
+}
+
+// progressBar renders a neon-filled bar with a fractional trailing cell so the
+// spring's motion reads smoothly at sub-cell resolution.
+func progressBar(frac float64, width int) string {
+	if width < 1 {
+		width = 1
+	}
+	const eighths = " ▏▎▍▌▋▊▉█"
+	total := frac * float64(width)
+	full := int(total)
+	rem := total - float64(full)
+
+	var b strings.Builder
+	for i := 0; i < width; i++ {
+		switch {
+		case i < full:
+			c := neonRamp[(i*len(neonRamp)/width)%len(neonRamp)]
+			b.WriteString(onBg.Foreground(c).Render("█"))
+		case i == full && rem > 0:
+			idx := int(rem*8 + 0.5)
+			if idx < 1 {
+				idx = 1
+			}
+			if idx > 8 {
+				idx = 8
+			}
+			r := []rune(eighths)[idx]
+			b.WriteString(onBg.Foreground(lipgloss.Color(cBlue)).Render(string(r)))
+		default:
+			b.WriteString(onBg.Foreground(lipgloss.Color(cLine)).Render("░"))
+		}
+	}
+	return b.String()
+}
+
+// ---- pixel-font wordmark ("dynamic text art") ---------------------------------
+//
+// Each glyph is a 5×5 bitmap; a lit pixel becomes a 2-wide block so the wordmark
+// keeps a square-ish aspect. Colours are pulled from neonRamp by absolute column
+// plus the frame offset, sweeping the shimmer across the letters over time.
+
+var glyphs = map[rune][5]string{
+	's': {"11111", "10000", "11111", "00001", "11111"},
+	'w': {"10001", "10001", "10101", "11011", "10001"},
+	'a': {"11111", "10001", "11111", "10001", "10001"},
+	'l': {"10000", "10000", "10000", "10000", "11111"},
+	'o': {"11111", "10001", "10001", "10001", "11111"},
+}
+
+func banner(frame int) string {
+	const word = "swallow"
+	rows := [5]strings.Builder{}
+	col := 0 // absolute lit-pixel column, for the gradient sweep
+	for li, ch := range word {
+		g := glyphs[ch]
+		for r := 0; r < 5; r++ {
+			for c := 0; c < 5; c++ {
+				if g[r][c] == '1' {
+					color := neonRamp[(col+c+frame)%len(neonRamp)]
+					rows[r].WriteString(onBg.Foreground(color).Render("██"))
+				} else {
+					rows[r].WriteString(onBg.Render("  "))
+				}
+			}
+			if li < len(word)-1 {
+				rows[r].WriteString(onBg.Render("  ")) // 1-pixel gap between glyphs
+			}
+		}
+		col += 6
+	}
+	lines := make([]string, 5)
+	for r := 0; r < 5; r++ {
+		lines[r] = rows[r].String()
+	}
+	return barBx.Render(lipgloss.JoinVertical(lipgloss.Left, lines...))
+}
+
+func clamp01(f float64) float64 {
+	if f < 0 {
+		return 0
+	}
+	if f > 1 {
+		return 1
+	}
+	return f
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
 }
 
 // ---- screen renderers (real package output; blunt, plain-language copy) ----
@@ -186,8 +477,8 @@ func (m model) header() string {
 // pad returns n surface-backed spaces (for indents/separators, never raw " ").
 func pad(n int) string { return base.Render(strings.Repeat(" ", n)) }
 
-// blank returns a full-width surface-backed line so multi-line bodies keep the
-// card colour on otherwise-empty rows.
+// blank returns a surface-backed blank line so multi-line bodies keep the card
+// colour on otherwise-empty rows.
 func blank() string { return "\n" }
 
 func runDiscover() string {

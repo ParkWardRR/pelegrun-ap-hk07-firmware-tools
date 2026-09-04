@@ -23,7 +23,7 @@ Discover · Connect · Back Up · Safeguards · Identity · Install · Verify.
 
 <br/>
 
-<img src="docs/tour.gif" alt="swallow TUI — walking through the seven steps" width="720"/>
+<img src="docs/tour.gif" alt="swallow TUI — a Tokyo Night dashboard walking the seven steps, with an animated wordmark and spring-driven caret/progress" width="760"/>
 
 </div>
 

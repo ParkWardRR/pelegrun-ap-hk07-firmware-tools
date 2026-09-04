@@ -3,7 +3,7 @@
 .DEFAULT_GOAL := help
 .PHONY: help ci hooks test test-race lint fmt fmt-check cover \
         test-rust test-go test-zig test-firmware lint-rust lint-go lint-zig \
-        dist tui screenshots clean
+        dist tui screenshots tour clean
 
 ## help: list targets
 help:
@@ -77,6 +77,10 @@ tui:
 screenshots:
 	cd go && go build -o /tmp/swallow ./cmd/swallow
 	cd tools/tui-harness && SWALLOW_BIN=/tmp/swallow SHOT_DIR=$(CURDIR)/docs/screenshots cargo run
+
+## tour: regenerate docs/tour.gif — pure-Go TUI-to-GIF renderer (no ffmpeg/vhs)
+tour:
+	cd go && go run ./cmd/tuigif -out $(CURDIR)/docs/tour.gif
 
 ## clean: remove build artifacts
 clean:
