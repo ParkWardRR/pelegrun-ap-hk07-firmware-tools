@@ -8,22 +8,22 @@ import (
 
 // Expected is the intended post-adoption state, taken from the immutable plan.
 type Expected struct {
-	Model          string
-	FirmwareFamily string // "fit"
-	FitVersion     string // the version the device should now report
-	RealSerial     string // the device's ORIGINAL serial — adoption must preserve it
-	ActiveSlot     string // the slot adoption should have activated
+	Model          string `json:"model"`
+	FirmwareFamily string `json:"firmware_family"` // "fit"
+	FitVersion     string `json:"fit_version"`     // the version the device should now report
+	RealSerial     string `json:"real_serial"`     // the device's ORIGINAL serial — adoption must preserve it
+	ActiveSlot     string `json:"active_slot"`     // the slot adoption should have activated
 }
 
 // Observed is what a re-probe (eyas/jess) actually found after adoption.
 type Observed struct {
-	Model          string
-	FirmwareFamily string
-	FitVersion     string
-	RealSerial     string
-	ActiveSlot     string
-	AccessOK       bool // the intended jess adapter reconnected and authenticated
-	ServiceHealthy bool // a model-appropriate health check passed (not just ping)
+	Model          string `json:"model"`
+	FirmwareFamily string `json:"firmware_family"`
+	FitVersion     string `json:"fit_version"`
+	RealSerial     string `json:"real_serial"`
+	ActiveSlot     string `json:"active_slot"`
+	AccessOK       bool   `json:"access_ok"`       // the intended jess adapter reconnected and authenticated
+	ServiceHealthy bool   `json:"service_healthy"` // a model-appropriate health check passed (not just ping)
 }
 
 // Proof is the P10b post-adoption verdict. A successful command or reboot is NOT

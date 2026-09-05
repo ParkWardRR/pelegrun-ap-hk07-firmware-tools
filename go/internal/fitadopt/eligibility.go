@@ -25,14 +25,14 @@ var hex64 = regexp.MustCompile(`^[0-9a-fA-F]{64}$`)
 // Request is a proposed FIT adoption, assembled read-only from device inspection
 // (eyas), the operator's target image, and the device's own reported serial.
 type Request struct {
-	Model           string   // device model, e.g. ap-hk07
-	FirmwareFamily  string   // must be "fit" (eyas family string)
-	FitVersion      string   // dotted FIT version the target adopts to
-	ImageSHA256     string   // target image digest (64 hex)
-	ImageProvenance string   // where the image came from (non-empty, auditable)
-	RealSerial      string   // serial READ FROM the device — never generated
-	BootloaderState string   // observed bootloader/boot state
-	RecoveryRoutes  []string // e.g. ["ab-rollback","uart","tftp"] — at least one
+	Model           string   `json:"model"`            // device model, e.g. ap-hk07
+	FirmwareFamily  string   `json:"firmware_family"`  // must be "fit" (eyas family string)
+	FitVersion      string   `json:"fit_version"`      // dotted FIT version the target adopts to
+	ImageSHA256     string   `json:"image_sha256"`     // target image digest (64 hex)
+	ImageProvenance string   `json:"image_provenance"` // where the image came from (non-empty, auditable)
+	RealSerial      string   `json:"real_serial"`      // serial READ FROM the device — never generated
+	BootloaderState string   `json:"bootloader_state"` // observed bootloader/boot state
+	RecoveryRoutes  []string `json:"recovery_routes"`  // e.g. ["ab-rollback","uart","tftp"] — at least one
 }
 
 // Result is the eligibility outcome. Reasons list every block so an operator sees

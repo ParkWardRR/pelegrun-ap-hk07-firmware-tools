@@ -1,0 +1,24 @@
+{
+  "version": "example-v1",
+  "supported_models": ["ap-hk07"],
+  "allowed_families": ["cloud", "ews-luci"],
+  "require_backup": true,
+  "min_identity_confidence": "verified",
+  "stale_after_seconds": 3600,
+  "max_concurrency": 2,
+  "per_network_concurrency": 1,
+  "maintenance_window": {
+    "start": "2026-09-04T00:00:00Z",
+    "end": "2026-12-31T23:59:59Z"
+  },
+  "canary": {
+    "count": 1,
+    "min_observation_seconds": 900,
+    "min_pass_rate": 1.0,
+    "diverse_by_model": false
+  },
+  "error_budget": {
+    "max_failed": 0,
+    "max_unknown": 0
+  }
+}

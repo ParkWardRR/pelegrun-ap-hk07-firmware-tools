@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "devices": [
+    {
+      "fleet_id": "ap-01",
+      "physical_identity": {
+        "model": "ap-hk07",
+        "board_revision": "unknown",
+        "mac_addresses": ["88:dc:97:04:44:07"],
+        "hardware_serial": "SWLWX420001T",
+        "identity_confidence": "verified"
+      },
+      "software_identity": {
+        "firmware_family": "cloud",
+        "firmware_version": "1.8.112",
+        "active_slot": "rootfs",
+        "inactive_slot": "rootfs_1"
+      },
+      "access": {
+        "management_address": "192.168.1.10",
+        "adapter": "ssh8822",
+        "last_seen_at": "2026-09-04T12:00:00Z"
+      },
+      "evidence": {
+        "backup_bundle_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "eligibility": { "state": "unknown" }
+    },
+    {
+      "fleet_id": "ap-02",
+      "physical_identity": {
+        "model": "ap-hk07",
+        "hardware_serial": "SWLWX420002P",
+        "identity_confidence": "verified"
+      },
+      "software_identity": {
+        "firmware_family": "cloud",
+        "active_slot": "rootfs_1",
+        "inactive_slot": "rootfs"
+      },
+      "access": {
+        "management_address": "192.168.1.11",
+        "adapter": "ssh8822",
+        "last_seen_at": "2026-09-04T12:00:00Z"
+      },
+      "evidence": {
+        "backup_bundle_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      },
+      "eligibility": { "state": "unknown" }
+    },
+    {
+      "fleet_id": "ap-03-blocked",
+      "physical_identity": {
+        "model": "ap-hk07",
+        "hardware_serial": "SWLWX420003X",
+        "identity_confidence": "probable"
+      },
+      "software_identity": { "firmware_family": "cloud", "active_slot": "rootfs", "inactive_slot": "rootfs_1" },
+      "access": { "management_address": "192.168.1.12", "last_seen_at": "2026-09-04T12:00:00Z" },
+      "evidence": {},
+      "eligibility": { "state": "unknown" }
+    }
+  ]
+}

@@ -129,6 +129,14 @@ The middle column maps each to its plain-language screen.
 | **creance** | UART gated env repair (the training line) | Go | ✅ tested |
 | **lure** | deep-brick TFTP recovery responder | Zig | ✅ integration-tested |
 
+Beyond the single-device pipeline, the fleet/product layer adds `fleet` (P9
+inventory · policy · plan/apply · canary · durable journal · resumable executor),
+`fleetexec` (SSH + cloud accessors wiring the executor to real I/O), `fitadopt`
+(P10 FIT real-serial eligibility + post-adoption proof), `dump` (on-device
+verified full-flash capture), `redact` (secret scrubbing for support bundles), and
+`adapter` (P12 capability contract + support registry). See
+[`ROADMAP.md`](ROADMAP.md) and [`docs/HANDOFF.md`](docs/HANDOFF.md).
+
 ## Install
 
 Download a prebuilt binary from the
@@ -160,6 +168,32 @@ $ swallow envcheck env.txt                # hood completeness gate (refuses frag
 # firmware re-head (Rust core)
 $ cd .. && cargo run -q -p quarry -- rehead ecw230v3.bin out.bin --to 282
 $ cargo run -q -p quarry -- serial --model X42 --prefix EPC1 --suffix 0001   # EPC1X4200011
+```
+
+### Fleet, safety & recovery commands
+
+All of these are **read-only / plan-only** — they change nothing on a device.
+Runnable fixtures live in [`examples/`](examples/).
+
+```console
+# P9 fleet rollout — build a deterministic plan, then revalidate it before apply
+$ swallow fleet plan  --inventory examples/fleet-inventory.json \
+      --policy examples/fleet-policy.json \
+      --image fw.bin --image-sha256 <hex> --family cloud --out plan.json
+$ swallow fleet apply --inventory examples/fleet-inventory.json \
+      --policy examples/fleet-policy.json --plan plan.json \
+      --image fw.bin --image-sha256 <hex> --family cloud --max-age 1h
+
+# on-device verified full-flash capture (safety net before any flash)
+$ swallow dump plan --dest /tmp/swallow-dump < /proc/mtd
+
+# P10 FIT real-serial adoption gates (never generates/spoofs a serial)
+$ swallow fit check --request examples/fit-request.json
+$ swallow fit prove --expected examples/fit-expected.json --observed examples/fit-observed.json
+
+# scrub secrets before sharing a support bundle; inspect the board support registry
+$ swallow redact bundle.txt --mac --value <serial>
+$ swallow adapters list          # tier + capabilities + flashability (ap-hk07 = experimental)
 ```
 
 Product ids: `282` EWS377AP v3 · `300` EWS377-FIT · `284` ECW230v3 · `275` ECW230 · `182` EWS377AP v2 · `285` ECW230S.

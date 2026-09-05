@@ -64,6 +64,8 @@ func run(args []string, out, errw io.Writer) int {
 		err = cmdRedact(out, args)
 	case "adapters":
 		err = cmdAdapters(out, args)
+	case "fit":
+		err = cmdFit(out, args)
 	case "-h", "--help", "help":
 		fmt.Fprint(out, usageText)
 	default:
@@ -183,7 +185,8 @@ const usageText = "swallow — cross-flash & recover EnGenius/Senao ap-hk07 APs 
 	"  swallow fleet   plan|apply ...                        P9 batch rollout (read-only planner)\n" +
 	"  swallow dump    plan --dest DIR [--proc-mtd f|-]      on-device full-flash capture plan\n" +
 	"  swallow redact  [file|-] [--mac] [--value S]...       scrub secrets from a bundle/log\n" +
-	"  swallow adapters list|validate                        board support registry (P12d)\n\n" +
+	"  swallow adapters list|validate                        board support registry (P12d)\n" +
+	"  swallow fit     check|prove ...                       FIT real-serial adoption gates (P10)\n\n" +
 	"Image re-head ships as the quarry binary (Rust). Unofficial; hardware you own only.\n"
 
 const planText = "Safety ladder (why UART is usually unnecessary):\n\n" +
