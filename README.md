@@ -29,6 +29,11 @@ Discover · Connect · Back Up · Safeguards · Identity · Install · Verify.
 
 ---
 
+> **Work in progress — mostly untested.** The unit and property test suites
+> pass, but end-to-end device testing is still ongoing. Treat this as
+> experimental software. It will be validated further over time; feedback and
+> bug reports are welcome.
+
 > **Cross-flashing can brick hardware.** Pelegrún is designed so the common
 > mistakes aren't reachable (see [the two invariants](#the-two-invariants)), but
 > firmware work is never zero-risk. Read [`SAFETY.md`](SAFETY.md) and the

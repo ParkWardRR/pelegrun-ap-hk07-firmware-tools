@@ -1,5 +1,10 @@
 # SAFETY
 
+> **Work in progress.** This software is largely untested in the field. The
+> core logic and unit tests pass, but end-to-end device testing is ongoing.
+> Treat every operation as experimental until this notice is removed. Feedback
+> and bug reports are welcome.
+
 Cross-flashing can **brick hardware**. This tool is built to make that nearly
 impossible, but firmware work is never zero-risk. Read this before you use it.
 
