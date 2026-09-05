@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-// The Go `band` package reimplements quarry's (Rust) Code27 math so swallow
+// The Go `band` package reimplements quarry's (Rust) Code27 math so pelegrun
 // needs no subprocess. This test guards that reimplementation against the Rust
 // source of truth: for many inputs, band's output must byte-match the quarry
 // binary's. It's opt-in — set QUARRY_BIN or build `target/release/quarry`; if the

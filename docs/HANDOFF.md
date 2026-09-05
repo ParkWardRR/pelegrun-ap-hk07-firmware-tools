@@ -76,16 +76,16 @@ Typed capabilities + support tiers. `CanFlash` requires ≥ experimental tier pl
 `backup` + `flash_ab` + a recovery route; `Validate` catches tier/capability
 incoherence. `Registry` is the machine-readable model DB (load/save/validate),
 seeded with `ap-hk07` at `experimental`. Promote to `verified` only after the
-ROADMAP hardware qualification matrix passes. CLI: `swallow adapters list|validate`.
+ROADMAP hardware qualification matrix passes. CLI: `pelegrun adapters list|validate`.
 
 ### 3b. `internal/redact` — secret scrubbing (safety)
 Scrubs passwords/tokens/private-keys/(opt-in)MACs and explicit literals
 (serials, hostnames) from support bundles, fixtures, and logs. Run every shared
-artifact through it: `swallow redact bundle.txt [--mac] [--value <serial>]`.
+artifact through it: `pelegrun redact bundle.txt [--mac] [--value <serial>]`.
 Verify on real fixtures that nothing sensitive survives before publishing.
 
 ### 4. `internal/dump` — on-device verified full-flash capture (NEW safety feature)
-`swallow dump plan --dest /tmp/swallow-dump` prints a read-only dd/nanddump script
+`pelegrun dump plan --dest /tmp/pelegrun-dump` prints a read-only dd/nanddump script
 that captures every mtd partition to device-local storage and hashes it, plus a
 provenance manifest. Safety net so a complete known-good image exists locally
 before any flash. **See the big `NOTES FOR THE NEXT AGENT` block at the top of
@@ -102,11 +102,11 @@ before any flash. **See the big `NOTES FOR THE NEXT AGENT` block at the top of
 ## New CLI surface
 
 ```
-swallow fleet plan  --inventory inv.json --policy policy.json --image <n> --image-sha256 <hex> [--out plan.json]
-swallow fleet apply --inventory inv.json --policy policy.json --plan plan.json --image <n> --image-sha256 <hex> [--max-age 10m]
-swallow dump  plan  --dest /tmp/swallow-dump [--proc-mtd file|-] [--nand] [--manifest out.json]
-swallow redact [file|-] [--mac] [--value <serial>]...
-swallow adapters list|validate [--file registry.json]
+pelegrun fleet plan  --inventory inv.json --policy policy.json --image <n> --image-sha256 <hex> [--out plan.json]
+pelegrun fleet apply --inventory inv.json --policy policy.json --plan plan.json --image <n> --image-sha256 <hex> [--max-age 10m]
+pelegrun dump  plan  --dest /tmp/pelegrun-dump [--proc-mtd file|-] [--nand] [--manifest out.json]
+pelegrun redact [file|-] [--mac] [--value <serial>]...
+pelegrun adapters list|validate [--file registry.json]
 ```
 
 `fleet apply` currently stops at `ApplyGuard` (no accessor wired) and changes

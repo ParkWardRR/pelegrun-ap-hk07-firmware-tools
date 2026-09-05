@@ -1,4 +1,4 @@
-// Package tui is swallow's dashboard (Bubble Tea). Each screen renders live
+// Package tui is pelegrun's dashboard (Bubble Tea). Each screen renders live
 // output from the real internal packages, so what you see is exactly what the
 // tool computes — including the safety refusals.
 //
@@ -26,9 +26,9 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	colorful "github.com/lucasb-eyer/go-colorful"
 
-	"github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/internal/band"
-	"github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/internal/hood"
-	"github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/internal/mews"
+	"github.com/ParkWardRR/pelegrun-ap-hk07-firmware-tools/internal/band"
+	"github.com/ParkWardRR/pelegrun-ap-hk07-firmware-tools/internal/hood"
+	"github.com/ParkWardRR/pelegrun-ap-hk07-firmware-tools/internal/mews"
 )
 
 // ---- Tokyo Night palette (tokyo-night.terminal) --------------------------------
@@ -304,7 +304,7 @@ func (m model) View() string {
 // ---- header: animated wordmark + tagline --------------------------------------
 
 func (m model) header() string {
-	tagline := sProductBg("swallow") +
+	tagline := sProductBg("Pelegrún") +
 		sBgMuted.Render("  ·  ap-hk07 firmware toolkit  ·  ") +
 		sVerBg("v"+m.version)
 
@@ -420,15 +420,17 @@ func progressBar(frac float64, width int) string {
 // plus the frame offset, sweeping the shimmer across the letters over time.
 
 var glyphs = map[rune][5]string{
-	's': {"11111", "10000", "11111", "00001", "11111"},
-	'w': {"10001", "10001", "10101", "11011", "10001"},
-	'a': {"11111", "10001", "11111", "10001", "10001"},
+	'p': {"11111", "10001", "11111", "10000", "10000"},
+	'e': {"11111", "10000", "11110", "10000", "11111"},
 	'l': {"10000", "10000", "10000", "10000", "11111"},
-	'o': {"11111", "10001", "10001", "10001", "11111"},
+	'g': {"11111", "10000", "10011", "10001", "11111"},
+	'r': {"11110", "10001", "11110", "10010", "10001"},
+	'u': {"10001", "10001", "10001", "10001", "11111"},
+	'n': {"10001", "11001", "10101", "10011", "10001"},
 }
 
 func banner(frame int) string {
-	const word = "swallow"
+	const word = "pelegrun"
 	rows := [5]strings.Builder{}
 	col := 0 // absolute lit-pixel column, for the gradient sweep
 	for li, ch := range word {
@@ -496,7 +498,7 @@ func runDiscover() string {
 		b.WriteString(pad(2) + sKey.Render(fmt.Sprintf("%-13s", r[0])) + sBody.Render(r[1]) + "\n")
 		b.WriteString(pad(15) + sSub.Render(r[2]) + "\n")
 	}
-	b.WriteString(blank() + sSub.Render("Run:  ") + sAccent.Render("swallow discover http://<ap-ip>"))
+	b.WriteString(blank() + sSub.Render("Run:  ") + sAccent.Render("pelegrun discover http://<ap-ip>"))
 	return b.String()
 }
 

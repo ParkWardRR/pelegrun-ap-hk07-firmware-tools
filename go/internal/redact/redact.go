@@ -1,6 +1,6 @@
 // Package redact scrubs secrets and sensitive identifiers out of text before it
 // leaves the operator's machine — support bundles, recorded fixtures, and logs.
-// swallow handles credentials, session tokens, Wi-Fi keys, and device identity,
+// pelegrun handles credentials, session tokens, Wi-Fi keys, and device identity,
 // and the ROADMAP makes redaction a first-class requirement ("fixture provenance
 // and redaction policy"; "keep credentials out of plans, fixtures, logs, and
 // support bundles"). This package is pure and deterministic: same input, same

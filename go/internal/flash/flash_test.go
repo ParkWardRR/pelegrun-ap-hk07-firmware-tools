@@ -4,8 +4,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/internal/eyas"
-	"github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/internal/hood"
+	"github.com/ParkWardRR/pelegrun-ap-hk07-firmware-tools/internal/eyas"
+	"github.com/ParkWardRR/pelegrun-ap-hk07-firmware-tools/internal/hood"
 )
 
 func TestSlotsAlwaysInactive(t *testing.T) {

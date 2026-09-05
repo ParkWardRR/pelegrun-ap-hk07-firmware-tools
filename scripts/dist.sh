@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Build cross-compiled release artifacts into dist/ with a SHA256SUMS manifest.
 #
-#   swallow (Go)  — the CLI/TUI, cross-compiled to 5 os/arch targets
+#   pelegrun (Go)  — the CLI/TUI, cross-compiled to 5 os/arch targets
 #   lure    (Zig) — the TFTP recovery responder, POSIX targets only (libc sockets)
 #   quarry  (Rust)— built for the host only here; CI builds it per-runner
 #
@@ -13,9 +13,9 @@ VERSION="${1:-$(git describe --tags --always --dirty 2>/dev/null || echo dev)}"
 OUT="dist"
 rm -rf "$OUT"
 mkdir -p "$OUT"
-echo "building swallow-ap-hk07-firmware-tools $VERSION → $OUT/"
+echo "building pelegrun-ap-hk07-firmware-tools $VERSION → $OUT/"
 
-# ---- swallow (Go) : os/arch matrix ----
+# ---- pelegrun (Go) : os/arch matrix ----
 GO_TARGETS=(
   "darwin/arm64" "darwin/amd64"
   "linux/amd64"  "linux/arm64"
@@ -24,11 +24,11 @@ GO_TARGETS=(
 for t in "${GO_TARGETS[@]}"; do
   os="${t%/*}"; arch="${t#*/}"
   ext=""; [ "$os" = "windows" ] && ext=".exe"
-  bin="$OUT/swallow-${os}-${arch}${ext}"
+  bin="$OUT/pelegrun-${os}-${arch}${ext}"
   ( cd go && GOOS="$os" GOARCH="$arch" CGO_ENABLED=0 \
       go build -trimpath -ldflags "-s -w -X main.Version=${VERSION#v}" \
-      -o "../$bin" ./cmd/swallow )
-  echo "  swallow  $os/$arch"
+      -o "../$bin" ./cmd/pelegrun )
+  echo "  pelegrun  $os/$arch"
 done
 
 # ---- lure (Zig) : POSIX targets only (uses libc sockets; not ported to winsock) ----

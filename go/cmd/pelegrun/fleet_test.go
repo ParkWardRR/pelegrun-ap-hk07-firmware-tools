@@ -110,7 +110,7 @@ func TestFleetApplyRefusesChangedTarget(t *testing.T) {
 }
 
 func TestFleetUsage(t *testing.T) {
-	if code, out, _ := runCap("fleet"); code != 0 || !strings.Contains(out, "swallow fleet") {
+	if code, out, _ := runCap("fleet"); code != 0 || !strings.Contains(out, "pelegrun fleet") {
 		t.Fatalf("fleet usage: code=%d out=%q", code, out)
 	}
 	if code, _, errout := runCap("fleet", "bogus"); code != 1 || !strings.Contains(errout, "unknown subcommand") {

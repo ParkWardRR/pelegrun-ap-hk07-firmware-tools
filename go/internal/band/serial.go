@@ -1,6 +1,6 @@
 // Package band provisions device identity — like ringing a bird.
 //
-// It mirrors the Rust `quarry` Code27 math in pure Go (so `swallow` needs no
+// It mirrors the Rust `quarry` Code27 math in pure Go (so `pelegrun` needs no
 // subprocess) and adds a collision-checked local inventory so every physical AP
 // gets a unique, valid serial (Constitution: fleet identity is 1:1, fail closed).
 package band

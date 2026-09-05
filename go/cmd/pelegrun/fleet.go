@@ -8,7 +8,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/internal/fleet"
+	"github.com/ParkWardRR/pelegrun-ap-hk07-firmware-tools/internal/fleet"
 )
 
 // cmdFleet is the P9 fleet control plane: `plan` builds a deterministic,
@@ -31,7 +31,7 @@ func cmdFleet(out io.Writer, a []string) error {
 		fmt.Fprint(out, fleetUsage)
 		return nil
 	default:
-		return fmt.Errorf("fleet: unknown subcommand %q (try `swallow fleet help`)", sub)
+		return fmt.Errorf("fleet: unknown subcommand %q (try `pelegrun fleet help`)", sub)
 	}
 }
 
@@ -162,11 +162,11 @@ func short(h string) string {
 	return h
 }
 
-const fleetUsage = "swallow fleet — policy- and evidence-driven batch rollout (P9)\n\n" +
+const fleetUsage = "pelegrun fleet — policy- and evidence-driven batch rollout (P9)\n\n" +
 	"USAGE:\n" +
-	"  swallow fleet plan  --inventory inv.json --policy policy.json \\\n" +
+	"  pelegrun fleet plan  --inventory inv.json --policy policy.json \\\n" +
 	"        --image <name> --image-sha256 <hex> [--family cloud] [--fit-version x] [--out plan.json]\n" +
-	"  swallow fleet apply --inventory inv.json --policy policy.json \\\n" +
+	"  pelegrun fleet apply --inventory inv.json --policy policy.json \\\n" +
 	"        --image <name> --image-sha256 <hex> --plan plan.json [--max-age 10m]\n\n" +
 	"plan is read-only (changes nothing). apply revalidates the saved plan against the\n" +
 	"live inventory/policy/target and fails closed on any drift; it does not yet execute.\n"

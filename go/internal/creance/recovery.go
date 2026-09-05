@@ -11,7 +11,7 @@ package creance
 import (
 	"fmt"
 
-	"github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/internal/hood"
+	"github.com/ParkWardRR/pelegrun-ap-hk07-firmware-tools/internal/hood"
 )
 
 // Cmd is one u-boot console command with why it runs.

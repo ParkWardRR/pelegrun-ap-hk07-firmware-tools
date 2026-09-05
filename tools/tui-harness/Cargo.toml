@@ -1,5 +1,5 @@
 # Standalone dev tool — NOT part of the quarry workspace (keeps `cargo test
-# --workspace` fast). Drives the swallow TUI with termwright: asserts each screen
+# --workspace` fast). Drives the pelegrun TUI with termwright: asserts each screen
 # (E2E) and writes README screenshots.
 [workspace]
 

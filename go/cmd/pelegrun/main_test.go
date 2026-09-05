@@ -18,7 +18,7 @@ func runCap(args ...string) (code int, out, errout string) {
 }
 
 func TestVersionAndPlanAndHelp(t *testing.T) {
-	if code, out, _ := runCap("version"); code != 0 || !strings.Contains(out, "swallow "+Version) {
+	if code, out, _ := runCap("version"); code != 0 || !strings.Contains(out, "pelegrun "+Version) {
 		t.Errorf("version: code=%d out=%q", code, out)
 	}
 	if code, out, _ := runCap("plan"); code != 0 || !strings.Contains(out, "APPEND-ONLY") {

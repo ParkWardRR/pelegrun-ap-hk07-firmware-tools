@@ -1,6 +1,6 @@
-//! Drive the swallow TUI with termwright: assert each screen and snapshot PNGs.
+//! Drive the pelegrun TUI with termwright: assert each screen and snapshot PNGs.
 //!
-//! Env: SWALLOW_BIN (default /tmp/swallow), SHOT_DIR (default docs/screenshots).
+//! Env: PELEGRUN_BIN (default /tmp/pelegrun), SHOT_DIR (default docs/screenshots).
 use std::time::Duration;
 use termwright::prelude::*;
 
@@ -8,7 +8,7 @@ const DOWN: &[u8] = b"\x1b[B"; // down-arrow escape
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    let bin = std::env::var("SWALLOW_BIN").unwrap_or_else(|_| "/tmp/swallow".into());
+    let bin = std::env::var("PELEGRUN_BIN").unwrap_or_else(|_| "/tmp/pelegrun".into());
     let dir = std::env::var("SHOT_DIR").unwrap_or_else(|_| "docs/screenshots".into());
     std::fs::create_dir_all(&dir)?;
 
@@ -24,7 +24,7 @@ async fn main() -> anyhow::Result<()> {
     ];
 
     let term = Terminal::builder().size(100, 30).spawn(&bin, &[]).await?;
-    term.expect("swallow").timeout(Duration::from_secs(8)).await?;
+    term.expect("pelegrun").timeout(Duration::from_secs(8)).await?;
 
     let mut failures = 0;
     for (i, (stem, marker)) in screens.iter().enumerate() {

@@ -2,8 +2,8 @@
 
 Two views of the same project. The **development roadmap** is the engineering
 execution order (all six phases complete as of **v0.4.0**); the **product
-roadmap** is the wider product surface and where swallow is still headed. Detailed
-task list: [specs/001-swallow-mvp/tasks.md](specs/001-swallow-mvp/tasks.md).
+roadmap** is the wider product surface and where Pelegrún is still headed. Detailed
+task list: [specs/001-pelegrun-mvp/tasks.md](specs/001-pelegrun-mvp/tasks.md).
 
 The remaining work is not another single-device flasher feature; it is the
 transition from a safe, validated **operator tool** into a scalable, supportable
@@ -44,7 +44,7 @@ flowchart LR
 
 | Phase | Scope | Deliverable | Status |
 |-------|-------|-------------|--------|
-| 1 | Core + scaffold | tested `quarry` (Rust) + `swallow`/Zig skeletons + Spec Kit + CI | ✅ done |
+| 1 | Core + scaffold | tested `quarry` (Rust) + `pelegrun`/Zig skeletons + Spec Kit + CI | ✅ done |
 | 2 | Access + discovery | `eyas` fingerprint, `jess` ssh/cloud/luci adapters | ✅ done |
 | 3 | Safety + backup + provision | `hood` env gate, `mews` bundles, `band` serials | ✅ done |
 | 4 | No-UART A/B flash | slot-aware flash + verify + rollback | ✅ done |
@@ -62,11 +62,11 @@ CI: `make ci` is the gate, enforced locally by the `githooks/pre-push` hook.
 
 ## Product roadmap (12 phases)
 
-Where **swallow** is headed as a product. Falconry codenames in parentheses.
+Where **Pelegrún** is headed as a product. Falconry codenames in parentheses.
 
 ```mermaid
 timeline
-    title swallow product roadmap
+    title Pelegrún product roadmap
     P1 Core math (quarry) : ✅ header re-head + Code27 serial
     P2 Device inspect (eyas) : ✅ fingerprint + read-only status
     P3 Network access (jess) : ✅ ssh8822 / cloud / luci
@@ -93,7 +93,7 @@ timeline
 | 8 | Deep-brick TFTP recovery | lure | Zig TFTP responder (unit + integration tested) | ✅ |
 | 9 | Fleet mode | band | inventory + unique-serial issuance + collision preflight ✅; batch + canary-gate automation ⬜ | 🟡 |
 | 10 | FIT real-serial path | — | adopt via FIT ≥ v1.1.65 with the device's real serial | ⬜ |
-| 11 | TUI + release binaries | swallow | bubbletea UI ✅, cross-compiled binaries + SHA256SUMS via local `make dist` ✅ | ✅ |
+| 11 | TUI + release binaries | Pelegrún | bubbletea UI ✅, cross-compiled binaries + SHA256SUMS via local `make dist` ✅ | ✅ |
 | 12 | Community & extensibility | — | recorded fixtures ✅, product-id/model DB ✅ (6 ids verified from real images); adapters for other Senao boards ⬜ | 🟡 |
 
 **Shipped:** phases 1–8 and 11 (all six dev phases above). **Remaining product
@@ -106,7 +106,7 @@ define the architecture, safety model, and evidence each one must satisfy.
 
 ## Product hardening gates
 
-The remaining work changes swallow from a safe single-device tool into a fleet
+The remaining work changes Pelegrún from a safe single-device tool into a fleet
 and multi-board product. Every new product phase must preserve the same safety
 guarantees: explicit identity, immutable operation plans, durable journals,
 evidence-backed compatibility claims, and tested recovery routes.
@@ -242,8 +242,8 @@ backup eligibility analysis, and canary cohort selection. It must make no device
 changes.
 
 ```text
-swallow fleet plan --inventory inventory.yaml --target firmware.fit --policy rollout.yaml
-swallow fleet apply --plan plan-2026-09-04T1516Z.json
+pelegrun fleet plan --inventory inventory.yaml --target firmware.fit --policy rollout.yaml
+pelegrun fleet apply --plan plan-2026-09-04T1516Z.json
 ```
 
 The apply command must reject a modified plan, mismatched target hash, changed

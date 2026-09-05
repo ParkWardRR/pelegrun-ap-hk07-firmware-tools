@@ -3,9 +3,9 @@ package flash
 import (
 	"fmt"
 
-	"github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/internal/eyas"
-	"github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/internal/hood"
-	"github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/internal/mews"
+	"github.com/ParkWardRR/pelegrun-ap-hk07-firmware-tools/internal/eyas"
+	"github.com/ParkWardRR/pelegrun-ap-hk07-firmware-tools/internal/hood"
+	"github.com/ParkWardRR/pelegrun-ap-hk07-firmware-tools/internal/mews"
 )
 
 // Step is one ordered, human-readable action in a safe flash.

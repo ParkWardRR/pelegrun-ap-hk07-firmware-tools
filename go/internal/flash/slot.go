@@ -9,7 +9,7 @@ package flash
 import (
 	"fmt"
 
-	"github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/internal/hood"
+	"github.com/ParkWardRR/pelegrun-ap-hk07-firmware-tools/internal/hood"
 )
 
 // The ap-hk07 dual-image slots.

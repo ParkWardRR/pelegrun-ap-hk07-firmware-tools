@@ -10,7 +10,7 @@ Legend: [x] done · [~] in progress · [ ] todo. Maps to `../../ROADMAP.md`.
 - [x] T1.4 20-char `snextra` generate/validate
 - [x] T1.5 `quarry` CLI: `inspect | rehead | serial | snextra | check`
 - [x] T1.6 12 unit tests incl. hardware-verified vectors (EPC1X4200011 / snextra)
-- [x] T1.7 Go module + `swallow` CLI skeleton (`version`, `plan`) building clean
+- [x] T1.7 Go module + `pelegrun` CLI skeleton (`version`, `plan`) building clean
 - [x] T1.8 Falconry internal package stubs (eyas/jess/hood/band/mews/creance/lure)
 - [x] T1.9 Zig `lure` stub building on 0.16
 - [x] T1.10 Spec Kit artifacts (constitution, spec, plan, tasks) + CI + docs

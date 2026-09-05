@@ -1,6 +1,6 @@
 <div align="center">
 
-# swallow · ap-hk07 firmware tools
+# Pelegrún · ap-hk07 firmware tools
 
 Cross-flash and recover EnGenius/Senao `ap-hk07` access points (EWS377AP v3 ·
 EWS377-FIT · ECW230v3) over the network. One-field firmware re-head, serial
@@ -10,7 +10,7 @@ Discover · Connect · Back Up · Safeguards · Identity · Install · Verify.
 
 [![License: Blue Oak 1.0.0](https://img.shields.io/badge/License-Blue_Oak_1.0.0-0a7bbb.svg)](LICENSE)
 [![CI: local](https://img.shields.io/badge/CI-local%20(make%20ci)-informational.svg)](Makefile)
-[![Release](https://img.shields.io/github/v/release/ParkWardRR/swallow-ap-hk07-firmware-tools?color=success)](https://github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/releases)
+[![Release](https://img.shields.io/github/v/release/ParkWardRR/pelegrun-ap-hk07-firmware-tools?color=success)](https://github.com/ParkWardRR/pelegrun-ap-hk07-firmware-tools/releases)
 [![Status: all phases ✓](https://img.shields.io/badge/dev-all%206%20phases%20✓-brightgreen.svg)](ROADMAP.md)
 [![Unofficial](https://img.shields.io/badge/vendor-unofficial-lightgrey.svg)](SAFETY.md)
 
@@ -23,13 +23,13 @@ Discover · Connect · Back Up · Safeguards · Identity · Install · Verify.
 
 <br/>
 
-<img src="docs/tour.gif" alt="swallow TUI — a Tokyo Night dashboard walking the seven steps, with an animated wordmark and spring-driven caret/progress" width="760"/>
+<img src="docs/tour.gif" alt="Pelegrún TUI — a Tokyo Night dashboard walking the seven steps, with an animated wordmark and spring-driven caret/progress" width="760"/>
 
 </div>
 
 ---
 
-> **Cross-flashing can brick hardware.** swallow is designed so the common
+> **Cross-flashing can brick hardware.** Pelegrún is designed so the common
 > mistakes aren't reachable (see [the two invariants](#the-two-invariants)), but
 > firmware work is never zero-risk. Read [`SAFETY.md`](SAFETY.md) and the
 > [scope/legal](#scope--legal) notes first. Unofficial — not affiliated with
@@ -41,7 +41,7 @@ The documented EWS377AP v3 → FIT/cloud bridge firmware is EOL and gone. The
 sibling `ap-hk07` images can be cross-flashed by editing one header field, but the
 manual path is easy to get wrong: a stray `setconfig` wipes the bootloader env, a
 hand-rebuilt env bricks the boot slot, SSH is on **port 8822**, and adoption fails
-silently on a blank serial. swallow encodes the safe path so those mistakes aren't
+silently on a blank serial. Pelegrún encodes the safe path so those mistakes aren't
 reachable.
 
 ## The two invariants
@@ -73,13 +73,13 @@ If the AP still shells or serves its web UI, everything above happens over the
 network and no UART is needed.
 
 <div align="center">
-<img src="docs/screenshots/04-safeguards.png" alt="swallow TUI — Safeguards screen" width="720"/>
+<img src="docs/screenshots/04-safeguards.png" alt="Pelegrún TUI — Safeguards screen" width="720"/>
 <br/><sub>The <b>Safeguards</b> screen refuses to write a wiped env, and refuses an empty value (which u-boot would delete). Live output — this is exactly what the tool computes.</sub>
 </div>
 
 ## The TUI
 
-`swallow` with no arguments opens the dashboard. The sidebar is the seven-step
+`pelegrun` with no arguments opens the dashboard. The sidebar is the seven-step
 sequence — Discover · Connect · Back Up · Safeguards · Identity · Install ·
 Verify — and each screen renders live output from the real internal packages, not
 mock data.
@@ -99,7 +99,7 @@ mock data.
 
 ```mermaid
 flowchart LR
-  U([operator]) --> S[swallow · Go TUI]
+  U([operator]) --> S[Pelegrún · Go TUI]
   S --> E[eyas<br/>discover/fingerprint]
   E --> J[jess<br/>ssh8822 · cloud · luci]
   J --> M[mews<br/>backup mtd7/8/11]
@@ -118,7 +118,7 @@ The middle column maps each to its plain-language screen.
 
 | Codename | UI screen · role | Lang | State |
 |---|---|---|---|
-| **swallow** | the tool + TUI | Go | ✅ |
+| **Pelegrún** | the tool + TUI | Go | ✅ |
 | **quarry** | *(core)* header re-head + Code27 serial (the prey) | Rust | ✅ tested |
 | **eyas** | **Discover** — fingerprint the AP (the nestling) | Go | ✅ tested |
 | **jess** | **Connect** — access tether (ssh/cloud/luci) | Go | ✅ tested |
@@ -140,30 +140,30 @@ verified full-flash capture), `redact` (secret scrubbing for support bundles), a
 ## Install
 
 Download a prebuilt binary from the
-[latest release](https://github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/releases/latest)
+[latest release](https://github.com/ParkWardRR/pelegrun-ap-hk07-firmware-tools/releases/latest)
 and **verify the checksum** — binaries ship for `darwin/{arm64,amd64}`,
 `linux/{amd64,arm64}`, and `windows/amd64`:
 
 ```console
-$ curl -LO .../releases/latest/download/swallow-linux-amd64
+$ curl -LO .../releases/latest/download/pelegrun-linux-amd64
 $ curl -LO .../releases/latest/download/SHA256SUMS
-$ sha256sum -c SHA256SUMS --ignore-missing && chmod +x swallow-linux-amd64
+$ sha256sum -c SHA256SUMS --ignore-missing && chmod +x pelegrun-linux-amd64
 ```
 
-Prefer source? `cd go && go build ./cmd/swallow`. Full walkthrough:
+Prefer source? `cd go && go build ./cmd/pelegrun`. Full walkthrough:
 **[docs/USAGE.md](docs/USAGE.md)**.
 
 ## Quick start
 
 ```console
 # the TUI
-$ cd go && go run ./cmd/swallow
+$ cd go && go run ./cmd/pelegrun
 
 # scriptable subcommands
-$ swallow discover http://192.168.1.1     # fingerprint firmware family
-$ swallow serial  --model X42             # unique Code27 serial (band)
-$ swallow snextra --model X42             # 20-char u-boot field-19 value
-$ swallow envcheck env.txt                # hood completeness gate (refuses fragile)
+$ pelegrun discover http://192.168.1.1     # fingerprint firmware family
+$ pelegrun serial  --model X42             # unique Code27 serial (band)
+$ pelegrun snextra --model X42             # 20-char u-boot field-19 value
+$ pelegrun envcheck env.txt                # hood completeness gate (refuses fragile)
 
 # firmware re-head (Rust core)
 $ cd .. && cargo run -q -p quarry -- rehead ecw230v3.bin out.bin --to 282
@@ -177,23 +177,23 @@ Runnable fixtures live in [`examples/`](examples/).
 
 ```console
 # P9 fleet rollout — build a deterministic plan, then revalidate it before apply
-$ swallow fleet plan  --inventory examples/fleet-inventory.json \
+$ pelegrun fleet plan  --inventory examples/fleet-inventory.json \
       --policy examples/fleet-policy.json \
       --image fw.bin --image-sha256 <hex> --family cloud --out plan.json
-$ swallow fleet apply --inventory examples/fleet-inventory.json \
+$ pelegrun fleet apply --inventory examples/fleet-inventory.json \
       --policy examples/fleet-policy.json --plan plan.json \
       --image fw.bin --image-sha256 <hex> --family cloud --max-age 1h
 
 # on-device verified full-flash capture (safety net before any flash)
-$ swallow dump plan --dest /tmp/swallow-dump < /proc/mtd
+$ pelegrun dump plan --dest /tmp/pelegrun-dump < /proc/mtd
 
 # P10 FIT real-serial adoption gates (never generates/spoofs a serial)
-$ swallow fit check --request examples/fit-request.json
-$ swallow fit prove --expected examples/fit-expected.json --observed examples/fit-observed.json
+$ pelegrun fit check --request examples/fit-request.json
+$ pelegrun fit prove --expected examples/fit-expected.json --observed examples/fit-observed.json
 
 # scrub secrets before sharing a support bundle; inspect the board support registry
-$ swallow redact bundle.txt --mac --value <serial>
-$ swallow adapters list          # tier + capabilities + flashability (ap-hk07 = experimental)
+$ pelegrun redact bundle.txt --mac --value <serial>
+$ pelegrun adapters list          # tier + capabilities + flashability (ap-hk07 = experimental)
 ```
 
 Product ids: `282` EWS377AP v3 · `300` EWS377-FIT · `284` ECW230v3 · `275` ECW230 · `182` EWS377AP v2 · `285` ECW230S.
@@ -224,7 +224,7 @@ Run `make hooks` once per clone so `git push` is gated on a green `make ci`
 What's covered:
 
 - **Rust (`quarry`)** — unit + **property tests** (`tests/properties.rs`, 5 invariants × 5000 generated cases) + error/display tests + an opt-in **real-image test** (`make test-firmware`) validating the parser against genuine firmware (6 product ids across ~26 images); `cargo fmt --check` and `clippy -D warnings` gate `make ci`.
-- **Go (`swallow`)** — every package tested (CLI, TUI model, `eyas` with recorded HTTP fixtures, `jess` adapters via `httptest`, `hood`/`band`/`flash`/`mews`/`creance`), plus a **Go↔Rust parity test** (`band` vs. the `quarry` binary); run under the **race detector**; `gofmt` + `go vet` gated.
+- **Go (`pelegrun`)** — every package tested (CLI, TUI model, `eyas` with recorded HTTP fixtures, `jess` adapters via `httptest`, `hood`/`band`/`flash`/`mews`/`creance`), plus a **Go↔Rust parity test** (`band` vs. the `quarry` binary); run under the **race detector**; `gofmt` + `go vet` gated.
 - **Zig (`lure`)** — unit tests (`zig build test`) for the TFTP parsing helpers + a real **multi-block transfer integration test**; `zig fmt --check` gated.
 
 ## Spec-driven
@@ -232,8 +232,8 @@ What's covered:
 Built with [GitHub Spec Kit](https://github.com/github/spec-kit) discipline —
 **Specify → Plan → Tasks → Implement → Validate**:
 [constitution](.specify/memory/constitution.md) ·
-[spec](specs/001-swallow-mvp/spec.md) · [plan](specs/001-swallow-mvp/plan.md) ·
-[tasks](specs/001-swallow-mvp/tasks.md) · [roadmap](ROADMAP.md).
+[spec](specs/001-pelegrun-mvp/spec.md) · [plan](specs/001-pelegrun-mvp/plan.md) ·
+[tasks](specs/001-pelegrun-mvp/tasks.md) · [roadmap](ROADMAP.md).
 
 ## Scope & legal
 

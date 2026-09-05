@@ -5,7 +5,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/internal/dump"
+	"github.com/ParkWardRR/pelegrun-ap-hk07-firmware-tools/internal/dump"
 )
 
 // cmdDump plans an on-device, verified full-flash capture — the safety net you
@@ -24,7 +24,7 @@ func cmdDump(out io.Writer, a []string) error {
 
 	dest := argVal(a, "--dest")
 	if dest == "" {
-		return fmt.Errorf("dump plan: --dest <device-local dir> required (e.g. /tmp/swallow-dump)")
+		return fmt.Errorf("dump plan: --dest <device-local dir> required (e.g. /tmp/pelegrun-dump)")
 	}
 	if err := dump.ValidateDest(dest); err != nil {
 		return err
@@ -72,7 +72,7 @@ func cmdDump(out io.Writer, a []string) error {
 	}
 
 	if mfPath := argVal(a, "--manifest"); mfPath != "" {
-		m := dump.NewManifest(parts, dest, "swallow "+Version, opts)
+		m := dump.NewManifest(parts, dest, "pelegrun "+Version, opts)
 		if err := m.Save(mfPath); err != nil {
 			return fmt.Errorf("write manifest: %w", err)
 		}
@@ -111,9 +111,9 @@ func humanBytes(n int64) string {
 	return fmt.Sprintf("%.1f %ciB", float64(n)/float64(div), "KMGTPE"[exp])
 }
 
-const dumpUsage = "swallow dump — plan an on-device, verified full-flash capture (safety net)\n\n" +
+const dumpUsage = "pelegrun dump — plan an on-device, verified full-flash capture (safety net)\n\n" +
 	"USAGE:\n" +
-	"  swallow dump plan --dest /tmp/swallow-dump [--proc-mtd file|-] [--nand] \\\n" +
+	"  pelegrun dump plan --dest /tmp/pelegrun-dump [--proc-mtd file|-] [--nand] \\\n" +
 	"        [--model ap-hk07] [--serial <s>] [--manifest out.json]\n\n" +
 	"Reads the device's /proc/mtd (stdin by default), then prints the read-only\n" +
 	"dd/nanddump script that writes every partition to --dest ON THE DEVICE and hashes\n" +

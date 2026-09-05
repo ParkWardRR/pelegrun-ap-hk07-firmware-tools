@@ -1,4 +1,4 @@
-# Using swallow
+# Using Pelegrún
 
 A practical walkthrough: install, the guided TUI, the individual commands, and
 how the safe-flash and recovery flows fit together.
@@ -12,16 +12,16 @@ how the safe-flash and recovery flows fit together.
 ### Prebuilt binaries (recommended)
 
 Grab the archive for your platform from the
-[latest release](https://github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/releases/latest),
+[latest release](https://github.com/ParkWardRR/pelegrun-ap-hk07-firmware-tools/releases/latest),
 then **verify the checksum** before running:
 
 ```sh
 # example: Apple Silicon macOS
-curl -LO https://github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/releases/latest/download/swallow-darwin-arm64
-curl -LO https://github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/releases/latest/download/SHA256SUMS
+curl -LO https://github.com/ParkWardRR/pelegrun-ap-hk07-firmware-tools/releases/latest/download/pelegrun-darwin-arm64
+curl -LO https://github.com/ParkWardRR/pelegrun-ap-hk07-firmware-tools/releases/latest/download/SHA256SUMS
 shasum -a 256 -c SHA256SUMS --ignore-missing   # or: sha256sum -c
-chmod +x swallow-darwin-arm64
-./swallow-darwin-arm64
+chmod +x pelegrun-darwin-arm64
+./pelegrun-darwin-arm64
 ```
 
 Binaries are published for `darwin/{arm64,amd64}`, `linux/{amd64,arm64}`, and
@@ -30,16 +30,16 @@ Binaries are published for `darwin/{arm64,amd64}`, `linux/{amd64,arm64}`, and
 ### From source
 
 ```sh
-git clone https://github.com/ParkWardRR/swallow-ap-hk07-firmware-tools
-cd swallow-ap-hk07-firmware-tools
-cd go && go build -o swallow ./cmd/swallow    # the CLI/TUI (Go)
+git clone https://github.com/ParkWardRR/pelegrun-ap-hk07-firmware-tools
+cd pelegrun-ap-hk07-firmware-tools
+cd go && go build -o pelegrun ./cmd/pelegrun    # the CLI/TUI (Go)
 cargo build -p quarry --release               # image re-head + serial core (Rust)
 cd zig && zig build                           # lure TFTP recovery helper (Zig)
 ```
 
 ## The guided TUI
 
-Run `swallow` with no arguments to open the dashboard. The sidebar walks the job
+Run `pelegrun` with no arguments to open the dashboard. The sidebar walks the job
 in plain steps; each screen shows **live output from the real logic** — including
 the safety refusals — not mock data.
 
@@ -60,20 +60,20 @@ Navigate with `↑ ↓` (or `j k`), jump with `g` / `G`, quit with `q`.
 Everything the TUI shows is also scriptable:
 
 ```sh
-swallow discover http://192.168.1.1     # → family + which access adapter to use
-swallow serial  --model X42 --prefix SWLW --suffix 0001   # → SWLWX420001T
-swallow snextra --model X42             # → 20-char u-boot field-19 value
-swallow check   EPC1X4200011            # → serial=… valid=true model_code=X42
-swallow envcheck env.txt                # completeness gate; refuses if incomplete
-swallow plan                            # print the ordered, gated flash plan
-swallow version
+pelegrun discover http://192.168.1.1     # → family + which access adapter to use
+pelegrun serial  --model X42 --prefix SWLW --suffix 0001   # → SWLWX420001T
+pelegrun snextra --model X42             # → 20-char u-boot field-19 value
+pelegrun check   EPC1X4200011            # → serial=… valid=true model_code=X42
+pelegrun envcheck env.txt                # completeness gate; refuses if incomplete
+pelegrun plan                            # print the ordered, gated flash plan
+pelegrun version
 ```
 
-`swallow envcheck` reads a `fw_printenv` dump (file, or `-` for stdin) and exits
+`pelegrun envcheck` reads a `fw_printenv` dump (file, or `-` for stdin) and exits
 non-zero if the bootloader env is incomplete — the one state that bricks:
 
 ```console
-$ printf 'ethaddr=00:03:7f:12:3e:87\n' | swallow envcheck -
+$ printf 'ethaddr=00:03:7f:12:3e:87\n' | pelegrun envcheck -
 env: INCOMPLETE — missing [active_fw app_part bootcmd rootfsname]
 refuse writes; recover with `env default -a` over UART first
 ```

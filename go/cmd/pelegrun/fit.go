@@ -6,7 +6,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/internal/fitadopt"
+	"github.com/ParkWardRR/pelegrun-ap-hk07-firmware-tools/internal/fitadopt"
 )
 
 // cmdFit exposes the P10 FIT real-serial gates: `check` runs the read-only
@@ -80,10 +80,10 @@ func cmdFitProve(out io.Writer, a []string) error {
 	return fmt.Errorf("%d proof failure(s)", len(p.Failures))
 }
 
-const fitUsage = "swallow fit — P10 FIT real-serial adoption gates (read-only)\n\n" +
+const fitUsage = "pelegrun fit — P10 FIT real-serial adoption gates (read-only)\n\n" +
 	"USAGE:\n" +
-	"  swallow fit check --request req.json                 eligibility (P10a): may this device adopt?\n" +
-	"  swallow fit prove --expected exp.json --observed obs.json   post-adoption proof (P10b)\n\n" +
+	"  pelegrun fit check --request req.json                 eligibility (P10a): may this device adopt?\n" +
+	"  pelegrun fit prove --expected exp.json --observed obs.json   post-adoption proof (P10b)\n\n" +
 	"check enforces FIT >= " + fitadopt.MinFitVersion + ", a hashed+provenanced image, a recovery route, and a\n" +
 	"real (never generated/spoofed) serial. prove verifies the serial was preserved,\n" +
 	"the version/slot/identity match, and access + service health after adoption.\n"

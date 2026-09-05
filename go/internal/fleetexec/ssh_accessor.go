@@ -1,5 +1,5 @@
 // Package fleetexec wires the pure fleet.Accessor contract to real device I/O.
-// It composes swallow's existing read-only plans (hood env, dump capture) over an
+// It composes pelegrun's existing read-only plans (hood env, dump capture) over an
 // injected command Runner — jess.SSH.Run matches the Runner signature — while the
 // family-specific DESTRUCTIVE steps (writing the inactive slot, verifying the
 // written image, pointing the boot slot) are REQUIRED injected hooks. That split
@@ -38,9 +38,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/internal/dump"
-	"github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/internal/fleet"
-	"github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/internal/hood"
+	"github.com/ParkWardRR/pelegrun-ap-hk07-firmware-tools/internal/dump"
+	"github.com/ParkWardRR/pelegrun-ap-hk07-firmware-tools/internal/fleet"
+	"github.com/ParkWardRR/pelegrun-ap-hk07-firmware-tools/internal/hood"
 )
 
 // Runner executes one shell command on the device and returns its combined
@@ -50,7 +50,7 @@ type Runner func(ctx context.Context, cmd string) (string, error)
 // SSHAccessor implements fleet.Accessor over a command Runner (EWS/LuCI SSH path).
 type SSHAccessor struct {
 	Run            Runner // required
-	DumpDest       string // device-local dump dir (tmpfs/USB); default /tmp/swallow-dump
+	DumpDest       string // device-local dump dir (tmpfs/USB); default /tmp/pelegrun-dump
 	NAND           bool   // use nanddump for the capture
 	ExpectedSerial string // optional identity assertion checked at preflight/validate
 	RebootCmd      string // default "reboot"
@@ -69,7 +69,7 @@ var _ fleet.Accessor = (*SSHAccessor)(nil)
 
 func (a *SSHAccessor) dest() string {
 	if a.DumpDest == "" {
-		return "/tmp/swallow-dump"
+		return "/tmp/pelegrun-dump"
 	}
 	return strings.TrimRight(a.DumpDest, "/")
 }

@@ -2,7 +2,7 @@
 //! recovery (`tftpboot`). Serves files from a root directory over UDP.
 //!
 //! Serves the current directory on :6969 (recovery uses :69, which needs root).
-//! Unofficial; part of swallow-ap-hk07-firmware-tools.
+//! Unofficial; part of pelegrun-ap-hk07-firmware-tools.
 //!
 //! Zig 0.16 removed std.net and the std.posix socket wrappers (networking is
 //! moving into std.Io), so lure talks to libc sockets directly — the stable,
@@ -45,7 +45,7 @@ fn parseRRQ(pkt: []const u8) ?[]const u8 {
 
 pub fn main() !void {
     // v1 config: serve the current directory on PORT. A future revision reads
-    // these from swallow once the 0.16 env/args API settles.
+    // these from pelegrun once the 0.16 env/args API settles.
     const port: u16 = PORT;
     const root: []const u8 = ".";
 

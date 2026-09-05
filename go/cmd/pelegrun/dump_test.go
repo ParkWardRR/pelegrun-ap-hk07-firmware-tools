@@ -21,7 +21,7 @@ func TestDumpPlanFromFile(t *testing.T) {
 	}
 	mf := filepath.Join(dir, "manifest.json")
 
-	code, out, errout := runCap("dump", "plan", "--dest", "/tmp/swallow-dump",
+	code, out, errout := runCap("dump", "plan", "--dest", "/tmp/pelegrun-dump",
 		"--proc-mtd", pm, "--model", "ap-hk07", "--manifest", mf)
 	if code != 0 {
 		t.Fatalf("dump plan failed: code=%d err=%q", code, errout)
@@ -72,7 +72,7 @@ func TestDumpRefusesDeviceDest(t *testing.T) {
 }
 
 func TestDumpUsage(t *testing.T) {
-	if code, out, _ := runCap("dump"); code != 0 || !strings.Contains(out, "swallow dump") {
+	if code, out, _ := runCap("dump"); code != 0 || !strings.Contains(out, "pelegrun dump") {
 		t.Fatalf("dump usage: code=%d out=%q", code, out)
 	}
 }

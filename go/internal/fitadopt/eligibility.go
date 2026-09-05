@@ -13,7 +13,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/internal/band"
+	"github.com/ParkWardRR/pelegrun-ap-hk07-firmware-tools/internal/band"
 )
 
 // MinFitVersion is the supported floor for real-serial FIT adoption.

@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/internal/fleet"
-	"github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/internal/jess"
+	"github.com/ParkWardRR/pelegrun-ap-hk07-firmware-tools/internal/fleet"
+	"github.com/ParkWardRR/pelegrun-ap-hk07-firmware-tools/internal/jess"
 )
 
 // CloudClient is the subset of jess.Cloud the CloudAccessor needs. *jess.Cloud

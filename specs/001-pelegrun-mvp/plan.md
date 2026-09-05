@@ -6,7 +6,7 @@
 
 ```mermaid
 flowchart LR
-  U([operator]) --> S[swallow · Go]
+  U([operator]) --> S[Pelegrún · Go]
   S --> E[eyas · discover/fingerprint]
   E --> J[jess · access: ssh8822 / cloud / luci / uart]
   J --> M[mews · backup mtd7/8/11 + config]
@@ -23,7 +23,7 @@ flowchart LR
 ## Tech stack + rationale
 - **Rust `quarry` (done):** pure header/serial math, exhaustively unit-tested.
   Zero I/O. Ships as a lib + a standalone CLI so it is useful today.
-- **Go `swallow`:** orchestration + all I/O. `x/crypto/ssh` is the only SSH stack
+- **Go `pelegrun`:** orchestration + all I/O. `x/crypto/ssh` is the only SSH stack
   that cleanly does the legacy `HostKeyAlgorithms=+ssh-rsa` these APs need on
   :8822; `net/http`+InsecureSkipVerify for the cloud GUI (`-k`) and LuCI. Trivial
   static cross-compile. The Code27 serial math is **reimplemented in pure Go**

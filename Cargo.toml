@@ -7,5 +7,5 @@ exclude = ["tools/shots"]
 version = "0.1.0"
 edition = "2021"
 license = "BlueOak-1.0.0"
-repository = "https://github.com/ParkWardRR/swallow-ap-hk07-firmware-tools"
+repository = "https://github.com/ParkWardRR/pelegrun-ap-hk07-firmware-tools"
 authors = ["ParkWardRR"]

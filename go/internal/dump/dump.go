@@ -4,7 +4,7 @@
 // layout to device-local storage, hashes every artifact, and records a manifest,
 // so a complete known-good image exists locally even if the network drops mid-job.
 //
-// Like the rest of swallow this package does no I/O: it parses `/proc/mtd`, plans
+// Like the rest of pelegrun this package does no I/O: it parses `/proc/mtd`, plans
 // the ordered read-only capture commands for an accessor to run, and verifies the
 // result by hash ("prove, don't assume"). Two invariants it must never break:
 //  1. It never emits a command that WRITES an mtd (`of=/dev/mtd*`); every command

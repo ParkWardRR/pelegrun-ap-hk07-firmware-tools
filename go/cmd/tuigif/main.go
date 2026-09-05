@@ -1,4 +1,4 @@
-// Command tuigif rasterises the swallow TUI into an animated GIF (docs/tour.gif)
+// Command tuigif rasterises the pelegrun TUI into an animated GIF (docs/tour.gif)
 // entirely offline — no terminal recorder, no ffmpeg. It drives the real model
 // through tui.DemoFrames, parses each frame's ANSI into a cell grid, draws the
 // grid with a monospaced system font, and encodes the frames with image/gif.
@@ -29,7 +29,7 @@ import (
 	"golang.org/x/image/font/opentype"
 	"golang.org/x/image/math/fixed"
 
-	"github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/internal/tui"
+	"github.com/ParkWardRR/pelegrun-ap-hk07-firmware-tools/internal/tui"
 )
 
 func main() {

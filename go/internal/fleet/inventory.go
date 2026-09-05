@@ -1,6 +1,6 @@
-// Package fleet is the P9 control plane: it composes swallow's safe single-device
+// Package fleet is the P9 control plane: it composes pelegrun's safe single-device
 // primitives (eyas/mews/hood/band/flash) into a policy- and evidence-driven batch
-// workflow. Like the rest of swallow it is pure logic that does no device I/O — it
+// workflow. Like the rest of pelegrun it is pure logic that does no device I/O — it
 // builds a normalized inventory, a deterministic read-only plan, canary cohorts,
 // and a durable per-device operation journal for an accessor to execute.
 //

@@ -17,7 +17,7 @@ func mustParts(t *testing.T) []Partition {
 }
 
 func TestPlanIsReadOnly(t *testing.T) {
-	steps, err := Plan(mustParts(t), "/tmp/swallow-dump", PlanOptions{})
+	steps, err := Plan(mustParts(t), "/tmp/pelegrun-dump", PlanOptions{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -84,7 +84,7 @@ func TestPlanDestRefusals(t *testing.T) {
 }
 
 func TestSafeDestHint(t *testing.T) {
-	if ok, _ := SafeDestHint("/tmp/swallow-dump"); !ok {
+	if ok, _ := SafeDestHint("/tmp/pelegrun-dump"); !ok {
 		t.Fatal("/tmp should be hinted safe")
 	}
 	if ok, _ := SafeDestHint("/dev/shm/x"); !ok {
@@ -116,7 +116,7 @@ func TestEstimatedBytesAndMissingCritical(t *testing.T) {
 
 func TestManifestRoundTripAndVerify(t *testing.T) {
 	parts := mustParts(t)
-	m := NewManifest(parts, "/tmp/swallow-dump", "swallow 0.4.0", PlanOptions{Model: "ap-hk07", Serial: "SWLWX420001Q"})
+	m := NewManifest(parts, "/tmp/pelegrun-dump", "pelegrun 0.4.0", PlanOptions{Model: "ap-hk07", Serial: "SWLWX420001Q"})
 	if m.Validation != StatusPlanned || len(m.Partitions) != 6 {
 		t.Fatalf("bad initial manifest: %+v", m)
 	}

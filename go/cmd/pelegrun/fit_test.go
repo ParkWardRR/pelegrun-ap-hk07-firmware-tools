@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-// examples/ lives at the repo root: go/cmd/swallow -> ../../../examples.
+// examples/ lives at the repo root: go/cmd/pelegrun -> ../../../examples.
 const examplesDir = "../../../examples/"
 
 func TestFitCheckExample(t *testing.T) {
@@ -46,7 +46,7 @@ func TestFitCheckBadRequestFails(t *testing.T) {
 }
 
 func TestFitUsage(t *testing.T) {
-	if code, out, _ := runCap("fit"); code != 0 || !strings.Contains(out, "swallow fit") {
+	if code, out, _ := runCap("fit"); code != 0 || !strings.Contains(out, "pelegrun fit") {
 		t.Fatalf("fit usage: code=%d out=%q", code, out)
 	}
 	if code, _, errout := runCap("fit", "bogus"); code != 1 || !strings.Contains(errout, "unknown subcommand") {

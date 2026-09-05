@@ -1,4 +1,4 @@
-# Constitution — swallow-ap-hk07-firmware-tools
+# Constitution — pelegrun-ap-hk07-firmware-tools
 
 Non-negotiable principles. Every spec, plan, task, and PR is checked against these.
 

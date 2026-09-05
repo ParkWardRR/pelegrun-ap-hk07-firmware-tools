@@ -45,7 +45,7 @@ func sizedModel(t *testing.T) model {
 func TestViewContainsHeaderAndSelectedContent(t *testing.T) {
 	m := sizedModel(t)
 	v := m.View()
-	for _, want := range []string{"swallow", "v0.4.0", "STEPS", "Discover", "Step 1 of 7"} {
+	for _, want := range []string{"Pelegrún", "v0.4.0", "STEPS", "Discover", "Step 1 of 7"} {
 		if !strings.Contains(v, want) {
 			t.Errorf("View() missing %q", want)
 		}

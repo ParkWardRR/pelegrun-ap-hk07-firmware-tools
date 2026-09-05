@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/internal/fleet"
+	"github.com/ParkWardRR/pelegrun-ap-hk07-firmware-tools/internal/fleet"
 )
 
 const procMTD = `dev:    size   erasesize  name

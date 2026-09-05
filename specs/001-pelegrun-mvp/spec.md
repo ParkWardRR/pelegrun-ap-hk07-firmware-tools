@@ -1,4 +1,4 @@
-# Spec 001 — swallow MVP: no-UART cross-flash + serial provisioning
+# Spec 001 — Pelegrún MVP: no-UART cross-flash + serial provisioning
 
 **Stage:** Specify · **Status:** implemented — MVP (FR1–FR6) shipped in v0.4.0; FR7–FR9 also landed
 **Constitution:** all clauses apply (esp. I, II, VI).

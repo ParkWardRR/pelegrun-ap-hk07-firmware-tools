@@ -1,7 +1,7 @@
 # Examples
 
 Runnable fixtures for the fleet (P9) and FIT (P10) command surfaces. They are
-exercised by the CLI tests (`go/cmd/swallow/*_test.go`), so they stay valid.
+exercised by the CLI tests (`go/cmd/pelegrun/*_test.go`), so they stay valid.
 
 Everything below is **read-only** — `fleet plan`, `fit check`, and `fit prove`
 change nothing on any device.
@@ -11,7 +11,7 @@ change nothing on any device.
 ```console
 # Build a read-only rollout plan. --now is fixed here so last_seen freshness is
 # deterministic; drop it to use the current time.
-swallow fleet plan \
+pelegrun fleet plan \
   --inventory examples/fleet-inventory.json \
   --policy    examples/fleet-policy.json \
   --image ecw230v3-282.bin \
@@ -26,7 +26,7 @@ evidence bundle (the policy requires `verified` + a backup).
 
 ```console
 # Revalidate the saved plan just before execution (fails closed on any drift).
-swallow fleet apply \
+pelegrun fleet apply \
   --inventory examples/fleet-inventory.json \
   --policy    examples/fleet-policy.json \
   --plan plan.json \
@@ -39,10 +39,10 @@ swallow fleet apply \
 
 ```console
 # P10a: is this device/image/serial combination allowed to adopt?
-swallow fit check --request examples/fit-request.json
+pelegrun fit check --request examples/fit-request.json
 
 # P10b: after adoption, prove it worked (serial preserved, version/slot/access).
-swallow fit prove \
+pelegrun fit prove \
   --expected examples/fit-expected.json \
   --observed examples/fit-observed.json
 ```

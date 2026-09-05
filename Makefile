@@ -1,5 +1,5 @@
-# swallow-ap-hk07-firmware-tools — build & test entry points.
-# One repo, three languages: Rust (quarry), Go (swallow), Zig (lure).
+# pelegrun-ap-hk07-firmware-tools — build & test entry points.
+# One repo, three languages: Rust (quarry), Go (pelegrun), Zig (lure).
 .DEFAULT_GOAL := help
 .PHONY: help ci hooks test test-race lint fmt fmt-check cover \
         test-rust test-go test-zig test-firmware lint-rust lint-go lint-zig \
@@ -62,8 +62,8 @@ fmt-check:
 
 ## cover: Go coverage summary (per-package + total)
 cover:
-	cd go && go test ./... -coverprofile=/tmp/swallow.cover >/dev/null && \
-	  go tool cover -func=/tmp/swallow.cover | tail -1
+	cd go && go test ./... -coverprofile=/tmp/pelegrun.cover >/dev/null && \
+	  go tool cover -func=/tmp/pelegrun.cover | tail -1
 
 ## dist: cross-compiled release binaries + SHA256SUMS into dist/
 dist:
@@ -71,16 +71,16 @@ dist:
 
 ## tui: run the dashboard
 tui:
-	cd go && go run ./cmd/swallow
+	cd go && go run ./cmd/pelegrun
 
 ## screenshots: regenerate README screenshots via the termwright harness
 screenshots:
-	cd go && go build -o /tmp/swallow ./cmd/swallow
-	cd tools/tui-harness && SWALLOW_BIN=/tmp/swallow SHOT_DIR=$(CURDIR)/docs/screenshots cargo run
+	cd go && go build -o /tmp/pelegrun ./cmd/pelegrun
+	cd tools/tui-harness && PELEGRUN_BIN=/tmp/pelegrun SHOT_DIR=$(CURDIR)/docs/screenshots cargo run
 
 ## tour: re-record docs/tour.gif from the live TUI with vhs, then optimize
 tour:
-	cd go && go build -o /tmp/swallow ./cmd/swallow
+	cd go && go build -o /tmp/pelegrun ./cmd/pelegrun
 	vhs docs/tour.tape
 	@command -v magick >/dev/null && magick docs/tour.gif -layers Optimize docs/tour.gif || true
 

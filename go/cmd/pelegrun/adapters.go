@@ -5,7 +5,7 @@ import (
 	"io"
 	"sort"
 
-	"github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/internal/adapter"
+	"github.com/ParkWardRR/pelegrun-ap-hk07-firmware-tools/internal/adapter"
 )
 
 // cmdAdapters inspects the board support registry (P12d model DB). `list` shows
@@ -70,8 +70,8 @@ func listAdapters(out io.Writer, reg *adapter.Registry) {
 	}
 }
 
-const adaptersUsage = "swallow adapters — inspect the board support registry (P12d)\n\n" +
+const adaptersUsage = "pelegrun adapters — inspect the board support registry (P12d)\n\n" +
 	"USAGE:\n" +
-	"  swallow adapters list     [--file registry.json]   tier + capabilities + flashability\n" +
-	"  swallow adapters validate [--file registry.json]   check every record's consistency\n\n" +
+	"  pelegrun adapters list     [--file registry.json]   tier + capabilities + flashability\n" +
+	"  pelegrun adapters validate [--file registry.json]   check every record's consistency\n\n" +
 	"With no --file, the builtin default registry is used (ap-hk07 = experimental).\n"

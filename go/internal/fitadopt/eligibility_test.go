@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/internal/band"
+	"github.com/ParkWardRR/pelegrun-ap-hk07-firmware-tools/internal/band"
 )
 
 func goodRequest() Request {

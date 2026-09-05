@@ -1,4 +1,4 @@
-// Command swallow — falconry-themed orchestrator to cross-flash and recover
+// Command pelegrun — falconry-themed orchestrator to cross-flash and recover
 // EnGenius/Senao ap-hk07 (IPQ807x) APs without bricking them.
 //
 // No arguments launches the TUI; subcommands are script/CI friendly.
@@ -13,11 +13,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/internal/band"
-	"github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/internal/eyas"
-	"github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/internal/hood"
-	"github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/internal/jess"
-	"github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/internal/tui"
+	"github.com/ParkWardRR/pelegrun-ap-hk07-firmware-tools/internal/band"
+	"github.com/ParkWardRR/pelegrun-ap-hk07-firmware-tools/internal/eyas"
+	"github.com/ParkWardRR/pelegrun-ap-hk07-firmware-tools/internal/hood"
+	"github.com/ParkWardRR/pelegrun-ap-hk07-firmware-tools/internal/jess"
+	"github.com/ParkWardRR/pelegrun-ap-hk07-firmware-tools/internal/tui"
 
 	"golang.org/x/term"
 )
@@ -43,7 +43,7 @@ func run(args []string, out, errw io.Writer) int {
 	case "", "tui":
 		err = runTUI(out)
 	case "version":
-		fmt.Fprintf(out, "swallow %s\n", Version)
+		fmt.Fprintf(out, "pelegrun %s\n", Version)
 	case "plan":
 		fmt.Fprint(out, planText)
 	case "serial":
@@ -69,7 +69,7 @@ func run(args []string, out, errw io.Writer) int {
 	case "-h", "--help", "help":
 		fmt.Fprint(out, usageText)
 	default:
-		fmt.Fprintf(errw, "swallow: %q is planned but not implemented yet (see ROADMAP.md)\n", cmd)
+		fmt.Fprintf(errw, "pelegrun: %q is planned but not implemented yet (see ROADMAP.md)\n", cmd)
 		return 2
 	}
 	if err != nil {
@@ -173,20 +173,20 @@ func cmdDiscover(out io.Writer, a []string) error {
 	return nil
 }
 
-const usageText = "swallow — cross-flash & recover EnGenius/Senao ap-hk07 APs (unofficial)\n\n" +
+const usageText = "pelegrun — cross-flash & recover EnGenius/Senao ap-hk07 APs (unofficial)\n\n" +
 	"USAGE:\n" +
-	"  swallow                 launch the TUI (default)\n" +
-	"  swallow version | plan\n" +
-	"  swallow discover <url>            fingerprint firmware family (eyas)\n" +
-	"  swallow serial  --model X42 [--prefix P --suffix S]   Code27 serial (band)\n" +
-	"  swallow snextra --model X42 [--prefix P]              20-char field-19 value\n" +
-	"  swallow check   <serial>                              validate a serial\n" +
-	"  swallow envcheck [file|-]                             hood env completeness gate\n" +
-	"  swallow fleet   plan|apply ...                        P9 batch rollout (read-only planner)\n" +
-	"  swallow dump    plan --dest DIR [--proc-mtd f|-]      on-device full-flash capture plan\n" +
-	"  swallow redact  [file|-] [--mac] [--value S]...       scrub secrets from a bundle/log\n" +
-	"  swallow adapters list|validate                        board support registry (P12d)\n" +
-	"  swallow fit     check|prove ...                       FIT real-serial adoption gates (P10)\n\n" +
+	"  pelegrun                 launch the TUI (default)\n" +
+	"  pelegrun version | plan\n" +
+	"  pelegrun discover <url>            fingerprint firmware family (eyas)\n" +
+	"  pelegrun serial  --model X42 [--prefix P --suffix S]   Code27 serial (band)\n" +
+	"  pelegrun snextra --model X42 [--prefix P]              20-char field-19 value\n" +
+	"  pelegrun check   <serial>                              validate a serial\n" +
+	"  pelegrun envcheck [file|-]                             hood env completeness gate\n" +
+	"  pelegrun fleet   plan|apply ...                        P9 batch rollout (read-only planner)\n" +
+	"  pelegrun dump    plan --dest DIR [--proc-mtd f|-]      on-device full-flash capture plan\n" +
+	"  pelegrun redact  [file|-] [--mac] [--value S]...       scrub secrets from a bundle/log\n" +
+	"  pelegrun adapters list|validate                        board support registry (P12d)\n" +
+	"  pelegrun fit     check|prove ...                       FIT real-serial adoption gates (P10)\n\n" +
 	"Image re-head ships as the quarry binary (Rust). Unofficial; hardware you own only.\n"
 
 const planText = "Safety ladder (why UART is usually unnecessary):\n\n" +

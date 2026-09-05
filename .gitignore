@@ -2,7 +2,7 @@
 **/target/
 **/*.rs.bk
 # Go
-/go/swallow
+/go/pelegrun
 *.test
 # Zig
 **/zig-out/

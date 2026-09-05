@@ -5,7 +5,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/ParkWardRR/swallow-ap-hk07-firmware-tools/internal/redact"
+	"github.com/ParkWardRR/pelegrun-ap-hk07-firmware-tools/internal/redact"
 )
 
 // cmdRedact scrubs secrets from a support bundle / fixture / log before sharing.
