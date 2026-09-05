@@ -312,9 +312,12 @@ func (m model) header() string {
 	if m.w < 84 {
 		return barBx.Width(m.w).Render(tagline)
 	}
-	art := banner(m.frame)
-	block := lipgloss.JoinVertical(lipgloss.Left, art, "", barBx.Render(tagline))
-	return onBg.Width(m.w).Render(block)
+	// Render every strip at full width so the whole header carries the page bg —
+	// no ragged default-background padding beside the wordmark or tagline.
+	art := onBg.Width(m.w).Render(banner(m.frame))
+	gap := onBg.Width(m.w).Render("")
+	tag := barBx.Width(m.w).Render(tagline)
+	return lipgloss.JoinVertical(lipgloss.Left, art, gap, tag)
 }
 
 func sProductBg(s string) string { return sBgInk.Render(s) }
