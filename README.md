@@ -196,9 +196,14 @@ $ pelegrun dump plan --dest /tmp/pelegrun-dump < /proc/mtd
 $ pelegrun fit check --request examples/fit-request.json
 $ pelegrun fit prove --expected examples/fit-expected.json --observed examples/fit-observed.json
 
+# mainline OpenWrt install planning (registry-gated; see "Run OpenWrt" below)
+$ pelegrun openwrt check                                  # is ap-hk07-openwrt flash-ready?
+$ pelegrun openwrt plan --env printenv.txt --image factory.ubi
+$ quarry verify-ubi factory.ubi --board hk07               # confirm the FIT config node first
+
 # scrub secrets before sharing a support bundle; inspect the board support registry
 $ pelegrun redact bundle.txt --mac --value <serial>
-$ pelegrun adapters list          # tier + capabilities + flashability (ap-hk07 = experimental)
+$ pelegrun adapters list          # tier + capabilities + flashability (ap-hk07, ap-hk07-openwrt = experimental)
 ```
 
 Product ids: `282` EWS377AP v3 · `300` EWS377-FIT · `284` ECW230v3 · `275` ECW230 · `182` EWS377AP v2 · `285` ECW230S.
@@ -224,6 +229,13 @@ OpenWrt is GPL and freely redistributable (unlike OEM images, which you still su
 yourself). It **overwrites the OEM slot — back up your NAND first**. Only the
 UART/u-boot install is hardware-proven; the web-upload `.bin` is experimental. Full
 steps (including restore to stock) are in the guide.
+
+This target is also a registered adapter (`ap-hk07-openwrt` in `pelegrun adapters
+list`), distinct from the `ap-hk07` FIT target: OpenWrt's kernel requires the fixed
+`rootfs` partition regardless of the active A/B slot (see `flash.FixedPartitionTarget`),
+so it declares `flash_fixed_partition`, not `flash_ab` — no live rollback exists once
+that write happens, only the UART/TFTP recovery route. `pelegrun openwrt check|plan`
+(above) walk the registry-gated, ordered plan before you touch anything over UART.
 
 ## Build & test
 
