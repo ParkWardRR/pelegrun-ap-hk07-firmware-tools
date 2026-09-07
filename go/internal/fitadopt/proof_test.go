@@ -7,14 +7,14 @@ import (
 
 func goodExpected() Expected {
 	return Expected{
-		Model: "ap-hk07", FirmwareFamily: "fit", FitVersion: "1.1.65",
+		Model: "ap-hk07", FirmwareFamily: "fit", FitVersion: "1.1.30",
 		RealSerial: "SWLWX420001Q", ActiveSlot: "rootfs_1",
 	}
 }
 
 func goodObserved() Observed {
 	return Observed{
-		Model: "ap-hk07", FirmwareFamily: "fit", FitVersion: "1.1.65",
+		Model: "ap-hk07", FirmwareFamily: "fit", FitVersion: "1.1.30",
 		RealSerial: "SWLWX420001Q", ActiveSlot: "rootfs_1",
 		AccessOK: true, ServiceHealthy: true,
 	}
@@ -51,7 +51,7 @@ func TestProveEachCheck(t *testing.T) {
 	}{
 		{"wrong model", func(o *Observed) { o.Model = "ecw230v3" }},
 		{"not fit", func(o *Observed) { o.FirmwareFamily = "cloud" }},
-		{"below floor", func(o *Observed) { o.FitVersion = "1.1.64" }},
+		{"below floor", func(o *Observed) { o.FitVersion = "1.1.29" }},
 		{"wrong version", func(o *Observed) { o.FitVersion = "1.2.0" }},
 		{"wrong slot", func(o *Observed) { o.ActiveSlot = "rootfs" }},
 		{"no access", func(o *Observed) { o.AccessOK = false }},

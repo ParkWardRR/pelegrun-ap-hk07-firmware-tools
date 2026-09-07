@@ -100,6 +100,35 @@ for identification only: `275` ECW230, `182` EWS377AP v2, `285` ECW230S — the
 last is a related cloud AP, **not** a verified cross-flash target. The parser is
 regression-tested against real firmware with `make test-firmware FW=<dir>`.
 
+### HTTP-only cross-flash (crossflash)
+
+Cross-flashing between the three sibling families over the network, no UART,
+using the cloud firmware's own web updater:
+
+```sh
+pelegrun crossflash check --ap 192.168.1.1          # which firmware is running now
+quarry rehead image.bin image-reheaded.bin --to 284  # match what `check` reported
+pelegrun crossflash push --ap 192.168.1.1 --image image-reheaded.bin           # stage only
+pelegrun crossflash push --ap 192.168.1.1 --image image-reheaded.bin --yes    # stage + flash
+```
+
+Confirmed on real hardware (2026-09-07): the device's `upload.cgi` validates
+the image's `product_id` against **its own currently-running identity**, not
+the family you're trying to reach — re-head to whatever `crossflash check`
+reports, not the target's own id. Once the flash completes and the device
+reboots into the new firmware, it reports its own true identity from then on;
+the header value only ever gated this one upload.
+
+This writes the device's inactive A/B slot through the OEM's own updater —
+the same mechanism as a same-family firmware update, just with a re-headed
+image. It worked cleanly for every genuine EnGenius image tried (FIT,
+ECW230v3). It has **not** been proven for a community OpenWrt image: on one
+unit, the identical write hit a NAND ECC error on the spare slot for two
+different OpenWrt UBI layouts while every genuine EnGenius image on the same
+slot succeeded — keep UART available regardless, and prefer
+`pelegrun openwrt plan` (which targets the fixed partition via UART, not this
+HTTP path) for OpenWrt specifically until that gap is resolved.
+
 ## The two invariants (why it won't brick)
 
 1. **Writes go to the `INACTIVE` A/B slot.** The running slot stays bootable — a

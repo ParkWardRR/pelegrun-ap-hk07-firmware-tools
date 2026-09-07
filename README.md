@@ -201,6 +201,12 @@ $ pelegrun openwrt check                                  # is ap-hk07-openwrt f
 $ pelegrun openwrt plan --env printenv.txt --image factory.ubi
 $ quarry verify-ubi factory.ubi --board hk07               # confirm the FIT config node first
 
+# HTTP-only cross-flash between EWS377AP v3 / EWS377-FIT / ECW230v3 (no UART)
+$ pelegrun crossflash check --ap <ip>                     # which firmware is running, which product_id to re-head to
+$ quarry rehead image.bin image-reheaded.bin --to 284      # match the id `check` reported
+$ pelegrun crossflash push --ap <ip> --image image-reheaded.bin           # stage + validate only
+$ pelegrun crossflash push --ap <ip> --image image-reheaded.bin --yes     # stage, validate, and flash
+
 # scrub secrets before sharing a support bundle; inspect the board support registry
 $ pelegrun redact bundle.txt --mac --value <serial>
 $ pelegrun adapters list          # tier + capabilities + flashability (ap-hk07, ap-hk07-openwrt = experimental)
@@ -208,6 +214,15 @@ $ pelegrun adapters list          # tier + capabilities + flashability (ap-hk07,
 
 Product ids: `282` EWS377AP v3 · `300` EWS377-FIT · `284` ECW230v3 · `275` ECW230 · `182` EWS377AP v2 · `285` ECW230S.
 Model codes: `X44` EWS377AP v3 · `X45` EWS377-FIT · `X42` ECW230v3.
+
+`crossflash`'s upload gate checks the image's header `product_id` against the
+**running** firmware's own identity, not the family you're pushing to — re-head
+to whatever `crossflash check` reports, then the device applies and boots the
+real target firmware, which reports its own true identity from then on. Writes
+the device's inactive A/B slot via its own updater; keep UART available
+regardless (see "Run OpenWrt" below for one payload type where that slot write
+has been observed to fail on real hardware while every genuine EnGenius image
+tried on the same slot succeeded).
 
 > The header parser is verified against **real vendor images** across the family
 > — see `make test-firmware FW=<dir>`. All ids/models above were read from

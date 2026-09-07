@@ -12,7 +12,7 @@ func goodRequest() Request {
 	return Request{
 		Model:           "ap-hk07",
 		FirmwareFamily:  "fit",
-		FitVersion:      "1.1.65",
+		FitVersion:      "1.1.30",
 		ImageSHA256:     strings.Repeat("a", 64),
 		ImageProvenance: "vendor portal, downloaded 2026-09-01",
 		RealSerial:      serial,
@@ -32,7 +32,7 @@ func TestValidateBlocks(t *testing.T) {
 		mut  func(*Request)
 	}{
 		{"not fit family", func(r *Request) { r.FirmwareFamily = "cloud" }},
-		{"below floor", func(r *Request) { r.FitVersion = "1.1.64" }},
+		{"below floor", func(r *Request) { r.FitVersion = "1.1.29" }},
 		{"unparseable version", func(r *Request) { r.FitVersion = "1.x" }},
 		{"bad image hash", func(r *Request) { r.ImageSHA256 = "short" }},
 		{"no provenance", func(r *Request) { r.ImageProvenance = "  " }},

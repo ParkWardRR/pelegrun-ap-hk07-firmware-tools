@@ -157,6 +157,14 @@ func DefaultRegistry() *Registry {
 					"config (UCI + a written test file) survives a real reboot",
 					"root-mount-requires-slot-0 and FIT config@<board>-name failure modes both " +
 						"found and fixed by direct hardware debugging in the same results/ directory",
+					"HTTP-only cross-flash (no UART) confirmed viable as a MECHANISM on this " +
+						"board family via the OEM cloud updater (see `pelegrun crossflash`) — but " +
+						"not yet proven for an OpenWrt payload specifically: on one unit, the same " +
+						"HTTP path hit an identical NAND ECC error on the spare slot for two " +
+						"different community UBI layouts (kernel-only and full 3-volume), while " +
+						"genuine EnGenius FIT and ECW230v3 images wrote clean on the same slot — " +
+						"CapUARTRecovery is not just the fallback here, it is the only path with a " +
+						"demonstrated clean write for this specific payload.",
 				},
 			},
 		},

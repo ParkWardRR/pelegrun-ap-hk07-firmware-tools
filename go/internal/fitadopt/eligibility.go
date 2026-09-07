@@ -17,7 +17,19 @@ import (
 )
 
 // MinFitVersion is the supported floor for real-serial FIT adoption.
-const MinFitVersion = "1.1.65"
+//
+// Was previously "1.1.65", based on an EnGenius Private Cloud/EPC support
+// claim whose origin couldn't be traced. Checked directly against the
+// official EnGenius firmware index (engeniustech.com/wp_firmware/) on
+// 2026-09-07: EnGenius has never published an `ews377-fit-*` build past
+// `1.1.30-13` — the old floor rejected every real EWS377-FIT firmware that
+// exists. Set here to the actual ceiling of what's published; cross-flashed
+// and boot-verified on real ap-hk07 hardware the same day (see
+// `local/2026-09-07_FIT-1.1.30-13-crossflash-test.md` in repo history).
+// Whether this version genuinely supports EPC/FitController adoption is a
+// separate, still-open question — this floor only says the firmware exists
+// and boots; it is not itself proof of EPC compatibility.
+const MinFitVersion = "1.1.30"
 
 // hex64 matches a lowercase/uppercase 64-char SHA-256 hex digest.
 var hex64 = regexp.MustCompile(`^[0-9a-fA-F]{64}$`)

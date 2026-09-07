@@ -92,7 +92,7 @@ timeline
 | 7 | UART gated recovery | creance | scripted `env default -a → inspect → env save` | ✅ |
 | 8 | Deep-brick TFTP recovery | lure | Zig TFTP responder (unit + integration tested) | ✅ |
 | 9 | Fleet mode | band | inventory + unique-serial issuance + collision preflight ✅; batch + canary-gate automation ⬜ | 🟡 |
-| 10 | FIT real-serial path | — | adopt via FIT ≥ v1.1.65 with the device's real serial | ⬜ |
+| 10 | FIT real-serial path | — | adopt via FIT ≥ `fitadopt.MinFitVersion` (`1.1.30`, the actual published ceiling) with the device's real serial | ⬜ |
 | 11 | TUI + release binaries | Pelegrún | bubbletea UI ✅, cross-compiled binaries + SHA256SUMS via local `make dist` ✅ | ✅ |
 | 12 | Community & extensibility | — | recorded fixtures ✅, product-id/model DB ✅ (6 ids verified from real images); adapters for other Senao boards ⬜ | 🟡 |
 
@@ -315,7 +315,7 @@ Before the first destructive or persistent action, require all of the following:
 
 | Gate | Requirement |
 |---|---|
-| Supported version | FIT version is at least the documented supported floor, currently stated as v1.1.65 or later |
+| Supported version | FIT version is at least `fitadopt.MinFitVersion` (currently `1.1.30` — the actual ceiling of what EnGenius has published for this AP; the old `1.1.65` floor referenced a version that was never released, see the constant's doc comment) |
 | Image identity | Target image has an immutable SHA-256 and recorded provenance/source |
 | Device compatibility | Exact model/board/flash-layout/bootloader constraints pass; no inference from marketing name alone |
 | Real serial | Serial is read from the device's authoritative existing state and retained; no generated/reused/spoofed serials |
@@ -462,6 +462,7 @@ The next work should compose and standardize them rather than reimplement them.
 | `hood` | Environment mutation safety gate | Reuse within plan/apply policy checks; ensure fleet policy cannot bypass local env invariants |
 | `band` | Unique serial issuance and collision preflight | Expand from serial issuance into inventory, fleet-policy input, and rollout evidence—not direct unbounded mutation |
 | A/B flash implementation | Inactive-slot write, verify, rollback | Wrap in durable per-device state transitions; never parallelize blindly |
+| `pelegrun crossflash` | HTTP-only cross-family flash (no UART), driven by `jess.Cloud` | Confirmed on real hardware 2026-09-07: the OEM cloud updater's upload gate checks `product_id` against the *running* firmware, not the target — re-head to that id, then it applies and boots the true target family. Genuine EnGenius images (FIT, ECW230v3) wrote clean on the spare A/B slot every time tried; a community OpenWrt UBI hit a NAND ECC error on the same slot on one unit twice — treat that gap as unresolved, not disproven, until reproduced/ruled out on more hardware |
 | `creance` | Gated UART repair | Present as a device-specific manual-recovery option in P9/P10 journals where hardware prerequisites exist |
 | `lure` | Tested Zig TFTP responder | Make recovery availability a declared adapter capability; do not infer that every board can use it |
 | Recorded fixtures / parity tests | Existing regression foundation | Generalize into versioned adapter contract fixtures and fleet plan/journal fixture suites |

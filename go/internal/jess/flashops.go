@@ -14,7 +14,17 @@ import (
 // UploadImage stages a firmware image on the cloud firmware and returns the
 // device-reported size + checksum from the local_upgrade_image validator. This
 // only STAGES — nothing is flashed until FwUpgrade.
+//
+// The image's Senao header product_id is validated against the RUNNING
+// firmware's own identity, not the target — e.g. flashing an EWS377-FIT image
+// onto a device currently running ECW230v3 cloud firmware requires the image
+// re-headed to product_id 284 (ECW230v3), not 300 (FIT). Once booted, the new
+// firmware reports its own real identity; the header value only gates this
+// upload. Use `quarry rehead <img> <img> --to <id>` before calling this.
 func (c *Cloud) UploadImage(ctx context.Context, filename string, data []byte) (size int, checksum string, err error) {
+	if err := c.DropCaches(ctx); err != nil {
+		return 0, "", fmt.Errorf("drop_caches: %w", err)
+	}
 	var body bytes.Buffer
 	mw := multipart.NewWriter(&body)
 	fw, err := mw.CreateFormFile("file", filename)

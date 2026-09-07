@@ -68,6 +68,8 @@ func run(args []string, out, errw io.Writer) int {
 		err = cmdFit(out, args)
 	case "openwrt":
 		err = cmdOpenWrt(out, args)
+	case "crossflash":
+		err = cmdCrossflash(out, args)
 	case "-h", "--help", "help":
 		fmt.Fprint(out, usageText)
 	default:
@@ -189,7 +191,8 @@ const usageText = "pelegrun — cross-flash & recover EnGenius/Senao ap-hk07 APs
 	"  pelegrun redact  [file|-] [--mac] [--value S]...       scrub secrets from a bundle/log\n" +
 	"  pelegrun adapters list|validate                        board support registry (P12d)\n" +
 	"  pelegrun fit     check|prove ...                       FIT real-serial adoption gates (P10)\n" +
-	"  pelegrun openwrt check|plan ...                        mainline OpenWrt install (read-only)\n\n" +
+	"  pelegrun openwrt check|plan ...                        mainline OpenWrt install (read-only)\n" +
+	"  pelegrun crossflash check|push ...                     HTTP-only cross-flash between firmware families\n\n" +
 	"Image re-head ships as the quarry binary (Rust). Unofficial; hardware you own only.\n"
 
 const planText = "Safety ladder (why UART is usually unnecessary):\n\n" +
