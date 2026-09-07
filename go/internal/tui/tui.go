@@ -563,10 +563,11 @@ func runIdentity() string {
 func runInstall() string {
 	var b strings.Builder
 	b.WriteString(sBody.Render("Flash over the network. No UART, no open case.") + blank() + blank())
-	b.WriteString(pad(2) + sAccent.Render("1  ") + sBody.Render("Write the ") + sKey.Render("spare") + sBody.Render(" slot; the running one stays bootable") + "\n")
-	b.WriteString(pad(2) + sAccent.Render("2  ") + sBody.Render("Reboot, then re-read firmware + serial") + "\n")
-	b.WriteString(pad(2) + sAccent.Render("3  ") + sBody.Render("Roll back anytime; UART only if truly dead") + "\n")
-	b.WriteString(blank() + sSub.Render("The active slot is never overwritten, so a bad flash can't brick."))
+	b.WriteString(pad(2) + sAccent.Render("1  ") + sBody.Render("Re-head the image to match the ") + sKey.Render("running") + sBody.Render(" firmware's own id") + "\n")
+	b.WriteString(pad(2) + sAccent.Render("2  ") + sBody.Render("Write the ") + sKey.Render("spare") + sBody.Render(" slot; the running one stays bootable") + "\n")
+	b.WriteString(pad(2) + sAccent.Render("3  ") + sBody.Render("Reboot, then re-read firmware + serial") + "\n")
+	b.WriteString(blank() + sSub.Render("Run:  ") + sAccent.Render("pelegrun crossflash check|push") + "\n")
+	b.WriteString(sSub.Render("Genuine EnGenius images: proven clean. UART stays the fallback either way."))
 	return b.String()
 }
 

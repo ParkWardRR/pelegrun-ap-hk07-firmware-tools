@@ -8,12 +8,15 @@ import (
 )
 
 func TestCloudUploadValidateFwUpgrade(t *testing.T) {
-	var uploaded, upgraded bool
+	var droppedCaches, uploaded, upgraded bool
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		switch r.URL.Path {
 		case "/api/sys/login":
 			w.Write([]byte(`{"status_code":200,"data":{"token":"t"}}`))
+		case "/api/mgm/drop_caches":
+			droppedCaches = true
+			w.Write([]byte(`{"status_code":200,"data":null}`))
 		case "/cgi-bin/upload.cgi":
 			if err := r.ParseMultipartForm(1 << 20); err == nil {
 				if _, _, e := r.FormFile("file"); e == nil {
@@ -55,6 +58,9 @@ func TestCloudUploadValidateFwUpgrade(t *testing.T) {
 	if !upgraded {
 		t.Fatal("fw_upgrade must send mode=Upgrade_locally")
 	}
+	if !droppedCaches {
+		t.Fatal("UploadImage must call drop_caches first, matching the real GUI's request sequence")
+	}
 }
 
 func TestLuciFlashopsTwoStep(t *testing.T) {
@@ -91,5 +97,28 @@ func TestFlashopsRequiresStok(t *testing.T) {
 	l := NewLuCI("http://x")
 	if err := l.Flashops(context.Background(), "f", []byte("x"), false); err == nil {
 		t.Fatal("must require stok (login) first")
+	}
+}
+
+func TestCloudDropCaches(t *testing.T) {
+	var called bool
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		if r.URL.Path == "/api/mgm/drop_caches" && r.Method == http.MethodPost {
+			called = true
+			w.Write([]byte(`{"status_code":200,"data":null}`))
+			return
+		}
+		w.Write([]byte(`{"status_code":404}`))
+	}))
+	defer srv.Close()
+
+	c := NewCloud(srv.URL)
+	c.Client = srv.Client()
+	if err := c.DropCaches(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	if !called {
+		t.Fatal("DropCaches must POST /api/mgm/drop_caches")
 	}
 }

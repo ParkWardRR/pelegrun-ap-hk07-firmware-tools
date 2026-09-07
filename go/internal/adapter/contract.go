@@ -26,12 +26,23 @@ const (
 	CapTFTPRecovery Capability = "tftp_recovery" // bootloader/TFTP recovery
 	CapHealthCheck  Capability = "health_check"  // model-appropriate post-op validation
 	CapEvidence     Capability = "evidence"      // structured before/after diagnostic bundle
+
+	// CapFlashFixedPartition is a *different promise* than CapFlashAB: write
+	// to a single required partition regardless of which A/B slot is
+	// currently active, with NO live rollback slot — recovery is
+	// uart_recovery/tftp_recovery only. This exists because some firmware
+	// (mainline OpenWrt on ap-hk07) cannot boot from the "inactive" slot at
+	// all (see flash.FixedPartitionTarget's doc comment), so declaring
+	// flash_ab for that path would be exactly the "adapter implies support
+	// for a path it cannot recover" case this contract exists to prevent.
+	CapFlashFixedPartition Capability = "flash_fixed_partition"
 )
 
 // AllCapabilities is the closed set, in a stable order for reporting.
 var AllCapabilities = []Capability{
 	CapFingerprint, CapInspect, CapAccess, CapBackup, CapProvision,
-	CapFlashAB, CapUARTRecovery, CapTFTPRecovery, CapHealthCheck, CapEvidence,
+	CapFlashAB, CapFlashFixedPartition, CapUARTRecovery, CapTFTPRecovery,
+	CapHealthCheck, CapEvidence,
 }
 
 // Tier is a board's support level. Destructive paths are gated on it.
@@ -125,10 +136,17 @@ func (s Support) Validate() []error {
 	return errs
 }
 
-// CanFlash reports whether the adapter is permitted to run a destructive A/B
-// flash: it must be at least experimental, and must declare backup, inactive-slot
-// flash, and at least one recovery route — an adapter can never offer a
-// destructive path it cannot back up or recover from.
+// CanFlash reports whether the adapter is permitted to run a destructive
+// flash: it must be at least experimental, and must declare backup, exactly
+// one of the two flash capabilities, and at least one recovery route — an
+// adapter can never offer a destructive path it cannot back up or recover
+// from, regardless of which flash policy it uses.
+//
+// flash_ab and flash_fixed_partition are mutually exclusive: they're
+// different promises (A/B rollback vs. a single required partition with no
+// live fallback — see flash.FixedPartitionTarget's doc comment), and an
+// adapter declaring both would be self-contradictory about which recovery
+// story applies.
 func (s Support) CanFlash() error {
 	if s.Tier.rank() < TierExperimental.rank() || s.Tier == TierRecoveryOnly {
 		return fmt.Errorf("tier %q does not permit flashing", s.Tier)
@@ -137,8 +155,11 @@ func (s Support) CanFlash() error {
 	if !s.Has(CapBackup) {
 		missing = append(missing, string(CapBackup))
 	}
-	if !s.Has(CapFlashAB) {
-		missing = append(missing, string(CapFlashAB))
+	switch {
+	case s.Has(CapFlashAB) && s.Has(CapFlashFixedPartition):
+		missing = append(missing, "flash_ab and flash_fixed_partition are mutually exclusive, but both are declared")
+	case !s.Has(CapFlashAB) && !s.Has(CapFlashFixedPartition):
+		missing = append(missing, "flash_ab or flash_fixed_partition")
 	}
 	if !s.Has(CapUARTRecovery) && !s.Has(CapTFTPRecovery) {
 		missing = append(missing, "a recovery route (uart_recovery or tftp_recovery)")

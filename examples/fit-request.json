@@ -1,7 +1,7 @@
 {
   "model": "ap-hk07",
   "firmware_family": "fit",
-  "fit_version": "1.1.65",
+  "fit_version": "1.1.30",
   "image_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
   "image_provenance": "vendor portal, downloaded 2026-09-01",
   "real_serial": "SWLWX420001T",

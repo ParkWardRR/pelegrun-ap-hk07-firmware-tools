@@ -36,7 +36,7 @@ func TestFitCheckBadRequestFails(t *testing.T) {
 	// A request with a below-floor FIT version is written inline via a temp file.
 	dir := t.TempDir()
 	bad := dir + "/bad.json"
-	if err := os.WriteFile(bad, []byte(`{"model":"ap-hk07","firmware_family":"fit","fit_version":"1.1.64","image_sha256":"`+strings40()+`","image_provenance":"x","real_serial":"SWLWX420001T","recovery_routes":["uart"]}`), 0o644); err != nil {
+	if err := os.WriteFile(bad, []byte(`{"model":"ap-hk07","firmware_family":"fit","fit_version":"1.1.29","image_sha256":"`+strings40()+`","image_provenance":"x","real_serial":"SWLWX420001T","recovery_routes":["uart"]}`), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	code, out, _ := runCap("fit", "check", "--request", bad)

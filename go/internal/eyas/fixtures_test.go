@@ -17,6 +17,7 @@ var fixtureFamily = map[string]Family{
 	"cloud":   Cloud,
 	"ews":     EwsLuCI,
 	"fit":     Fit,
+	"openwrt": OpenWrt,
 	"unknown": Unknown,
 }
 
@@ -72,7 +73,7 @@ func TestFingerprintFromRecordedFixtures(t *testing.T) {
 		}
 		// LuCI markers live on the /cgi-bin/luci page in the real world.
 		servePath := "/"
-		if want == EwsLuCI {
+		if want == EwsLuCI || want == OpenWrt {
 			servePath = "/cgi-bin/luci"
 		}
 		t.Run(name, func(t *testing.T) {

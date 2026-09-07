@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>OpenWrt Login</title>
+    <link rel="stylesheet" href="/luci-static/resources/cascade.css" />
+  </head>
+  <body>
+    <form method="post" action="/cgi-bin/luci/">
+      <div class="cbi-value">
+        <label>Username</label>
+        <input type="text" name="luci_username" value="root" />
+      </div>
+      <div class="cbi-value">
+        <label>Password</label>
+        <input type="password" name="luci_password" />
+      </div>
+      <input type="submit" value="Login" />
+    </form>
+    <footer>Powered by LuCI (OpenWrt SNAPSHOT)</footer>
+  </body>
+</html>
