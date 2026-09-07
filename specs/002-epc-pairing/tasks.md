@@ -29,8 +29,15 @@ real controller/AP to complete, not just source review.
       `fitadopt.Expected`/`Observed`/`Prove`.
 - [x] T1.4 `Client` interface stubbed per plan.md (narrow: Login /
       RegisterDevice / DeviceStatus) — no concrete implementation yet.
-- [ ] T1.5 Fill in `Validate`/`Prove` logic once T0.3's findings are in
-      (depends on Phase 0).
+- [~] T1.5 `Validate`/`Prove` logic implemented for every precondition that
+      does NOT depend on T0.3 (model/scope/real-identity/recovery-route gates,
+      full report-every-failure proof). The one remaining piece — gating on
+      which firmware families the controller accepts — stays deferred until
+      T0.3, and is marked TODO in `eligibility.go` rather than guessed.
+- [x] T1.6 `epcadopt.Plan(Request) ([]flash.Step, error)` added (plan.go):
+      reuses `flash.Step`, refuses ineligible requests, encodes the FR6
+      ordered/gated sequence (backup-before-mutation, pointer-persistence,
+      checkin-gate re-assert, real-serial registration, survive-disruption).
 
 ## Phase 2 — Controller client implementation
 - [ ] T2.1 Concrete `Client` implementation for whichever transport T0.1/T0.2
@@ -45,17 +52,22 @@ real controller/AP to complete, not just source review.
       minimal precondition checks are feasible without a live connection.
 
 ## Phase 3 — CLI
-- [ ] T3.1 `go/cmd/pelegrun/epc.go`: `check` subcommand (read-only identity +
-      reachability + auth report), modeled on `cmdFitCheck`/`cmdOpenWrtCheck`.
-- [ ] T3.2 `plan` subcommand: build and print the ordered, gated plan (reusing
-      `flash.Step`), modeled on `cmdOpenWrtPlan`.
-- [ ] T3.3 `prove` subcommand: modeled on `cmdFitProve` exactly (same
+- [~] T3.1 `go/cmd/pelegrun/epc.go`: `check` subcommand — reads AP identity
+      live (reusing crossflash's login+SysInfo path) and reports FR4
+      eligibility. Controller reachability/auth is honestly labeled NOT
+      VERIFIED rather than faked, because the controller client's real shape
+      is still Phase 0 (T0.1/T0.2). Finish when Phase 0 confirms the transport.
+- [x] T3.2 `plan` subcommand: builds and prints the ordered, gated plan
+      (`epcadopt.Plan`, reusing `flash.Step`), modeled on `cmdOpenWrtPlan`;
+      mutates nothing and says so.
+- [x] T3.3 `prove` subcommand: modeled on `cmdFitProve` exactly (same
       `--expected`/`--observed` JSON-file pattern).
-- [ ] T3.4 Wire into `main.go`'s dispatch + usage text, same pattern as the
+- [x] T3.4 Wired into `main.go`'s dispatch + usage text, same pattern as the
       `openwrt`/`crossflash` additions.
-- [ ] T3.5 `runCap`-based CLI tests: usage, missing required flags, and (with
-      synthetic `httptest` servers only) the check/plan happy paths — mirror
-      `openwrt_test.go`/`crossflash_test.go` structure closely.
+- [x] T3.5 `runCap`-based CLI tests (`epc_test.go`): usage, missing-flag
+      errors, eligible/ineligible check, gated plan + ineligible-plan refusal,
+      and prove happy-path + report-every-failure — synthetic `httptest` AP
+      only, fake serial/MAC, mirroring `openwrt_test.go`/`crossflash_test.go`.
 
 ## Phase 4 — Registry/adapter integration
 - [ ] T4.1 Decide whether EPC-adoptability is a new `adapter.Capability`
