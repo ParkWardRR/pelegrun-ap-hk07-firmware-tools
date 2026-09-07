@@ -17,6 +17,7 @@ const (
 	EwsLuCI        // ezMaster/EnSky EWS firmware — LuCI web, SSH exec on :8822
 	Cloud          // ECW230v3 cloud firmware — local React GUI + JSON API
 	Fit            // EWS377-FIT firmware — FitController/EPC managed
+	OpenWrt        // mainline/community OpenWrt — LuCI web, SSH on :22, no vendor auth
 )
 
 func (f Family) String() string {
@@ -27,6 +28,8 @@ func (f Family) String() string {
 		return "cloud"
 	case Fit:
 		return "fit"
+	case OpenWrt:
+		return "openwrt"
 	default:
 		return "unknown"
 	}
@@ -39,21 +42,33 @@ func (f Family) AccessHint() string {
 		return "SSH exec on :8822 (root / web-admin pw) + LuCI flashops"
 	case Cloud, Fit:
 		return "cloud/FIT local JSON API (admin/admin) — no shell"
+	case OpenWrt:
+		return "SSH exec on :22 (root, often no password/key-only) + mainline LuCI"
 	default:
 		return "unknown"
 	}
 }
 
 // classify inspects a fetched HTML/JS body for family markers. Exposed for tests.
+//
+// Ordering matters: mainline OpenWrt's LuCI also serves `/cgi-bin/luci`, so
+// the EWS vendor fork must be identified by its *stronger*, vendor-specific
+// markers (`md5.js`, `password_plain_text` — EnGenius's own login JS) before
+// falling through to a bare `cgi-bin/luci`/`luci-static` match, which now
+// means mainline OpenWrt rather than being misclassified as EwsLuCI (that
+// bug would have told an operator to SSH port 8822 with a web-admin
+// password against a device whose dropbear is on :22 with no auth at all).
 func Classify(body string) Family {
 	b := strings.ToLower(body)
 	switch {
 	case strings.Contains(b, "static/js/main"): // React SPA shell
 		return Cloud
-	case strings.Contains(b, "md5.js") || strings.Contains(b, "password_plain_text") || strings.Contains(b, "cgi-bin/luci"):
+	case strings.Contains(b, "md5.js") || strings.Contains(b, "password_plain_text"):
 		return EwsLuCI
 	case strings.Contains(b, "ews377-fit") || strings.Contains(b, "fitcontroller") || strings.Contains(b, "/fit/"):
 		return Fit
+	case strings.Contains(b, "luci-static") || strings.Contains(b, "cgi-bin/luci") || strings.Contains(b, "openwrt"):
+		return OpenWrt
 	default:
 		return Unknown
 	}
