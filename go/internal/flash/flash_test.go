@@ -65,6 +65,72 @@ func TestPlanWritesInactiveSlot(t *testing.T) {
 	}
 }
 
+func TestPlanOpenWrtRefusesIncompleteEnv(t *testing.T) {
+	_, err := PlanOpenWrt(hood.ParsePrintenv("ethaddr=x\n"), "factory.ubi")
+	if !errors.Is(err, ErrEnvIncomplete) {
+		t.Fatalf("expected env-incomplete refusal, got %v", err)
+	}
+}
+
+func TestPlanOpenWrtWritesFixedRootfsPartitionEvenWhenActive(t *testing.T) {
+	// active_fw=0 means SlotA (rootfs) is the ACTIVE slot right now — the FIT
+	// path would refuse to write it (it always writes "inactive"). OpenWrt's
+	// plan must write it anyway: that's the whole point of FixedPartitionTarget.
+	steps, err := PlanOpenWrt(hood.ParsePrintenv(completeEnv), "factory.ubi")
+	if err != nil {
+		t.Fatal(err)
+	}
+	found := false
+	for _, s := range steps {
+		if s.Desc == "write the FIXED rootfs partition" && contains(s.Note, "target=rootfs") {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatal("PlanOpenWrt must target rootfs (FixedPartitionTarget) regardless of active_fw")
+	}
+}
+
+func TestPlanOpenWrtNeverClaimsABRollback(t *testing.T) {
+	steps, err := PlanOpenWrt(hood.ParsePrintenv(completeEnv), "factory.ubi")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, s := range steps {
+		if contains(s.Note, "reset-button hold reverts") {
+			t.Fatalf("OpenWrt plan step %q must not claim a live A/B rollback: %q", s.Desc, s.Note)
+		}
+	}
+	if !contains(noteOf(steps, "no live A/B fallback"), "UART/TFTP") {
+		t.Fatal("OpenWrt plan must name the real recovery route (UART/TFTP), not a reset-button hold")
+	}
+}
+
+func TestPlanOpenWrtGatesOnImageVerifyAndART(t *testing.T) {
+	steps, err := PlanOpenWrt(hood.ParsePrintenv(completeEnv), "factory.ubi")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{"verify image", "verify ART is excluded"} {
+		s := findStep(steps, want)
+		if s == nil {
+			t.Fatalf("missing step %q", want)
+		}
+		if !s.Gate {
+			t.Errorf("step %q must be a hard gate", want)
+		}
+	}
+}
+
+func findStep(steps []Step, desc string) *Step {
+	for i := range steps {
+		if steps[i].Desc == desc {
+			return &steps[i]
+		}
+	}
+	return nil
+}
+
 func TestPlanCloudVsLuCI(t *testing.T) {
 	cloud, _ := Plan(eyas.Cloud, hood.ParsePrintenv(completeEnv), "x")
 	luci, _ := Plan(eyas.EwsLuCI, hood.ParsePrintenv(completeEnv), "x")
