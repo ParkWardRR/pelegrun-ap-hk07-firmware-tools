@@ -17,9 +17,9 @@ import (
 // fail the handshake outright, the mirror image of the bug SSH's own doc
 // comment describes for the legacy EWS side.
 type OpenWrtSSH struct {
-	Host     string          // host:port; defaults to :22 if no port
-	User     string          // "root"
-	Pass     string          // often empty — OpenWrt commonly ships no root password
+	Host     string           // host:port; defaults to :22 if no port
+	User     string           // "root"
+	Pass     string           // often empty — OpenWrt commonly ships no root password
 	AuthKeys []ssh.AuthMethod // optional: e.g. ssh.PublicKeys(signer) for key auth
 }
 
