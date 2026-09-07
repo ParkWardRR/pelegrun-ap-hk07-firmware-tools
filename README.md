@@ -209,6 +209,22 @@ Model codes: `X44` EWS377AP v3 · `X45` EWS377-FIT · `X42` ECW230v3.
 > genuine firmware; nothing is committed to the repo. (`285` ECW230S is labelled
 > but is a related cloud AP, **not** a verified cross-flash target.)
 
+## Run OpenWrt on the EWS377AP v3
+
+Beyond cross-flashing OEM images, there's now a **community [OpenWrt](https://openwrt.org/)
+build** for the EWS377AP v3 (`ap-hk07`, IPQ8072A) — kernel 6.18 with Qualcomm NSS
+offload — **validated on hardware**: persistent NAND boot, Ethernet, WiFi (WPA2), and
+config surviving reboots.
+
+- **Images + `SHA256SUMS`:** [Releases](https://github.com/ParkWardRR/pelegrun-ap-hk07-firmware-tools/releases) → tag `openwrt-ews377ap-v3-v0.1`
+- **Install & back-to-stock guide:** **[`docs/openwrt-ews377ap-v3.md`](docs/openwrt-ews377ap-v3.md)**
+- **Source:** fork branch `ews377ap-v3` of [`openwrt-nss-edma`](https://github.com/ParkWardRR/openwrt-nss-edma)
+
+OpenWrt is GPL and freely redistributable (unlike OEM images, which you still supply
+yourself). It **overwrites the OEM slot — back up your NAND first**. Only the
+UART/u-boot install is hardware-proven; the web-upload `.bin` is experimental. Full
+steps (including restore to stock) are in the guide.
+
 ## Build & test
 
 CI is **local only** — this project runs no hosted CI (no GitHub Actions). One

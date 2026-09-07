@@ -19,13 +19,14 @@
 
 pub mod header;
 pub mod serial;
+pub mod ubi;
 
 /// Crate-wide error type.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Error {
     /// Image is shorter than the fields we need to read.
     TooShort { need: usize, got: usize },
-    /// Magic value at offset 0x5C was not `0x12345678`.
+    /// Magic value at offset 0x5C was not `0x12345678` (Senao header).
     BadMagic { got: u32 },
     /// A serial/model-code string had the wrong length.
     BadLength {
@@ -35,6 +36,12 @@ pub enum Error {
     },
     /// A serial/model-code contained a character outside the allowed set.
     BadChar { field: &'static str },
+    /// No UBI erase-counter header magic (`UBI#`) at the start of the image.
+    NotUbiImage,
+    /// The UBI image parsed, but no volume with the given name was found.
+    VolumeNotFound { name: String },
+    /// Expected a flattened device tree (FDT) blob but the magic didn't match.
+    NotFdt,
 }
 
 impl core::fmt::Display for Error {
@@ -50,6 +57,9 @@ impl core::fmt::Display for Error {
                 write!(f, "{field}: expected {want} chars, got {got}")
             }
             Error::BadChar { field } => write!(f, "{field}: contains a disallowed character"),
+            Error::NotUbiImage => write!(f, "not a UBI image: missing 'UBI#' EC header magic"),
+            Error::VolumeNotFound { name } => write!(f, "UBI volume not found: {name}"),
+            Error::NotFdt => write!(f, "not a flattened device tree: bad or missing magic"),
         }
     }
 }

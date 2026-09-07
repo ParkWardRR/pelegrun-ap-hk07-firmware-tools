@@ -14,3 +14,5 @@
 *.bin
 !**/testdata/*.bin
 dist/
+# local working data: device dumps, fleet-specific notes, internal snapshots (never publish)
+local/

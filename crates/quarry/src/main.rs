@@ -8,14 +8,19 @@ fn usage() -> &'static str {
     "quarry — Senao/EnGenius ap-hk07 firmware header + serial tool (unofficial)
 
 USAGE:
-  quarry inspect <image.bin>
-  quarry rehead  <in.bin> <out.bin> --to <product_id>     # e.g. --to 282
-  quarry serial  --model <CODE> [--prefix PPPP] [--suffix SSSS]
-  quarry snextra --model <CODE> [--prefix PPPP]           # 20-char field 19
-  quarry check   <serial12>
+  quarry inspect    <image.bin>
+  quarry rehead     <in.bin> <out.bin> --to <product_id>  # e.g. --to 282
+  quarry verify-ubi <factory.ubi> --board <name>          # e.g. --board hk07
+  quarry serial     --model <CODE> [--prefix PPPP] [--suffix SSSS]
+  quarry snextra    --model <CODE> [--prefix PPPP]        # 20-char field 19
+  quarry check      <serial12>
 
 Product ids: 282 = EWS377AP v3, 300 = EWS377-FIT, 284 = ECW230v3.
-Model codes:  X44 = EWS377AP v3, X45 = EWS377-FIT, X42 = ECW230v3."
+Model codes:  X44 = EWS377AP v3, X45 = EWS377-FIT, X42 = ECW230v3.
+verify-ubi checks a factory.ubi's 'kernel' volume for a FIT config node named
+'config@<board>' — the OpenWrt EWS377AP v3 port only boots from NAND with a
+board-matched config name (see openwrt-ews377ap-v3/results-2026-09-06/ in the
+repo history for why)."
 }
 
 fn arg_val(args: &[String], key: &str) -> Option<String> {
@@ -32,6 +37,7 @@ fn main() -> ExitCode {
     let result: Result<(), String> = match cmd {
         "inspect" => cmd_inspect(rest),
         "rehead" => cmd_rehead(rest),
+        "verify-ubi" => cmd_verify_ubi(rest),
         "serial" => cmd_serial(rest),
         "snextra" => cmd_snextra(rest),
         "check" => cmd_check(rest),
@@ -83,6 +89,30 @@ fn cmd_rehead(a: &[String]) -> Result<(), String> {
     );
     println!("note: verify on a recoverable A/B slot; the tool never asserts a flash succeeded.");
     Ok(())
+}
+
+fn cmd_verify_ubi(a: &[String]) -> Result<(), String> {
+    let path = a.first().ok_or("verify-ubi: missing <factory.ubi>")?;
+    let board = arg_val(a, "--board").ok_or("verify-ubi: missing --board <name>")?;
+    let data = std::fs::read(path).map_err(|e| format!("read {path}: {e}"))?;
+    let result = quarry::ubi::check_factory_ubi(&data, &board).map_err(|e| e.to_string())?;
+    println!("file             : {path} ({} bytes)", data.len());
+    println!("kernel volume    : {} bytes", result.kernel_volume_bytes);
+    println!(
+        "config@{board:<9}: {}",
+        if result.has_config {
+            "present"
+        } else {
+            "MISSING"
+        }
+    );
+    if result.has_config {
+        Ok(())
+    } else {
+        Err(format!(
+            "kernel volume has no /configurations/config@{board} node — bootipq will refuse to boot this image from NAND"
+        ))
+    }
 }
 
 fn cmd_serial(a: &[String]) -> Result<(), String> {
