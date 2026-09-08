@@ -28,6 +28,12 @@ import (
 // field here is either read from the device or supplied explicitly by the
 // operator — never a hardcoded default (Constitution VII: no real
 // controller/org/network identity ever lives in this codebase).
+//
+// Scope confirmed against a real controller's own OpenAPI schema (T0.2):
+// device registration is scoped org -> hierarchy view (hv) -> network, a
+// three-level hierarchy, not the two-level org/network this type originally
+// assumed. HVID is that middle "hierarchy view" scope — e.g.
+// `/api/v1/orgs/{org_id}/hvs/{hv_id}/networks/{network_id}/devices`.
 type Request struct {
 	Model          string   `json:"model"`           // device model, e.g. ap-hk07
 	FirmwareFamily string   `json:"firmware_family"` // eyas family string; which families are eligible is TODO, see T0.3
@@ -35,6 +41,7 @@ type Request struct {
 	RealMAC        string   `json:"real_mac"`        // MAC READ FROM the device — never generated
 	ControllerAddr string   `json:"controller_addr"` // operator-supplied controller address; never defaulted
 	OrgID          string   `json:"org_id"`          // operator-supplied controller org scope
+	HVID           string   `json:"hv_id"`           // operator-supplied "hierarchy view" scope, between org and network
 	NetworkID      string   `json:"network_id"`      // operator-supplied controller network scope
 	RecoveryRoutes []string `json:"recovery_routes"` // e.g. ["ab-rollback","uart","tftp"] — at least one
 }
@@ -68,6 +75,9 @@ func Validate(r Request) Result {
 	}
 	if strings.TrimSpace(r.OrgID) == "" {
 		reasons = append(reasons, "no controller org scope supplied")
+	}
+	if strings.TrimSpace(r.HVID) == "" {
+		reasons = append(reasons, "no controller hierarchy-view (hv) scope supplied")
 	}
 	if strings.TrimSpace(r.NetworkID) == "" {
 		reasons = append(reasons, "no controller network scope supplied")

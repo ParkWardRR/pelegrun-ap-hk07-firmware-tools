@@ -75,6 +75,7 @@ func epcRequest(a []string) (epcadopt.Request, error) {
 		RealMAC:        info.MAC,
 		ControllerAddr: argVal(a, "--controller"),
 		OrgID:          argVal(a, "--org"),
+		HVID:           argVal(a, "--hv"),
 		NetworkID:      argVal(a, "--network"),
 		RecoveryRoutes: routes,
 	}, nil
@@ -152,16 +153,17 @@ func cmdEpcProve(out io.Writer, a []string) error {
 
 const epcUsage = "pelegrun epc — spec-002 EnGenius Private Cloud pairing gates (read-only)\n\n" +
 	"USAGE:\n" +
-	"  pelegrun epc check --ap <ip> --controller <addr> [--org ID] [--network ID]\n" +
+	"  pelegrun epc check --ap <ip> --controller <addr> [--org ID] [--hv ID] [--network ID]\n" +
 	"                     [--recovery ab-rollback,uart] [--user admin] [--pass admin]\n" +
 	"      read AP identity live + report FR4 eligibility. Controller auth is not\n" +
 	"      verified yet (protocol pending, specs/002 Phase 0).\n" +
-	"  pelegrun epc plan  --ap <ip> --controller <addr> --org ID --network ID\n" +
+	"  pelegrun epc plan  --ap <ip> --controller <addr> --org ID --hv ID --network ID\n" +
 	"                     [--recovery ab-rollback,uart]\n" +
 	"      ordered, gated adoption plan (FR6) — point at controller, register,\n" +
 	"      prove checkin. Prints only; nothing is mutated.\n" +
 	"  pelegrun epc prove --expected exp.json --observed obs.json\n" +
 	"      post-adoption proof (FR5), modeled on `pelegrun fit prove`.\n\n" +
-	"Every controller-identifying value (--controller/--org/--network/creds) is\n" +
+	"Controller scope is three levels: org -> hv (hierarchy view) -> network.\n" +
+	"Every controller-identifying value (--controller/--org/--hv/--network/creds) is\n" +
 	"explicit operator input, never a default (Constitution VII). Adoption always\n" +
 	"preserves the device's REAL serial/MAC; this tool never generates either.\n"

@@ -10,6 +10,7 @@ func goodRequest() Request {
 		RealMAC:        "AA:BB:CC:11:22:33",
 		ControllerAddr: "controller.example",
 		OrgID:          "org-000000000000000000000000",
+		HVID:           "hv-000000000000000000000000",
 		NetworkID:      "net-000000000000000000000000",
 		RecoveryRoutes: []string{"uart"},
 	}
@@ -29,6 +30,7 @@ func TestValidateBlocks(t *testing.T) {
 		{"no model", func(r *Request) { r.Model = "" }},
 		{"no controller addr", func(r *Request) { r.ControllerAddr = "" }},
 		{"no org", func(r *Request) { r.OrgID = "" }},
+		{"no hv", func(r *Request) { r.HVID = "" }},
 		{"no network", func(r *Request) { r.NetworkID = "" }},
 		{"empty serial", func(r *Request) { r.RealSerial = "" }},
 		{"empty mac", func(r *Request) { r.RealMAC = "" }},

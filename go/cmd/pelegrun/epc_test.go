@@ -30,7 +30,7 @@ func apServer(t *testing.T) string {
 func TestEpcCheckEligibleReportsIdentity(t *testing.T) {
 	ap := apServer(t)
 	code, out, errout := runCap("epc", "check", "--ap", ap,
-		"--controller", "controller.example", "--org", "org-0", "--network", "net-0",
+		"--controller", "controller.example", "--org", "org-0", "--hv", "hv-0", "--network", "net-0",
 		"--recovery", "ab-rollback,uart")
 	if code != 0 {
 		t.Fatalf("check should be eligible: code=%d err=%q", code, errout)
@@ -63,7 +63,7 @@ func TestEpcCheckReportsIneligibility(t *testing.T) {
 func TestEpcPlanIsGatedAndMutatesNothing(t *testing.T) {
 	ap := apServer(t)
 	code, out, errout := runCap("epc", "plan", "--ap", ap,
-		"--controller", "controller.example", "--org", "org-0", "--network", "net-0",
+		"--controller", "controller.example", "--org", "org-0", "--hv", "hv-0", "--network", "net-0",
 		"--recovery", "uart")
 	if code != 0 {
 		t.Fatalf("plan should succeed: code=%d err=%q", code, errout)

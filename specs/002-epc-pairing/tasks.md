@@ -5,20 +5,38 @@ Legend: [x] done · [~] in progress · [ ] todo · **(live)** requires a reachab
 real controller/AP to complete, not just source review.
 
 ## Phase 0 — Protocol reconnaissance (resolve spec.md's open questions)
-- [ ] T0.1 **(live)** Confirm the controller's own web-session/API auth model
-      (cookie vs bearer vs CSRF) against a real instance.
-- [ ] T0.2 **(live)** Confirm whether device registration has a stable API, or
-      requires direct datastore access — and if the latter, exactly which
-      operations are unavoidable that way.
+- [x] T0.1 **(live)** Confirmed 2026-09-07 via read-only introspection against
+      a real controller instance (imported its own FastAPI app module,
+      called its `.openapi()`, and probed auth behavior with empty/garbage
+      payloads via an in-process TestClient — no real network calls, no
+      writes, no state mutated). Result: NOT a single cookie/CSRF model —
+      user-facing endpoints use a custom JWT-bearer decorator (clean `401
+      Not authenticated`); device checkin uses a separate header-based
+      scheme entirely (see T0.4). See spec.md's Open Questions §1/§2.
+- [x] T0.2 **(live)** Confirmed 2026-09-07, same session as T0.1: a real,
+      stable REST API exists under `/api/v1/`, no direct datastore access
+      needed for registration. Scope is org → hv ("hierarchy view") →
+      network → device — three levels, not the two this spec originally
+      assumed. `epcadopt.Request` updated with the missing `HVID` field;
+      `Validate`/`Plan`/CLI (`--hv` flag) updated to match. Exact
+      request/response body shapes for the registration calls themselves
+      are still unconfirmed — that's Phase 2, not this task.
 - [ ] T0.3 **(live)** Confirm which firmware families/versions the target
       controller version actually accepts for adoption — do not carry over an
       unverified version-support claim (see the `fitadopt.MinFitVersion`
       correction elsewhere in this repo's history as the cautionary precedent).
-- [ ] T0.4 **(live)** Confirm the device-checkin protocol's stability/versioning
-      posture (is it documented anywhere, or purely reverse-engineered).
-- [ ] T0.5 Write up T0.1–T0.4's findings **generically** (no real IPs/IDs/MACs)
-      as a follow-up note in this spec directory, updating spec.md's "Open
-      questions" section with resolved answers before Phase 2 begins.
+- [x] T0.4 **(live)** Confirmed 2026-09-07: device checkin (`POST
+      /api/v1/checkin`) uses a distinct, non-JWT scheme — an empty-body probe
+      threw a server-side `KeyError: 'id'` inside the controller's own
+      checkin-auth handler, consistent with the previously reverse-engineered
+      header-based HMAC checkin mechanism documented elsewhere in this
+      project's research (not repeated here — protocol mechanics, not secret
+      values). Not formally "documented" by the vendor as far as this probe
+      could tell; treat as reverse-engineered and version defensively, per
+      the original question's framing.
+- [x] T0.5 spec.md's "Open questions" §1/§2 updated in place with the
+      resolved answers above (2026-09-07), generic — no real IPs/IDs/MACs
+      from the instance used to confirm them.
 
 ## Phase 1 — Package skeleton (no live controller needed)
 - [x] T1.1 `go/internal/epcadopt/` package created with doc comment
@@ -84,15 +102,18 @@ real controller/AP to complete, not just source review.
       need for the former turns up during implementation).
 
 ## Phase 5 — Docs + evidence (**live** for the actual walkthrough content)
-- [ ] T5.1 **(live)** `docs/USAGE.md` section: EPC pairing walkthrough, written
-      the way the existing "HTTP-only cross-flash" section is — real command
-      sequences, generic placeholder values only.
-- [ ] T5.2 **(live)** Extend `README.md`'s command examples block, matching the
-      `crossflash`/`openwrt` entries' style.
-- [ ] T5.3 **(live)** ROADMAP.md: promote this from "framework only" to a
-      tracked phase (P13, or fold into P10 if T0.3 finds EPC and FitController
-      share enough mechanism to unify) once Phase 0–3 are done and validated
-      against a real controller at least once.
+- [x] T5.1 `docs/USAGE.md` "EPC pairing — framework stage" section added,
+      matching the "HTTP-only cross-flash" section's style — real command
+      sequences (verified against `epc.go`'s actual flags), generic
+      placeholder values only, and an honest statement of what `check`/`plan`
+      can and can't verify yet.
+- [x] T5.2 `README.md`'s command examples block extended with `pelegrun epc
+      check|plan|prove`, matching the `crossflash`/`openwrt` entries' style.
+- [~] T5.3 `ROADMAP.md` updated with a status row in "Existing work to
+      leverage" describing the framework-vs-controller-client split honestly.
+      **Not yet promoted to a tracked top-level phase (P13)** — per this
+      task's own condition, that's still gated on Phase 0/2 (live controller
+      confirmation), which hasn't happened.
 
 ## Explicit non-tasks (per spec.md's non-goals)
 - Deploying/configuring an EPC controller instance.

@@ -17,9 +17,12 @@ import (
 // ineligible" posture flash.Plan takes toward an incomplete env.
 //
 // The steps are deliberately transport-agnostic: they name WHAT must happen
-// and in what order, not the controller-specific HTTP calls, because the
-// controller's actual API/auth shape is still an open question (specs/002
-// Phase 0, T0.1/T0.2). Two notes are load-bearing:
+// and in what order, not the controller-specific HTTP calls. T0.1/T0.2 are
+// now resolved (a real REST API exists, org/hv/network scoped, two separate
+// auth models for users vs. device checkin — see Client's doc comment), but
+// Plan still doesn't hardcode the calls: Client's concrete implementation
+// (Phase 2, still open) is what should actually drive them. Two notes are
+// load-bearing:
 //
 //  1. Pointing the AP at the controller (jess.Cloud.SetForceAC) is a
 //     device-side config mutation; per Constitution III it sits behind the
@@ -39,7 +42,7 @@ func Plan(r Request) ([]flash.Step, error) {
 		{Desc: "point the AP at the controller", Note: fmt.Sprintf("jess.Cloud.SetForceAC → %s (device-side mutation)", r.ControllerAddr), Gate: false},
 		{Desc: "verify the controller pointer persisted", Note: "re-read the AP's discovery override AFTER an AP reboot — a one-time read is not proof (spec 002 scenario 1/4)", Gate: true},
 		{Desc: "re-assert the controller-side checkin gate", Note: "re-assert, do not assume: this setting has been observed to silently revert to disabled (spec 002 scenario 5)", Gate: false},
-		{Desc: "register the device in controller inventory", Note: fmt.Sprintf("org=%s network=%s, keyed by the device's REAL serial %s (never a generated identity)", r.OrgID, r.NetworkID, r.RealSerial), Gate: false},
+		{Desc: "register the device in controller inventory", Note: fmt.Sprintf("org=%s hv=%s network=%s, keyed by the device's REAL serial %s (never a generated identity)", r.OrgID, r.HVID, r.NetworkID, r.RealSerial), Gate: false},
 		{Desc: "confirm checkin authenticated", Note: "controller reports auth success, not a silent/ambiguous 4xx (spec 002 FR5)", Gate: true},
 		{Desc: "prove adoption survives disruption", Note: "adopted state must be intact after BOTH an AP reboot and a controller restart, or the plan documents why that check was skipped (epcadopt.Prove)", Gate: true},
 	}, nil

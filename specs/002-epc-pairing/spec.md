@@ -68,11 +68,17 @@ self-host fleet management via EPC instead of vendor cloud or the EOL ezMaster.
 - **FR3 (controller client):** A new package (working name `epcadopt`, mirroring
   `fitadopt`'s naming) that can authenticate to an EPC controller's own
   management surface and perform, at minimum: read inventory/device state,
-  register a device under an operator-specified org/network scope, and read back
-  checkin/connection status for a specific device. The controller's exact API
-  shape (REST endpoints vs. requiring direct datastore access) is an **open
-  question** — see below; the interface should be defined so the underlying
-  transport is swappable without changing callers.
+  register a device under an operator-specified scope, and read back
+  checkin/connection status for a specific device. **Confirmed against a real
+  controller's own published API schema (2026-09-07, see "Open questions"
+  below): the controller exposes a real, stable REST API — no direct
+  datastore access is needed for registration.** The scope is **three
+  levels**, not two as originally assumed here: organization → "hierarchy
+  view" (an intermediate grouping level the controller's own API calls `hv`)
+  → network → device. The interface should still be defined so
+  the underlying transport is swappable without changing callers, since the
+  exact request/response body shapes for registration are not yet confirmed
+  (see Phase 2 in tasks.md).
 - **FR4 (eligibility gate, mirroring `fitadopt.Validate`):** Before attempting
   registration, validate: device model/family is one the target controller
   version is confirmed to support; a real (non-placeholder) serial and MAC are
@@ -114,14 +120,25 @@ self-host fleet management via EPC instead of vendor cloud or the EOL ezMaster.
 
 ## Open questions (resolve empirically before/during implementation)
 
-1. **Does the controller expose a stable device-registration API**, or does
-   reliable registration currently require direct datastore manipulation? If
-   the latter is the only path today, FR3's "controller client" needs an
-   explicit, clearly-labeled escape hatch for that — and the plan/apply model
-   (FR6) must treat it as a distinctly higher-risk step than an API call.
-2. **What is the controller's own web-session/API auth model** (cookie, bearer
-   token, CSRF) — does it match the pattern `jess.Cloud` already implements for
-   AP-side auth, or does it need its own client shape entirely?
+1. ~~Does the controller expose a stable device-registration API~~ **RESOLVED
+   (2026-09-07):** yes. Confirmed by reading the controller's own running
+   application's route table (its FastAPI app object) and its published
+   OpenAPI schema on a real instance. Base path `/api/v1/`; registration is
+   scoped `org → hv ("hierarchy view") → network → device` — three levels,
+   not the two (`org`/`network`) this spec originally assumed. No direct
+   datastore manipulation is needed. Exact request/response body shapes for
+   the registration calls themselves are still unconfirmed (Phase 2).
+2. ~~What is the controller's own web-session/API auth model~~ **RESOLVED
+   (2026-09-07):** confirmed empirically (unauthenticated calls against a
+   real instance) that there are **two separate auth models**, not one:
+   user-facing endpoints sit behind a custom JWT-bearer check (a clean `401
+   Not authenticated` when missing — a distinct scheme from `jess.Cloud`'s
+   AP-side login, needs its own client shape as FR3 anticipated); the
+   device's own checkin call uses a completely different, header-based
+   scheme — consistent with the `Kaiwoo-authentication`/HMAC mechanism
+   documented elsewhere in this project's research — which is not something
+   this tool's controller `Client` needs to implement (the AP performs that
+   call itself, not this tool).
 3. **Which firmware families does the target controller version actually
    support for adoption** — this determines FR4's eligibility gate contents.
    Don't assume a specific version number without checking a real controller
