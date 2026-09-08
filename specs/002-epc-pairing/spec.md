@@ -129,16 +129,15 @@ self-host fleet management via EPC instead of vendor cloud or the EOL ezMaster.
    datastore manipulation is needed. Exact request/response body shapes for
    the registration calls themselves are still unconfirmed (Phase 2).
 2. ~~What is the controller's own web-session/API auth model~~ **RESOLVED
-   (2026-09-07):** confirmed empirically (unauthenticated calls against a
-   real instance) that there are **two separate auth models**, not one:
-   user-facing endpoints sit behind a custom JWT-bearer check (a clean `401
-   Not authenticated` when missing — a distinct scheme from `jess.Cloud`'s
-   AP-side login, needs its own client shape as FR3 anticipated); the
-   device's own checkin call uses a completely different, header-based
-   scheme — consistent with the `Kaiwoo-authentication`/HMAC mechanism
-   documented elsewhere in this project's research — which is not something
-   this tool's controller `Client` needs to implement (the AP performs that
-   call itself, not this tool).
+   (2026-09-07)** that authenticated endpoints sit behind a custom JWT-bearer
+   check (a clean `401 Not authenticated` when missing) and that device
+   checkin is a completely separate header-based scheme (see T0.4). **Still
+   open (re-probed same day):** where the FIRST JWT itself comes from. The
+   obvious candidate, `POST /api/v1/jwt-token`, is itself gated behind that
+   same JWT-bearer check (confirmed via two distinguishable 401 bodies — one
+   for a missing token, a different one for an invalid-but-present token),
+   so it cannot be the initial login call. See tasks.md T0.6 — this now
+   blocks `epcadopt.Client.Login`'s implementation specifically.
 3. **Which firmware families does the target controller version actually
    support for adoption** — this determines FR4's eligibility gate contents.
    Don't assume a specific version number without checking a real controller

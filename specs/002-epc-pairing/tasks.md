@@ -13,6 +13,16 @@ real controller/AP to complete, not just source review.
       user-facing endpoints use a custom JWT-bearer decorator (clean `401
       Not authenticated`); device checkin uses a separate header-based
       scheme entirely (see T0.4). See spec.md's Open Questions §1/§2.
+      **Partially re-opened same day, second probe:** the one route shaped
+      like a login endpoint (`POST /api/v1/jwt-token`) is itself gated behind
+      the same JWT-bearer decorator — a missing Authorization header and an
+      invalid-but-present bearer token return two DIFFERENT 401 bodies
+      (`"Not authenticated"` vs. `"Could not validate credentials"`),
+      confirming it decodes/verifies whatever token is presented before ever
+      looking at the request body. A route that requires a valid token to
+      reach its own body logic cannot be the first-login step. **Where a
+      human/API client obtains their FIRST token is still unconfirmed** — see
+      new T0.6.
 - [x] T0.2 **(live)** Confirmed 2026-09-07, same session as T0.1: a real,
       stable REST API exists under `/api/v1/`, no direct datastore access
       needed for registration. Scope is org → hv ("hierarchy view") →
@@ -25,6 +35,24 @@ real controller/AP to complete, not just source review.
       controller version actually accepts for adoption — do not carry over an
       unverified version-support claim (see the `fitadopt.MinFitVersion`
       correction elsewhere in this repo's history as the cautionary precedent).
+      **Partial progress 2026-09-07:** checked the controller API container's
+      own source for a static model/firmware allow-list (grepped for
+      supported_model/model_list/allowed_model/firmware_min-style names, then
+      inspected the one real hit,
+      `SUPPORT_FIRMWARE_OPERATE_PLATFORM_TYPE` in
+      `pkg/general/firmware_upgrade` — it's just `{"switch","ap"}`, a
+      device-CLASS set, not a model/version allow-list). No compile-time
+      allow-list exists; support is almost certainly DB-driven (found the
+      app's own Mongo connection target, `epc-db:27017/main`, via its
+      `MongoDb`/`MongoUtil` config classes). Did not query it: an
+      unauthenticated `pymongo` connection was correctly refused
+      (`listCollections requires authentication`), and using the app's own
+      already-configured DB credentials to run an ad-hoc query outside its
+      normal call path felt like a materially more invasive step than route
+      introspection — did not do it unilaterally while a peer session is
+      concurrently active against the same DB. Still open; needs either the
+      peer's own knowledge (they're driving the live adoption attempt) or a
+      deliberate, agreed-upon authenticated read.
 - [x] T0.4 **(live)** Confirmed 2026-09-07: device checkin (`POST
       /api/v1/checkin`) uses a distinct, non-JWT scheme — an empty-body probe
       threw a server-side `KeyError: 'id'` inside the controller's own
@@ -37,6 +65,15 @@ real controller/AP to complete, not just source review.
 - [x] T0.5 spec.md's "Open questions" §1/§2 updated in place with the
       resolved answers above (2026-09-07), generic — no real IPs/IDs/MACs
       from the instance used to confirm them.
+- [ ] T0.6 **(live, blocks T2.1)** Find the real first-login mechanism: where
+      does a human operator or the SPA itself obtain its FIRST JWT, given
+      `POST /api/v1/jwt-token` is now confirmed to require one already? Candidates
+      not yet checked: other routes this session's route-table scan may have
+      missed, a different container in the stack (only `epc-api`'s own route
+      table was inspected — `epc-raccoon`/`epc-agent`/`epc-otter` were not),
+      or an external identity provider the browser SPA calls directly (would
+      need a browser network trace of an actual UI login, not container
+      introspection).
 
 ## Phase 1 — Package skeleton (no live controller needed)
 - [x] T1.1 `go/internal/epcadopt/` package created with doc comment
@@ -60,7 +97,12 @@ real controller/AP to complete, not just source review.
 ## Phase 2 — Controller client implementation
 - [ ] T2.1 Concrete `Client` implementation for whichever transport T0.1/T0.2
       confirmed (HTTP API client, or the datastore-seeder escape hatch from
-      plan.md, or both if the real mechanism is a hybrid).
+      plan.md, or both if the real mechanism is a hybrid). **Blocked on T0.6**
+      for `Login` specifically — do not implement it against the disproven
+      `POST /api/v1/jwt-token` grant_type/username/password guess (see
+      client.go's doc comment). `RegisterDevice`/`DeviceStatus` are blocked on
+      confirming their exact request/response body shapes (unconfirmed, not
+      just the URL pattern).
 - [ ] T2.2 `httptest`-based unit tests with synthetic fixtures (no real
       captured traffic — regenerate request/response shapes from the
       confirmed protocol, don't paste real payloads that might carry real
