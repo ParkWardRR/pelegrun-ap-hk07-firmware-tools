@@ -41,3 +41,22 @@ func NextActiveFW(slot string) (string, error) {
 		return "", fmt.Errorf("unknown slot %q", slot)
 	}
 }
+
+// FixedPartitionTarget is the single partition mainline OpenWrt's qualcommax
+// target boots from, regardless of which slot `active_fw` currently selects.
+//
+// Unlike the FIT firmware's A/B pair, an OpenWrt kernel hardcodes root-mount
+// to the DTS-labeled "rootfs" partition (SlotA) no matter which physical
+// slot u-boot loaded it from — writing SlotB leaves an otherwise-valid image
+// with a kernel that boots but can never find its own root filesystem. This
+// was proven on real EWS377AP v3 hardware: see
+// openwrt-ews377ap-v3/results-2026-09-06/STAGE3-SLOT0-INSTALL-RESULTS.md in
+// this repo's history for the full trace, and the earlier attempt at
+// openwrt-ews377ap-v3/results-2026-09-06/FLASH-STAGE2-RESULT.md that first
+// found the wrong-slot hang.
+//
+// A direct consequence: writing this target when it's currently the
+// *active* slot leaves no bootable A/B fallback during the write. Callers
+// must not advertise A/B rollback for this path (see flash.PlanOpenWrt and
+// adapter.CapFlashAB's doc comment).
+const FixedPartitionTarget = SlotA

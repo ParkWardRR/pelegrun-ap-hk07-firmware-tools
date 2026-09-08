@@ -67,9 +67,12 @@ call `dump.Manifest.Verify`, and confirm where the real serial actually lives.
 See the NOTES block at the top of `internal/fleetexec/ssh_accessor.go`.
 
 ### 2. `internal/fitadopt` — P10a FIT real-serial eligibility
-Read-only gate: FIT ≥ 1.1.65, FIT family, 64-hex image digest + provenance, ≥1
-recovery route, and a **real device-read serial** (Code27-checked; rejects
-empty/generated/spoofed). Absolute rule: never generate or spoof a serial.
+Read-only gate: FIT ≥ `fitadopt.MinFitVersion` (`1.1.30` — the newest
+`ews377-fit-*` EnGenius has ever published; see the constant's doc comment for
+why the floor used to say `1.1.65`, a version that doesn't exist), FIT family,
+64-hex image digest + provenance, ≥1 recovery route, and a **real device-read
+serial** (Code27-checked; rejects empty/generated/spoofed). Absolute rule:
+never generate or spoof a serial.
 
 ### 3. `internal/adapter` — P12a capability contract + P12d registry
 Typed capabilities + support tiers. `CanFlash` requires ≥ experimental tier plus

@@ -84,11 +84,28 @@ func (r *Registry) Flashable() []string {
 	return models
 }
 
-// DefaultRegistry is the builtin model DB. ap-hk07 is `experimental`: the tool
-// implements every safe primitive for it (fingerprint/inspect/access/backup/
-// provision/A-B flash/UART+TFTP recovery/evidence), but it is NOT yet promoted to
-// `verified` — that requires passing the hardware qualification matrix in the
-// ROADMAP on real units. health_check is not implemented yet (false).
+// DefaultRegistry is the builtin model DB. It carries **two** records for the
+// physical ap-hk07 board, one per firmware target — the registry is keyed on
+// Model, and "which firmware is this write plan for" changes the recovery
+// story enough (A/B rollback vs. a single fixed partition with no live
+// fallback) that a single shared record would have to either lie about one
+// of them or blur flash_ab/flash_fixed_partition together. Rather than that,
+// the OpenWrt target gets its own Model string ("ap-hk07-openwrt") so
+// Registry.Get never has to arbitrate between two different recovery
+// promises for the same key.
+//
+// ap-hk07 (FIT) is `experimental`: the tool implements every safe primitive
+// for it (fingerprint/inspect/access/backup/provision/A-B flash/UART+TFTP
+// recovery/evidence), but it is NOT yet promoted to `verified` — that
+// requires passing the hardware qualification matrix in the ROADMAP on real
+// units. health_check is not implemented yet (false).
+//
+// ap-hk07-openwrt is also `experimental`, on the strength of the real-hardware
+// evidence below — a persistent, reboot-surviving NAND install, not just a
+// RAM-boot smoke test. It declares flash_fixed_partition (not flash_ab): see
+// flash.FixedPartitionTarget's doc comment for why OpenWrt can't use the A/B
+// path at all, and CapFlashFixedPartition's doc comment for why that's a
+// distinct, honestly-weaker promise than flash_ab.
 func DefaultRegistry() *Registry {
 	return &Registry{
 		SchemaVersion: RegistrySchemaVersion,
@@ -113,6 +130,41 @@ func DefaultRegistry() *Registry {
 					"6 product ids verified across ~26 real images (quarry real_images test)",
 					"Go<->Rust Code27 parity test",
 					"lure TFTP unit + integration tests",
+				},
+			},
+			{
+				Adapter:       "ap-hk07-openwrt",
+				Model:         "ap-hk07-openwrt",
+				BoardRevision: "EWS377AP v3 (IPQ8072A)",
+				Tier:          TierExperimental,
+				Capabilities: map[Capability]bool{
+					CapFingerprint:         true,  // eyas (OpenWrt family + BoardID shell probe)
+					CapInspect:             true,  // quarry verify-ubi + eyas.BoardID
+					CapAccess:              true,  // jess ssh (:22, no vendor auth)
+					CapBackup:              true,  // mews + dump (mtd7/8/11 + full rootfs)
+					CapProvision:           false, // no serial/append-only story on OpenWrt yet
+					CapFlashAB:             false, // NOT A/B-capable — see flash_fixed_partition
+					CapFlashFixedPartition: true,  // flash.PlanOpenWrt (rootfs @0x1000000, always)
+					CapUARTRecovery:        true,  // manual tftpboot+nand write, hardware-proven
+					CapTFTPRecovery:        true,  // same TFTP path used for both install and recovery
+					CapHealthCheck:         false, // not implemented yet
+					CapEvidence:            true,  // openwrt-ews377ap-v3/results-2026-09-06/ + mews
+				},
+				Evidence: []string{
+					"first persistent NAND boot on real EWS377AP v3 hardware (not RAM-boot): " +
+						"openwrt-ews377ap-v3/results-2026-09-06/STAGE3-SLOT0-INSTALL-RESULTS.md",
+					"ethernet + dual-band WiFi (WPA2) + NSS offload confirmed working from NAND",
+					"config (UCI + a written test file) survives a real reboot",
+					"root-mount-requires-slot-0 and FIT config@<board>-name failure modes both " +
+						"found and fixed by direct hardware debugging in the same results/ directory",
+					"HTTP-only cross-flash (no UART) confirmed viable as a MECHANISM on this " +
+						"board family via the OEM cloud updater (see `pelegrun crossflash`) — but " +
+						"not yet proven for an OpenWrt payload specifically: on one unit, the same " +
+						"HTTP path hit an identical NAND ECC error on the spare slot for two " +
+						"different community UBI layouts (kernel-only and full 3-volume), while " +
+						"genuine EnGenius FIT and ECW230v3 images wrote clean on the same slot — " +
+						"CapUARTRecovery is not just the fallback here, it is the only path with a " +
+						"demonstrated clean write for this specific payload.",
 				},
 			},
 		},

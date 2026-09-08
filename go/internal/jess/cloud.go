@@ -100,3 +100,12 @@ func (c *Cloud) SetForceAC(ctx context.Context, ip string) error {
 	_, err := c.do(ctx, http.MethodPost, "/api/mgm/force_ac", map[string]string{"ip": ip})
 	return err
 }
+
+// DropCaches clears any previously-staged upgrade image. The real admin GUI
+// calls this immediately before every upload.cgi POST (confirmed by decoding
+// its JS bundle); UploadImage calls it for the same reason — matching the
+// genuine device flow exactly, not a guessed subset of it.
+func (c *Cloud) DropCaches(ctx context.Context) error {
+	_, err := c.do(ctx, http.MethodPost, "/api/mgm/drop_caches", nil)
+	return err
+}

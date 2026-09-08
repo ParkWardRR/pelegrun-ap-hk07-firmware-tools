@@ -12,7 +12,7 @@ func TestClassify(t *testing.T) {
 		`<script src="/static/js/main.abc.chunk.js">`:           Cloud,
 		`<script src="/luci-static/resources/md5.js"></script>`: EwsLuCI,
 		`<input name="password_plain_text" type="password">`:    EwsLuCI,
-		`action="/cgi-bin/luci"`:                                EwsLuCI,
+		`action="/cgi-bin/luci"`:                                OpenWrt, // bare LuCI, no EWS vendor markers
 		`<title>EWS377-FIT</title>`:                             Fit,
 		`<html><body>nothing here</body></html>`:                Unknown,
 	}

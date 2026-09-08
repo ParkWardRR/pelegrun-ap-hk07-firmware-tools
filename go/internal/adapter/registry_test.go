@@ -30,8 +30,31 @@ func TestFlashableList(t *testing.T) {
 		Capabilities: map[Capability]bool{CapFingerprint: true},
 	})
 	flashable := r.Flashable()
-	if len(flashable) != 1 || flashable[0] != "ap-hk07" {
-		t.Fatalf("only ap-hk07 should be flashable, got %v", flashable)
+	want := []string{"ap-hk07", "ap-hk07-openwrt"} // Flashable() sorts
+	if len(flashable) != len(want) {
+		t.Fatalf("flashable = %v, want %v", flashable, want)
+	}
+	for i, m := range want {
+		if flashable[i] != m {
+			t.Fatalf("flashable = %v, want %v", flashable, want)
+		}
+	}
+}
+
+func TestDefaultRegistryHasOpenWrtTarget(t *testing.T) {
+	r := DefaultRegistry()
+	ow := r.Get("ap-hk07-openwrt")
+	if ow == nil {
+		t.Fatal("ap-hk07-openwrt must be in the default registry")
+	}
+	if ow.Has(CapFlashAB) {
+		t.Fatal("the OpenWrt target must not declare flash_ab — it has no A/B fallback")
+	}
+	if !ow.Has(CapFlashFixedPartition) {
+		t.Fatal("the OpenWrt target must declare flash_fixed_partition")
+	}
+	if err := ow.CanFlash(); err != nil {
+		t.Fatalf("ap-hk07-openwrt should be flash-ready: %v", err)
 	}
 }
 
