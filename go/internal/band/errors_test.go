@@ -56,4 +56,3 @@ func TestModelCodeAndSnextraErrors(t *testing.T) {
 		t.Errorf("default prefix: got %q err %v", x, err)
 	}
 }
-

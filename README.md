@@ -19,7 +19,41 @@ bootloader env safety gate, and firmware family fingerprinting. Rust + Go.
 
 <img src="docs/tour.gif" alt="Pelegrún TUI dashboard" width="760"/>
 
+<br/>
+
+[![Bubble Tea](https://img.shields.io/badge/TUI-Bubble%20Tea-ff69b4?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTEyIDJhMTAgMTAgMCAxIDAgMCAyMCAxMCAxMCAwIDAgMCAwLTIweiIgZmlsbD0id2hpdGUiLz48L3N2Zz4=)](https://github.com/charmbracelet/bubbletea)
+
 </div>
+
+### TUI screenshots
+
+<table>
+<tr>
+<td><img src="docs/screenshots/01-discover.png" alt="Discover — fingerprint firmware family" width="420"/></td>
+<td><img src="docs/screenshots/04-safeguards.png" alt="Safeguards — why it can't brick" width="420"/></td>
+</tr>
+<tr>
+<td><img src="docs/screenshots/05-identity.png" alt="Identity — mint a unique serial" width="420"/></td>
+<td><img src="docs/screenshots/06-install.png" alt="Install — no-UART A/B flash" width="420"/></td>
+</tr>
+</table>
+
+<details>
+<summary>All 7 TUI screens</summary>
+
+| Step | Screen | What it does |
+|------|--------|--------------|
+| 1 | Discover | Fingerprints the firmware family (Cloud · EWS/LuCI · FIT) |
+| 2 | Connect | How to reach each family — SSH on **:8822**, not 22 |
+| 3 | Back Up | Required read-only evidence bundle before flashing |
+| 4 | Safeguards | Why the tool can't brick: append-only env gate |
+| 5 | Identity | Mint a unique, collision-checked serial |
+| 6 | Install | No-UART A/B flash: write the spare slot, reboot |
+| 7 | Verify | Confirm the device came back as intended |
+
+Navigate `↑↓` / `jk`, jump `g`/`G`, quit `q`.
+
+</details>
 
 ---
 

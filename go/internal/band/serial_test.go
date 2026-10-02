@@ -34,4 +34,3 @@ func TestSnextra(t *testing.T) {
 		t.Fatalf("got %q err %v", x, err)
 	}
 }
-
