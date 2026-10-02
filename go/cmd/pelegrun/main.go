@@ -1,6 +1,4 @@
-// Command pelegrun — falconry-themed orchestrator to cross-flash and recover
-// EnGenius/Senao ap-hk07 (IPQ807x) APs without bricking them.
-//
+// Command pelegrun — cross-flash and recover EnGenius/Senao ap-hk07 (IPQ807x) APs.
 // No arguments launches the TUI; subcommands are script/CI friendly.
 // Unofficial; not affiliated with EnGenius or Senao. See README.md / SAFETY.md.
 package main

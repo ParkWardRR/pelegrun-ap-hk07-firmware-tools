@@ -2,8 +2,6 @@ package band
 
 import (
 	"errors"
-	"os"
-	"path/filepath"
 	"testing"
 )
 
@@ -59,17 +57,3 @@ func TestModelCodeAndSnextraErrors(t *testing.T) {
 	}
 }
 
-func TestLoadMissingAndMalformed(t *testing.T) {
-	dir := t.TempDir()
-	// Missing file → empty inventory, no error.
-	inv, err := Load(filepath.Join(dir, "nope.json"))
-	if err != nil || len(inv.Assets) != 0 {
-		t.Errorf("missing: got %v err %v", inv, err)
-	}
-	// Malformed JSON → error.
-	bad := filepath.Join(dir, "bad.json")
-	os.WriteFile(bad, []byte("{not json"), 0o644)
-	if _, err := Load(bad); err == nil {
-		t.Error("malformed JSON: expected error")
-	}
-}

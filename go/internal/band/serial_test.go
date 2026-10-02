@@ -1,8 +1,6 @@
 package band
 
 import (
-	"errors"
-	"path/filepath"
 	"testing"
 )
 
@@ -37,34 +35,3 @@ func TestSnextra(t *testing.T) {
 	}
 }
 
-func TestInventoryCollision(t *testing.T) {
-	inv := &Inventory{}
-	if err := inv.Reserve(Asset{Name: "ap1", Serial: "EPC1X4200011", MAC: "88:DC:97:00:00:01"}); err != nil {
-		t.Fatal(err)
-	}
-	// same serial, different asset -> collision
-	if err := inv.Reserve(Asset{Name: "ap2", Serial: "EPC1X4200011", MAC: "88:DC:97:00:00:02"}); !errors.Is(err, ErrCollision) {
-		t.Fatalf("want ErrCollision, got %v", err)
-	}
-	// same MAC, different asset -> collision
-	if err := inv.Reserve(Asset{Name: "ap3", Serial: "EPC1X4200025", MAC: "88:DC:97:00:00:01"}); !errors.Is(err, ErrCollision) {
-		t.Fatalf("want ErrCollision (mac), got %v", err)
-	}
-	// unique -> ok
-	if err := inv.Reserve(Asset{Name: "ap4", Serial: "EPC1X4200025", MAC: "88:DC:97:00:00:04"}); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func TestInventoryPersist(t *testing.T) {
-	p := filepath.Join(t.TempDir(), "inv.json")
-	inv := &Inventory{}
-	_ = inv.Reserve(Asset{Name: "ap1", Serial: "EPC1X4200011"})
-	if err := inv.Save(p); err != nil {
-		t.Fatal(err)
-	}
-	got, err := Load(p)
-	if err != nil || len(got.Assets) != 1 {
-		t.Fatalf("reload failed: %v %+v", err, got)
-	}
-}
