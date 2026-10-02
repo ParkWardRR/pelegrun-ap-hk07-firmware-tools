@@ -1,9 +1,9 @@
 # pelegrun-ap-hk07-firmware-tools — build & test entry points.
-# Two binaries: quarry (Rust, the core) and pelegrun (Go, three CLI utilities).
+# Two binaries: quarry (Rust, the core) and pelegrun (Go, TUI + CLI).
 .DEFAULT_GOAL := help
 .PHONY: help ci hooks test test-race lint fmt fmt-check cover \
         test-rust test-go test-firmware lint-rust lint-go \
-        dist clean
+        dist tui tour tour-offline clean
 
 ## help: list targets
 help:
@@ -61,6 +61,21 @@ cover:
 ## dist: cross-compiled release binaries + SHA256SUMS into dist/
 dist:
 	./scripts/dist.sh
+
+## tui: run the dashboard
+tui:
+	cd go && go run ./cmd/pelegrun
+
+## tour: re-record docs/tour.gif from the live TUI with vhs, then optimize
+tour:
+	cd go && go build -o /tmp/pelegrun ./cmd/pelegrun
+	vhs docs/tour.tape
+	@command -v magick >/dev/null && magick docs/tour.gif -layers Optimize docs/tour.gif || true
+
+## tour-offline: regenerate docs/tour.gif + screenshots with the pure-Go renderer (no vhs/ffmpeg)
+tour-offline:
+	cd go && go run ./cmd/tuigif -out $(CURDIR)/docs/tour.gif
+	cd go && go run ./cmd/tuigif -shots $(CURDIR)/docs/screenshots
 
 ## clean: remove build artifacts
 clean:

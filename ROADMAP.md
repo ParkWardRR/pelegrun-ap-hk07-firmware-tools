@@ -6,10 +6,10 @@ is the wider product surface — most of which is **shelved** pending real fleet
 needs. Detailed task list:
 [specs/001-pelegrun-mvp/tasks.md](specs/001-pelegrun-mvp/tasks.md).
 
-> **Scope guarantee:** the tool's job is patching 4 bytes in a firmware header
-> and providing three useful CLI utilities (discover, envcheck, redact). Fleet
-> orchestration, multi-board adapters, and FIT adoption are product-roadmap
-> ambition that will be built only when real need materialises.
+> **Scope guarantee:** the tool's job is patching 4 bytes in a firmware header,
+> providing a guided TUI, and offering focused CLI utilities (discover, envcheck,
+> redact). Fleet orchestration, multi-board adapters, and FIT adoption are
+> product-roadmap ambition that will be built only when real need materialises.
 
 Status: ✅ done · ❄️ shelved (code removed) · ⬜ planned.
 
@@ -61,7 +61,7 @@ timeline
     P8 Secret scrubbing (redact) : ✅ passwords / tokens / MACs
     P9 Fleet mode : ❄️ shelved — inventory + canary gating
     P10 FIT real-serial path : ❄️ shelved — supported adoption
-    P11 TUI : ❄️ shelved — Bubble Tea dashboard
+    P11 TUI + release binaries : ✅ Bubble Tea dashboard + cross-compile
     P12 Community adapters : ❄️ shelved — other Senao boards
 ```
 
@@ -74,14 +74,14 @@ timeline
 | 8 | Secret scrubbing | `redact`: passwords, tokens, keys, MACs, explicit values | ✅ |
 | 9 | Fleet mode | Inventory, policy, plan/apply, canary, journal, executor | ❄️ shelved |
 | 10 | FIT real-serial path | Adopt via FIT with the device's real serial | ❄️ shelved |
-| 11 | TUI | Bubble Tea dashboard (7-step guided flow) | ❄️ shelved |
+| 11 | TUI + release binaries | Bubble Tea dashboard + cross-compiled binaries | ✅ |
 | 12 | Community adapters | Board support registry for other Senao models | ❄️ shelved |
 
 ### Why shelved
 
 The shelved phases were fully designed and prototyped (see git history before
-v0.5.0), but they added 16 Go packages and 12 subcommands for a tool whose core
-job is patching 4 bytes. The fleet, FIT, adapter, TUI, dump, and UART recovery
+v0.5.0), but they added many Go packages and subcommands for a tool whose core
+job is patching 4 bytes. The fleet, FIT, adapter, dump, and UART recovery
 code will be rebuilt only when there's a concrete need — not as speculative
 infrastructure.
 
@@ -104,6 +104,8 @@ the commit before v0.5.0 for the complete specifications.
 | `jess` | HTTP client for cloud/LuCI APIs |
 | `hood` | Environment mutation safety gate |
 | `band` | Unique serial issuance and collision preflight |
+| `mews` | Backup/evidence bundle data |
 | `redact` | Secret scrubbing for fixtures, logs, and support bundles |
+| TUI | Bubble Tea dashboard for operator-facing guided flow |
 | Property + parity tests | Regression foundation across Rust and Go |
 | Git history | Full P9/P10/P12 prototypes, designs, and test suites |

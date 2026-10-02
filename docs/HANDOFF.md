@@ -1,14 +1,13 @@
 # Handoff — scope reduction notes
 
 This note documents the v0.5.0 scope reduction. The Go CLI was slimmed from 16
-internal packages and 12 subcommands down to 5 packages and 6 commands. The Zig
-lure binary and Bubble Tea TUI were also removed.
+internal packages and 12 subcommands down to 8 packages and 7 commands. The Zig
+lure binary was removed. The TUI was kept.
 
 ## What was removed (and why)
 
 The following were removed because they solved problems that don't exist yet at
-the current 6-AP fleet scale, or because they wrapped functionality already
-available via the CLI subcommands:
+the current 6-AP fleet scale:
 
 | Cut component | Reason |
 |---|---|
@@ -18,12 +17,8 @@ available via the CLI subcommands:
 | `adapter` (P12) | Registry for boards that don't exist yet |
 | `dump` | Generates shell scripts you'd write yourself |
 | `creance` | UART recovery — separate concern |
-| `mews` | Backup bundles — not related to header patching |
 | `flash` | Only used by cut packages |
-| `style` | Only used by the TUI |
 | `lure` (Zig) | TFTP recovery — separate binary, separate language |
-| `tui` | 581-line Bubble Tea TUI wrapping commands you can just type |
-| `tuigif` | TUI gif recorder |
 | `tui-harness` | termwright E2E screenshot harness |
 
 ## What was kept
@@ -31,11 +26,14 @@ available via the CLI subcommands:
 | Component | Role |
 |---|---|
 | `quarry` (Rust) | The core: header re-head, Code27 serial, snextra, inspect, UBI |
+| `pelegrun` TUI | Bubble Tea dashboard — the seven-step guided flow |
 | `pelegrun discover` | Fingerprint firmware family via `eyas` |
 | `pelegrun envcheck` | Bootloader env completeness gate via `hood` |
 | `pelegrun redact` | Secret scrubbing via `redact` |
 | `pelegrun serial/snextra/check` | Serial utilities via `band` |
+| `mews` | Backup/evidence bundle data (used by TUI) |
 | `jess` | HTTP client used by `discover` |
+| `tuigif` | Pure-Go tour.gif + screenshot renderer |
 
 ## Recovering the removed code
 

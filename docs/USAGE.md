@@ -1,7 +1,7 @@
 # Using Pelegrún
 
-A practical walkthrough: install, the individual commands, and how the safe-flash
-and recovery flows fit together.
+A practical walkthrough: install, the guided TUI, the individual commands, and
+how the safe-flash and recovery flows fit together.
 
 > **Unofficial — not affiliated with EnGenius or Senao.** For interoperability
 > and self-hosting on hardware you own. Cross-flashing can brick hardware; read
@@ -32,13 +32,31 @@ Binaries are published for `darwin/{arm64,amd64}`, `linux/{amd64,arm64}`, and
 ```sh
 git clone https://github.com/ParkWardRR/pelegrun-ap-hk07-firmware-tools
 cd pelegrun-ap-hk07-firmware-tools
-cd go && go build -o pelegrun ./cmd/pelegrun    # the CLI utilities (Go)
+cd go && go build -o pelegrun ./cmd/pelegrun    # the TUI/CLI (Go)
 cargo build -p quarry --release                 # image re-head + serial core (Rust)
 ```
 
+## The guided TUI
+
+Run `pelegrun` with no arguments to open the dashboard. The sidebar walks the job
+in plain steps; each screen shows **live output from the real logic** — including
+the safety refusals — not mock data.
+
+| Step | What it does |
+|------|--------------|
+| **Discover** | Fingerprints the firmware family (Cloud · EWS/LuCI · FIT) from its web UI |
+| **Connect** | Shows how to reach each family — SSH is on **:8822**, not 22 |
+| **Back Up** | The required read-only evidence bundle to capture *before* flashing |
+| **Safeguards** | Why the tool can't brick: the env gate refuses wiped/empty writes |
+| **Identity** | Mints a unique, collision-checked serial for the target model |
+| **Install** | The no-UART A/B flash: write the spare slot, reboot, re-verify |
+| **Verify** | Confirms the device came back as intended; rollback if not |
+
+Navigate with `↑ ↓` (or `j k`), jump with `g` / `G`, quit with `q`.
+
 ## Commands
 
-### pelegrun (Go CLI utilities)
+Everything the TUI shows is also scriptable:
 
 ```sh
 pelegrun discover http://192.168.1.1     # → family + which access adapter to use

@@ -4,8 +4,8 @@
 
 Cross-flash and recover EnGenius/Senao `ap-hk07` access points (EWS377AP v3 ·
 EWS377-FIT · ECW230v3) over the network. One-field firmware re-head, serial
-provisioning, and a gated recovery path. Rust core (`quarry`) plus three
-focused Go CLI utilities (`discover`, `envcheck`, `redact`).
+provisioning, A/B-slot flashing, and a gated UART recovery path. Rust core,
+Go TUI/CLI.
 
 [![License: Blue Oak 1.0.0](https://img.shields.io/badge/License-Blue_Oak_1.0.0-0a7bbb.svg)](LICENSE)
 [![CI: local](https://img.shields.io/badge/CI-local%20(make%20ci)-informational.svg)](Makefile)
@@ -13,7 +13,12 @@ focused Go CLI utilities (`discover`, `envcheck`, `redact`).
 [![Unofficial](https://img.shields.io/badge/vendor-unofficial-lightgrey.svg)](SAFETY.md)
 
 ![Rust](https://img.shields.io/badge/Rust-core-000000?logo=rust&logoColor=white)
-![Go](https://img.shields.io/badge/Go-CLI%20utilities-00ADD8?logo=go&logoColor=white)
+![Go](https://img.shields.io/badge/Go-TUI%20%2B%20CLI-00ADD8?logo=go&logoColor=white)
+![Bubble Tea](https://img.shields.io/badge/TUI-Bubble%20Tea-ff69b4)
+
+<br/>
+
+<img src="docs/tour.gif" alt="Pelegrún TUI — a Tokyo Night dashboard walking the seven steps, with an animated wordmark and spring-driven caret/progress" width="760"/>
 
 </div>
 
@@ -66,27 +71,48 @@ header only when the network path is already gone:
 If the AP still shells or serves its web UI, everything above happens over the
 network and no UART is needed.
 
+<div align="center">
+<img src="docs/screenshots/04-safeguards.png" alt="Pelegrún TUI — Safeguards screen" width="720"/>
+<br/><sub>The <b>Safeguards</b> screen refuses to write a wiped env, and refuses an empty value (which u-boot would delete). Live output — this is exactly what the tool computes.</sub>
+</div>
+
+## The TUI
+
+`pelegrun` with no arguments opens the dashboard. The sidebar is the seven-step
+sequence — Discover · Connect · Back Up · Safeguards · Identity · Install ·
+Verify — and each screen renders live output from the real internal packages, not
+mock data.
+
+| | |
+|:--:|:--:|
+| <img src="docs/screenshots/05-identity.png" width="380"/> | <img src="docs/screenshots/03-backup.png" width="380"/> |
+| <sub><b>Identity</b> — unique, collision-checked serials</sub> | <sub><b>Back Up</b> — read-only evidence bundle, first</sub> |
+| <img src="docs/screenshots/02-connect.png" width="380"/> | <img src="docs/screenshots/06-install.png" width="380"/> |
+| <sub><b>Connect</b> — SSH :8822 · cloud · LuCI</sub> | <sub><b>Install</b> — no-UART A/B slot flash + verify</sub> |
+
 ## Architecture
 
 ```mermaid
 flowchart LR
-  U([operator]) --> Q[quarry · Rust<br/>re-head + serial]
-  U --> P[pelegrun · Go<br/>discover · envcheck · redact]
-  P --> E[eyas<br/>fingerprint]
-  P --> H[hood<br/>env gate]
-  P --> R[redact<br/>scrub secrets]
-  Q --> B[band<br/>serial math]
+  U([operator]) --> S[Pelegrún · Go TUI]
+  S --> E[eyas<br/>discover/fingerprint]
+  E --> J[jess<br/>HTTP client]
+  J --> H[hood<br/>append-only env gate]
+  H --> Q[quarry · Rust<br/>re-head + serial]
+  Q --> B[band<br/>unique serial]
+  H -. fragile? .-> X[[refuse / stop]]
 ```
 
 | Component | Role | Lang |
 |---|---|---|
 | **quarry** | Image header re-head, Code27 serial, snextra, inspect | Rust |
-| **pelegrun discover** | Fingerprint the AP's firmware family (Cloud · EWS/LuCI · FIT) | Go |
-| **pelegrun envcheck** | Verify bootloader env completeness — refuses a fragile env | Go |
-| **pelegrun redact** | Scrub passwords, tokens, keys, MACs, and specific values from logs | Go |
-
-Internal packages: `eyas` (fingerprint), `hood` (env parsing), `jess` (HTTP client),
-`band` (serial math), `redact` (secret scrubbing).
+| **pelegrun** | TUI dashboard + CLI subcommands | Go |
+| **eyas** | Fingerprint firmware family (Cloud · EWS/LuCI · FIT) | Go |
+| **jess** | HTTP client for cloud/LuCI APIs | Go |
+| **hood** | Bootloader env completeness gate (append-only writes) | Go |
+| **band** | Unique serial provisioning + collision preflight | Go |
+| **mews** | Backup/evidence bundle data | Go |
+| **redact** | Secret scrubbing for logs and support bundles | Go |
 
 ## Install
 
@@ -107,7 +133,10 @@ Prefer source? `cd go && go build ./cmd/pelegrun`. Full walkthrough:
 ## Quick start
 
 ```console
-# pelegrun CLI utilities
+# the TUI
+$ cd go && go run ./cmd/pelegrun
+
+# scriptable subcommands
 $ pelegrun discover http://192.168.1.1     # fingerprint firmware family
 $ pelegrun serial  --model X42             # unique Code27 serial (band)
 $ pelegrun snextra --model X42             # 20-char u-boot field-19 value
@@ -118,7 +147,6 @@ $ pelegrun redact  bundle.txt --mac --value <serial>   # scrub secrets
 # firmware re-head (Rust core)
 $ cargo run -q -p quarry -- rehead ecw230v3.bin out.bin --to 282
 $ cargo run -q -p quarry -- serial --model X42 --prefix EPC1 --suffix 0001
-$ cargo run -q -p quarry -- inspect firmware.bin
 ```
 
 Product ids: `282` EWS377AP v3 · `300` EWS377-FIT · `284` ECW230v3 · `275` ECW230 · `182` EWS377AP v2 · `285` ECW230S.
@@ -157,6 +185,8 @@ make test          # every suite: cargo test + go test
 make cover         # Go coverage summary
 make fmt           # auto-format Rust + Go
 make dist          # cross-compiled binaries + SHA256SUMS → dist/
+make tui           # run the dashboard
+make tour-offline  # regenerate docs/tour.gif + screenshots (pure Go, no vhs)
 ```
 
 Run `make hooks` once per clone so `git push` is gated on a green `make ci`
@@ -165,7 +195,7 @@ Run `make hooks` once per clone so `git push` is gated on a green `make ci`
 What's covered:
 
 - **Rust (`quarry`)** — unit + **property tests** (`tests/properties.rs`, 5 invariants × 5000 generated cases) + error/display tests + an opt-in **real-image test** (`make test-firmware`) validating the parser against genuine firmware (6 product ids across ~26 images); `cargo fmt --check` and `clippy -D warnings` gate `make ci`.
-- **Go (`pelegrun`)** — every package tested (CLI, `eyas` with recorded HTTP fixtures, `jess` adapters via `httptest`, `hood`/`band`/`redact`), plus a **Go↔Rust parity test** (`band` vs. the `quarry` binary); run under the **race detector**; `gofmt` + `go vet` gated.
+- **Go (`pelegrun`)** — every package tested (CLI, TUI model, `eyas` with recorded HTTP fixtures, `jess` adapters via `httptest`, `hood`/`band`/`mews`/`redact`), plus a **Go↔Rust parity test** (`band` vs. the `quarry` binary); run under the **race detector**; `gofmt` + `go vet` gated.
 
 ## Spec-driven
 
@@ -190,6 +220,7 @@ warranty/support. No warranty; use at your own risk. See [`SAFETY.md`](SAFETY.md
 Born from a real cross-flash + recovery saga documented in the
 [engenius-field-guide](https://github.com/ParkWardRR/engenius-field-guide),
 building on [DaveCorder's EnGenius notes](https://github.com/DaveCorder/EnGenius).
+TUI by [Bubble Tea](https://github.com/charmbracelet/bubbletea).
 
 ## License
 

@@ -1,6 +1,7 @@
-// Command pelegrun — falconry-themed utilities for cross-flashing and recovering
+// Command pelegrun — falconry-themed orchestrator to cross-flash and recover
 // EnGenius/Senao ap-hk07 (IPQ807x) APs without bricking them.
 //
+// No arguments launches the TUI; subcommands are script/CI friendly.
 // Unofficial; not affiliated with EnGenius or Senao. See README.md / SAFETY.md.
 package main
 
@@ -16,6 +17,9 @@ import (
 	"github.com/ParkWardRR/pelegrun-ap-hk07-firmware-tools/internal/eyas"
 	"github.com/ParkWardRR/pelegrun-ap-hk07-firmware-tools/internal/hood"
 	"github.com/ParkWardRR/pelegrun-ap-hk07-firmware-tools/internal/jess"
+	"github.com/ParkWardRR/pelegrun-ap-hk07-firmware-tools/internal/tui"
+
+	"golang.org/x/term"
 )
 
 // Version is stamped via -ldflags "-X main.Version=...".
@@ -36,8 +40,8 @@ func run(args []string, out, errw io.Writer) int {
 
 	var err error
 	switch cmd {
-	case "":
-		fmt.Fprint(out, usageText)
+	case "", "tui":
+		err = runTUI(out)
 	case "version":
 		fmt.Fprintf(out, "pelegrun %s\n", Version)
 	case "plan":
@@ -65,6 +69,14 @@ func run(args []string, out, errw io.Writer) int {
 		return 1
 	}
 	return 0
+}
+
+func runTUI(out io.Writer) error {
+	if !term.IsTerminal(int(os.Stdout.Fd())) {
+		fmt.Fprint(out, usageText)
+		return nil
+	}
+	return tui.Run(Version)
 }
 
 func argVal(a []string, key string) string {
@@ -155,6 +167,7 @@ func cmdDiscover(out io.Writer, a []string) error {
 
 const usageText = "pelegrun — cross-flash & recover EnGenius/Senao ap-hk07 APs (unofficial)\n\n" +
 	"USAGE:\n" +
+	"  pelegrun                 launch the TUI (default)\n" +
 	"  pelegrun version | plan\n" +
 	"  pelegrun discover <url>            fingerprint firmware family (eyas)\n" +
 	"  pelegrun serial  --model X42 [--prefix P --suffix S]   Code27 serial (band)\n" +
