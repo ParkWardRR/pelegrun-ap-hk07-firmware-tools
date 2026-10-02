@@ -21,7 +21,7 @@ import (
 )
 
 // Version is stamped via -ldflags "-X main.Version=...".
-var Version = "0.5.0"
+var Version = "0.5.2"
 
 func main() {
 	os.Exit(run(os.Args[1:], os.Stdout, os.Stderr))

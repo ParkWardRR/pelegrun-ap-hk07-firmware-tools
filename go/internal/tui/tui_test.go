@@ -37,7 +37,7 @@ func TestAllRenderersProduceOutput(t *testing.T) {
 
 func sizedModel(t *testing.T) model {
 	t.Helper()
-	m := New("0.5.0")
+	m := New("0.5.2")
 	nm, _ := m.Update(tea.WindowSizeMsg{Width: 100, Height: 30})
 	return nm.(model)
 }
@@ -45,7 +45,7 @@ func sizedModel(t *testing.T) model {
 func TestViewContainsHeaderAndSelectedContent(t *testing.T) {
 	m := sizedModel(t)
 	v := m.View()
-	for _, want := range []string{"Pelegrún", "v0.5.0", "STEPS", "Discover", "Step 1 of 7"} {
+	for _, want := range []string{"Pelegrún", "v0.5.2", "STEPS", "Discover", "Step 1 of 7"} {
 		if !strings.Contains(v, want) {
 			t.Errorf("View() missing %q", want)
 		}
@@ -112,7 +112,7 @@ func TestQuitKeys(t *testing.T) {
 }
 
 func TestViewSurvivesTinyTerminal(t *testing.T) {
-	m := New("0.5.0")
+	m := New("0.5.2")
 	nm, _ := m.Update(tea.WindowSizeMsg{Width: 20, Height: 8})
 	// Must not panic and must still render something.
 	if v := nm.(model).View(); strings.TrimSpace(v) == "" {
