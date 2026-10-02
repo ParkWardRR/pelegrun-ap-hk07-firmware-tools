@@ -1,15 +1,15 @@
 # pelegrun-ap-hk07-firmware-tools — build & test entry points.
-# One repo, three languages: Rust (quarry), Go (pelegrun), Zig (lure).
+# Two binaries: quarry (Rust, the core) and pelegrun (Go, three CLI utilities).
 .DEFAULT_GOAL := help
 .PHONY: help ci hooks test test-race lint fmt fmt-check cover \
-        test-rust test-go test-zig test-firmware lint-rust lint-go lint-zig \
-        dist tui screenshots tour tour-offline clean
+        test-rust test-go test-firmware lint-rust lint-go \
+        dist clean
 
 ## help: list targets
 help:
 	@grep -E '^## ' $(MAKEFILE_LIST) | sed 's/## //'
 
-## ci: everything CI runs — format check, lint, tests (race), all three langs
+## ci: everything CI runs — format check, lint, tests (race)
 ## This is the project's ONLY CI: there is no hosted CI (no GitHub Actions).
 ci: fmt-check lint test-race
 	@echo "== CI OK =="
@@ -19,11 +19,11 @@ hooks:
 	git config core.hooksPath githooks
 	@echo "local CI hook enabled: git will run `make ci` before each push"
 
-## test: run every test suite (Rust + Go + Zig unit + lure integration)
-test: test-rust test-go test-zig
+## test: run every test suite (Rust + Go)
+test: test-rust test-go
 
 ## test-race: like `test`, with the Go race detector
-test-race: test-rust test-zig
+test-race: test-rust
 	cd go && go test -race ./...
 
 test-rust:
@@ -35,30 +35,23 @@ test-firmware:
 	  cargo test -p quarry --test real_images -- --nocapture
 test-go:
 	cd go && go test ./...
-test-zig:
-	cd zig && zig build test
-	cd zig && ./tftp_test.sh
 
-## lint: static analysis across all three languages (warnings are errors)
-lint: lint-rust lint-go lint-zig
+## lint: static analysis (warnings are errors)
+lint: lint-rust lint-go
 lint-rust:
 	cargo clippy --workspace --all-targets -- -D warnings
 lint-go:
 	cd go && go vet ./...
-lint-zig:
-	cd zig && zig build   # zig's compiler is the linter
 
 ## fmt: auto-format all sources
 fmt:
 	cargo fmt
 	cd go && gofmt -w .
-	cd zig && zig fmt lure.zig build.zig
 
 ## fmt-check: fail if anything is unformatted (CI gate)
 fmt-check:
 	cargo fmt --check
 	@out="$$(cd go && gofmt -l .)"; if [ -n "$$out" ]; then echo "gofmt needed:"; echo "$$out"; exit 1; fi
-	cd zig && zig fmt --check lure.zig build.zig
 
 ## cover: Go coverage summary (per-package + total)
 cover:
@@ -69,27 +62,7 @@ cover:
 dist:
 	./scripts/dist.sh
 
-## tui: run the dashboard
-tui:
-	cd go && go run ./cmd/pelegrun
-
-## screenshots: regenerate README screenshots via the termwright harness
-screenshots:
-	cd go && go build -o /tmp/pelegrun ./cmd/pelegrun
-	cd tools/tui-harness && PELEGRUN_BIN=/tmp/pelegrun SHOT_DIR=$(CURDIR)/docs/screenshots cargo run
-
-## tour: re-record docs/tour.gif from the live TUI with vhs, then optimize
-tour:
-	cd go && go build -o /tmp/pelegrun ./cmd/pelegrun
-	vhs docs/tour.tape
-	@command -v magick >/dev/null && magick docs/tour.gif -layers Optimize docs/tour.gif || true
-
-## tour-offline: regenerate docs/tour.gif + screenshots with the pure-Go renderer (no vhs/ffmpeg)
-tour-offline:
-	cd go && go run ./cmd/tuigif -out $(CURDIR)/docs/tour.gif
-	cd go && go run ./cmd/tuigif -shots $(CURDIR)/docs/screenshots
-
 ## clean: remove build artifacts
 clean:
 	cargo clean
-	rm -rf dist zig/zig-out zig/.zig-cache tools/tui-harness/target
+	rm -rf dist

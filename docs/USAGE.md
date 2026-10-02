@@ -1,7 +1,7 @@
 # Using Pelegrún
 
-A practical walkthrough: install, the guided TUI, the individual commands, and
-how the safe-flash and recovery flows fit together.
+A practical walkthrough: install, the individual commands, and how the safe-flash
+and recovery flows fit together.
 
 > **Unofficial — not affiliated with EnGenius or Senao.** For interoperability
 > and self-hosting on hardware you own. Cross-flashing can brick hardware; read
@@ -25,39 +25,20 @@ chmod +x pelegrun-darwin-arm64
 ```
 
 Binaries are published for `darwin/{arm64,amd64}`, `linux/{amd64,arm64}`, and
-`windows/amd64` (the `lure` recovery helper is POSIX-only: macOS + Linux).
+`windows/amd64`.
 
 ### From source
 
 ```sh
 git clone https://github.com/ParkWardRR/pelegrun-ap-hk07-firmware-tools
 cd pelegrun-ap-hk07-firmware-tools
-cd go && go build -o pelegrun ./cmd/pelegrun    # the CLI/TUI (Go)
-cargo build -p quarry --release               # image re-head + serial core (Rust)
-cd zig && zig build                           # lure TFTP recovery helper (Zig)
+cd go && go build -o pelegrun ./cmd/pelegrun    # the CLI utilities (Go)
+cargo build -p quarry --release                 # image re-head + serial core (Rust)
 ```
-
-## The guided TUI
-
-Run `pelegrun` with no arguments to open the dashboard. The sidebar walks the job
-in plain steps; each screen shows **live output from the real logic** — including
-the safety refusals — not mock data.
-
-| Step | What it does |
-|------|--------------|
-| **Discover** | Fingerprints the firmware family (Cloud · EWS/LuCI · FIT) from its web UI |
-| **Connect** | Shows how to reach each family — SSH is on **:8822**, not 22 |
-| **Back Up** | The required read-only evidence bundle to capture *before* flashing |
-| **Safeguards** | Why the tool can't brick: the env gate refuses wiped/empty writes |
-| **Identity** | Mints a unique, collision-checked serial for the target model |
-| **Install** | The no-UART A/B flash: write the spare slot, reboot, re-verify |
-| **Verify** | Confirms the device came back as intended; rollback if not |
-
-Navigate with `↑ ↓` (or `j k`), jump with `g` / `G`, quit with `q`.
 
 ## Commands
 
-Everything the TUI shows is also scriptable:
+### pelegrun (Go CLI utilities)
 
 ```sh
 pelegrun discover http://192.168.1.1     # → family + which access adapter to use
@@ -65,6 +46,7 @@ pelegrun serial  --model X42 --prefix SWLW --suffix 0001   # → SWLWX420001T
 pelegrun snextra --model X42             # → 20-char u-boot field-19 value
 pelegrun check   EPC1X4200011            # → serial=… valid=true model_code=X42
 pelegrun envcheck env.txt                # completeness gate; refuses if incomplete
+pelegrun redact  bundle.txt --mac --value <serial>   # scrub secrets
 pelegrun plan                            # print the ordered, gated flash plan
 pelegrun version
 ```
@@ -112,17 +94,12 @@ regression-tested against real firmware with `make test-firmware FW=<dir>`.
 ## If it won't boot (UART recovery)
 
 Rarely needed, but if a board is truly dead you'll want a USB-TTL adapter on the
-console header. Two helpers cover it:
+console header. The recovery steps are:
 
-- **creance** drives the gated *"prove before persist"* u-boot env repair:
-  `printenv` → `env default -a` (RAM only) → inspect → `env save` → `env load` →
-  verify → **cold boot** (full power removal, not just `reset`).
-- **lure** is a tiny TFTP responder for `tftpboot` recovery — point the board's
-  u-boot at your machine and serve it a known-good image:
-
-  ```sh
-  cd /path/with/firmware && lure       # serves the current dir over TFTP
-  ```
+1. **Env repair:** `printenv` → `env default -a` (RAM only) → inspect → `env save`
+   → `env load` → verify → **cold boot** (full power removal, not just `reset`).
+2. **TFTP re-flash:** point the board's u-boot at your machine and serve it a
+   known-good image via a TFTP server.
 
 See [`../SAFETY.md`](../SAFETY.md) and the field guide's
 [cross-flash walkthrough](https://github.com/ParkWardRR/engenius-field-guide/blob/main/crossflash-ews377apv3-walkthrough.md)

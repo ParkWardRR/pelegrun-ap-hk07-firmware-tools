@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 # Build cross-compiled release artifacts into dist/ with a SHA256SUMS manifest.
 #
-#   pelegrun (Go)  — the CLI/TUI, cross-compiled to 5 os/arch targets
-#   lure    (Zig) — the TFTP recovery responder, POSIX targets only (libc sockets)
-#   quarry  (Rust)— built for the host only here; CI builds it per-runner
+#   pelegrun (Go)  — three CLI utilities (discover, envcheck, redact)
+#   quarry  (Rust) — the core image re-head + serial tool
 #
 # Usage:  scripts/dist.sh [version]   (version defaults to `git describe`)
 set -euo pipefail
@@ -30,21 +29,6 @@ for t in "${GO_TARGETS[@]}"; do
       -o "../$bin" ./cmd/pelegrun )
   echo "  pelegrun  $os/$arch"
 done
-
-# ---- lure (Zig) : POSIX targets only (uses libc sockets; not ported to winsock) ----
-if command -v zig >/dev/null; then
-  ZIG_TARGETS=(
-    "aarch64-macos"    "x86_64-macos"
-    "x86_64-linux-musl" "aarch64-linux-musl"
-  )
-  for zt in "${ZIG_TARGETS[@]}"; do
-    ( cd zig && zig build -Dtarget="$zt" -Doptimize=ReleaseSafe >/dev/null )
-    cp "zig/zig-out/bin/lure" "$OUT/lure-${zt}"
-    echo "  lure     $zt"
-  done
-else
-  echo "  (skipping lure: zig not found)"
-fi
 
 # ---- quarry (Rust) : host build only; CI cross-builds per runner ----
 if command -v cargo >/dev/null; then

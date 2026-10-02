@@ -1,7 +1,6 @@
-// Command pelegrun — falconry-themed orchestrator to cross-flash and recover
+// Command pelegrun — falconry-themed utilities for cross-flashing and recovering
 // EnGenius/Senao ap-hk07 (IPQ807x) APs without bricking them.
 //
-// No arguments launches the TUI; subcommands are script/CI friendly.
 // Unofficial; not affiliated with EnGenius or Senao. See README.md / SAFETY.md.
 package main
 
@@ -17,13 +16,10 @@ import (
 	"github.com/ParkWardRR/pelegrun-ap-hk07-firmware-tools/internal/eyas"
 	"github.com/ParkWardRR/pelegrun-ap-hk07-firmware-tools/internal/hood"
 	"github.com/ParkWardRR/pelegrun-ap-hk07-firmware-tools/internal/jess"
-	"github.com/ParkWardRR/pelegrun-ap-hk07-firmware-tools/internal/tui"
-
-	"golang.org/x/term"
 )
 
 // Version is stamped via -ldflags "-X main.Version=...".
-var Version = "0.4.0"
+var Version = "0.5.0"
 
 func main() {
 	os.Exit(run(os.Args[1:], os.Stdout, os.Stderr))
@@ -40,8 +36,8 @@ func run(args []string, out, errw io.Writer) int {
 
 	var err error
 	switch cmd {
-	case "", "tui":
-		err = runTUI(out)
+	case "":
+		fmt.Fprint(out, usageText)
 	case "version":
 		fmt.Fprintf(out, "pelegrun %s\n", Version)
 	case "plan":
@@ -56,20 +52,12 @@ func run(args []string, out, errw io.Writer) int {
 		err = cmdEnvcheck(out, args)
 	case "discover":
 		err = cmdDiscover(out, args)
-	case "fleet":
-		err = cmdFleet(out, args)
-	case "dump":
-		err = cmdDump(out, args)
 	case "redact":
 		err = cmdRedact(out, args)
-	case "adapters":
-		err = cmdAdapters(out, args)
-	case "fit":
-		err = cmdFit(out, args)
 	case "-h", "--help", "help":
 		fmt.Fprint(out, usageText)
 	default:
-		fmt.Fprintf(errw, "pelegrun: %q is planned but not implemented yet (see ROADMAP.md)\n", cmd)
+		fmt.Fprintf(errw, "pelegrun: unknown command %q\n", cmd)
 		return 2
 	}
 	if err != nil {
@@ -77,14 +65,6 @@ func run(args []string, out, errw io.Writer) int {
 		return 1
 	}
 	return 0
-}
-
-func runTUI(out io.Writer) error {
-	if !term.IsTerminal(int(os.Stdout.Fd())) {
-		fmt.Fprint(out, usageText)
-		return nil
-	}
-	return tui.Run(Version)
 }
 
 func argVal(a []string, key string) string {
@@ -175,23 +155,18 @@ func cmdDiscover(out io.Writer, a []string) error {
 
 const usageText = "pelegrun — cross-flash & recover EnGenius/Senao ap-hk07 APs (unofficial)\n\n" +
 	"USAGE:\n" +
-	"  pelegrun                 launch the TUI (default)\n" +
 	"  pelegrun version | plan\n" +
 	"  pelegrun discover <url>            fingerprint firmware family (eyas)\n" +
 	"  pelegrun serial  --model X42 [--prefix P --suffix S]   Code27 serial (band)\n" +
 	"  pelegrun snextra --model X42 [--prefix P]              20-char field-19 value\n" +
 	"  pelegrun check   <serial>                              validate a serial\n" +
 	"  pelegrun envcheck [file|-]                             hood env completeness gate\n" +
-	"  pelegrun fleet   plan|apply ...                        P9 batch rollout (read-only planner)\n" +
-	"  pelegrun dump    plan --dest DIR [--proc-mtd f|-]      on-device full-flash capture plan\n" +
-	"  pelegrun redact  [file|-] [--mac] [--value S]...       scrub secrets from a bundle/log\n" +
-	"  pelegrun adapters list|validate                        board support registry (P12d)\n" +
-	"  pelegrun fit     check|prove ...                       FIT real-serial adoption gates (P10)\n\n" +
+	"  pelegrun redact  [file|-] [--mac] [--value S]...       scrub secrets from a bundle/log\n\n" +
 	"Image re-head ships as the quarry binary (Rust). Unofficial; hardware you own only.\n"
 
 const planText = "Safety ladder (why UART is usually unnecessary):\n\n" +
 	"  1. network flash        no UART — dual A/B slot means a bad image never bricks\n" +
 	"  2. network env-repair   no UART — append-only fw_setenv on a verified env\n" +
 	"  3. UART env-repair      gated: env default -a -> inspect -> env save\n" +
-	"  4. UART TFTP re-flash   truly dead board — lure calls it back over the wire\n\n" +
+	"  4. UART TFTP re-flash   truly dead board — pull it back over the wire\n\n" +
 	"Invariants the tool cannot break: write the INACTIVE slot; env is APPEND-ONLY.\n"

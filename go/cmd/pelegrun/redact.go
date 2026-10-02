@@ -41,6 +41,15 @@ func cmdRedact(out io.Writer, a []string) error {
 	return nil
 }
 
+func has(a []string, flag string) bool {
+	for _, v := range a {
+		if v == flag {
+			return true
+		}
+	}
+	return false
+}
+
 // firstPositional returns the first arg that is not a flag or a flag's value.
 func firstPositional(a []string) string {
 	skip := false

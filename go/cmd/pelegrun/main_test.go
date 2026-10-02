@@ -42,7 +42,7 @@ func TestNoArgsPrintsUsageWhenNotTTY(t *testing.T) {
 
 func TestUnknownCommandExits2(t *testing.T) {
 	code, _, errout := runCap("frobnicate")
-	if code != 2 || !strings.Contains(errout, "not implemented") {
+	if code != 2 || !strings.Contains(errout, "unknown command") {
 		t.Errorf("unknown: code=%d err=%q", code, errout)
 	}
 }
